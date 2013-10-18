@@ -6,7 +6,8 @@ make_schema_at(
     { debug => 1,
       dump_directory => '../lib',
     },
-    [ 'dbi:Pg:dbname=iro;host=localhost;port=5556', 'interch', '94daq2rix',
+    
+    [ 'dbi:mysql:dbname=bizi;host=localhost;port=3306', 'root', 'toor'
        #{ loader_class => 'MyLoader' } # optionally
     ],
 );

@@ -19,3 +19,166 @@ get '/' => sub {
 };
 
 true;
+
+__END__
+ 
+=pod
+ 
+=head1 NAME
+ 
+Dancer - Table Edit
+ 
+=head1 SYNOPSIS
+ 
+Table Edit lets you edit database data. It uses L<DBIx::Class> models for database metadata. 
+
+ 
+=head1 CONFIGURATION
+ 
+You need a database and L<DBIx::Class> models for this module to work. You can 
+write your own L<DBIx::Class> models, or use schema loader.
+
+For now it only works with branched version of Tamplate::Flute available on https://github.com/gregapompe/Template-Flute.
+
+To make sure app uses this version of Flute, set appropriate path in app.pm
+
+	#!/usr/bin/env perl
+	use lib '/home/Template-Flute/lib';
+	use Dancer;
+	use TableEdit;
+	dance;
+
+=head2 DBIx schema loader
+
+L<DBIx::Class::Schema::Loader> perl script is included in /bin folder. All you have 
+to do is set the database data and run it. This will create L<DBIx::Class> model files
+for you.
+
+=head2 Database config
+
+You also have to set Dancers DBCI connection in config.yml
+
+	plugins: 
+	   DBIC:
+	    default:
+	      dsn: dbi:mysql:dbname=myDbName;host=localhost;port=3306
+	      schema_class: TableEdit::Schema
+	      user: root
+	      pass: toor
+	      options:
+	        RaiseError: 1
+	        PrintError: 1
+
+=head1 USE
+
+Whit basic configuration done you can start using Table Edit. You will probably want to fine tune it a bit though.
+
+=head1 FINE TUNE
+
+Make sure you set all additional info below # DO NOT MODIFY THIS OR ANYTHING ABOVE! line in L<DBIx::Class> model.
+
+For this example we will use folowing model.
+
+	use utf8;
+	package TableEdit::Schema::Result::User;
+	
+	use strict;
+	use warnings;
+	
+	use base 'DBIx::Class::Core';
+	
+	__PACKAGE__->table("user");
+	
+	__PACKAGE__->add_columns(
+	  "id",
+	  { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
+	  "username",
+	  { data_type => "varchar", is_nullable => 0, size => 45 },
+	  "email",
+	  { data_type => "varchar", is_nullable => 1, size => 90 },
+	  "birthday",
+	  { data_type => "timestamp with time zone", is_nullable => 1 },
+	  "internal_code",
+	  { data_type => "integer", is_nullable => 1 },
+	  "created_date",
+	  {
+	    data_type     => "timestamp with time zone",
+	    default_value => \"current_timestamp",
+	    is_nullable   => 0,
+	    original      => { default_value => \"now()" },
+	  },
+	);
+	
+	__PACKAGE__->set_primary_key("id");
+	
+	__PACKAGE__->belongs_to(
+	  "company",
+	  "TableEdit::Schema::Result::Company",
+	  { id => "podjetje_id" },
+	  { is_deferrable => 1, on_delete => "CASCADE", on_update => "CASCADE" },
+	);
+	
+	__PACKAGE__->has_many(
+	  "user_items",
+	  "eShopAdmin::Schema::Result::UserItem",
+	  { "foreign.approval_id" => "self.approval_id" },
+	  { cascade_copy => 0, cascade_delete => 0 },
+	);
+		
+	__PACKAGE__->many_to_many("items", "user_items", "id", {class=>"Item",});
+	
+	# Created by DBIx::Class::Schema::Loader v0.07033
+	# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:g5NE5itWUoKXqfEKXj/8Rg
+	
+	
+	# You can replace this text with custom code or comments, and it will be preserved on regeneration
+	1;
+		
+
+=head2 Column label
+
+You can override column label by specifying it  
+
+	__PACKAGE__->columns_info->{fname}->{label} = 'Name';
+
+=head2 Object / Row string representation
+
+Row often has to be represented as string (titles, drop-down selectors, ...) so it is a good idea to 
+define a custum, human redable strigification method. For example users username, his id in parentheses 
+and company if he / she has one. It could be just username or something much complicated.
+
+	use overload fallback => 1,
+        '""' => \&to_string; 
+
+	sub to_string {
+		my $self = shift;	
+		my $company = $self->company || "";
+		return "$self->username ($self->id) $company";
+	}
+
+=head2 Hidden columns
+
+Some columns are used only internaly and you never want to see them in TableEdit. You can hide them.
+
+	__PACKAGE__->columns_info->{internal_code}->{hidden} = 1;
+
+=head2 Many to many
+
+"Has many" and "belongs_to" is automaticly detected. However, many to many DBIx::Class information 
+doesn't provide enough information, so you have to specify it manualy.
+Only set resultset_attributes once, or it will be overwritten! 
+
+	__PACKAGE__->resultset_attributes({ 
+		many_to_many => {
+			items => {class => 'eShopAdmin::Schema::Result::Item', where => {inactive => 'false'}},  
+		},		
+	});
+	
+=head2 Grid visible columns
+Often you don't care about all columns when you browse though rows or there are simply to many. 
+You can specify a list of columns that will appear on grid. 
+Only set resultset_attributes once, or it will be overwritten! 
+
+	__PACKAGE__->resultset_attributes({ 	
+		grid_columns => ['approval_id', 'item_id', 'notify', 'is_approved'],
+	});
