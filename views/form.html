@@ -1,0 +1,87 @@
+<!-- Page heading -->
+<div class="page-head">
+	<!-- Page heading -->
+	<h2 class="title">New <span class="class"></span></h2>
+	<!-- Breadcrumb -->
+	<div>
+		<a href="/"><i class="icon-home"></i> Home</a>
+		<!-- Divider -->
+		<span class="crumb">
+			<span class="divider">/</span> <a class="bread-current class link">Objects</a>
+		</span>
+	</div>
+
+	<div class="clearfix"></div>
+
+</div>
+<!-- Page heading ends -->
+
+<!-- Matter -->
+<div class="matter">
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div class="alert-box span12"></div>
+		</div>
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="#">General</a></li>
+			<li class="sub-menu-item"><a class="sub-menu-link" href="#">Categories</a></li>
+		</ul>
+		<div class="row-fluid">
+			<div class="span12">
+				<form method="post" enctype="multipart/form-data" action="../save" class="form-horizontal form">
+					<fieldset>
+
+
+						<!-- Form Name -->
+						<div class="messages"></div>
+
+						<div class="errors">
+							<ul>
+								<li class="error"><span class="error-label"></span></li>
+							</ul>
+						</div>
+
+						<input name="pk" type="hidden" class="pk" />
+
+
+						<!-- Text input-->
+						<div class="control-group form-field">
+							<label class="control-label ">Field</label>
+							<div class="controls">
+							
+
+								<div class="text_field">
+									<input class="input input-textfield" placeholder="" type="text" >
+								</div>
+
+								<div class="text_area">
+									<textarea class="input input-textarea" rows="10" cols="30">
+									</textarea>
+								</div>
+								
+								<div class="dropdown">
+									<select class="input" id="media_format" >
+										<option class="option input-dropdown"></option>
+									</select>
+								</div>
+								
+								<div class="checkbox">
+									<input class="input input-checkbox input-textfield" type="checkbox"/>										
+								</div>
+							</div>
+						</div>
+
+						
+						<div class="control-group">
+							<div class="controls">
+								<input type="submit" value="Save" class="btn btn-success pull-right" />
+							</div>
+						</div>
+
+					</fieldset>
+				</form>
+			</div>
+		</div>
+		
+	</div>
+</div>

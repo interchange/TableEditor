@@ -1,0 +1,6 @@
+<specification>
+	<list name="krneki" class="menu-item" iterator="menu">
+		<param name="link"></param>
+	</list>
+	<value name="menu-title" field="menu_title" />
+</specification>

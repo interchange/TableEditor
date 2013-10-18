@@ -1,0 +1,11 @@
+<specification>
+	<!-- value name="jsvars" id="vars" filter="json_var" /-->
+	<value name="content" class="mainbar" op="hook" />
+	<value name="username"/>
+	<value name="site-title"/>
+	
+	<list name="nred" iterator="menu">
+		<param name="url" class="link" target="href" op="append"/>
+		<param name="name"/>
+	</list>
+</specification>

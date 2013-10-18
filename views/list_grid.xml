@@ -1,0 +1,59 @@
+<specification>
+
+	<container name="pagging" value="pagination">
+		<value name="pagination" op="hook" />
+	</container>
+	<value name="page_size" />
+
+	<value name="class" />
+	<value name="table-title" />
+	<value name="form-data-class" class="form-search" field="class" target="data-class"/>
+	<value name="form-data-class" class="form-search" field="url" target="data-url"/>
+	<value name="form-search" field="class" target="name" op="append" />
+
+
+	<list name="object-table-row" iterator="rows">
+		<list name="object-table-value" iterator="row">
+			<param name="object-table-value" class="value" field="value" />
+		</list>
+		<list name="action" iterator="actions">
+			<param name="action_class" class="action" field="css" target="class" op="append" />
+			<param name="action_name" class="action" field="name" />
+			<param name="action_link" class="action" field="link" target="href" />
+			<container name="actions" value="actions"></container>
+			<container name="default_actions" value="default_actions"></container>
+		</list>
+		<container name="default_actions" value="default_actions"></container>
+	</list>
+
+	<list name="field" iterator="field_list">
+		<param name="label" class="field-label" />
+		<param name="class" class="field-label" target="class" op="append" joiner=" " />
+		<param name="sort" class="field-label" field="name" target="href" op="append" />
+
+	</list>
+
+	<list name="column-search" iterator="field_list">
+		<param name="search" class="field-search" />
+		<param name="class" class="field-search" target="class" op="append" joiner=" " />
+		<param name="namea" class="field-search" field="field" target="name" />
+		<param name="name" class="input" target="name" />
+		<param name="value" class="input-textfield" target="value" />
+		<param name="value_textarea" class="input-textarea" field="value" />
+		<param name="value_checkbox" class="input-checkbox" target="checked" filter="boolean" field="value" />
+
+		<container name="dropdown" value="dropdown"></container>
+		<list name="option" iterator="options">
+			<param name="option-value" field="value" class="option" target="value" />
+			<param name="option-label" field="option_label" class="option" />
+			<param name="value_dropdown" class="input-dropdown" target="selected" filter="boolean" field="selected" />
+		</list>
+
+		<container name="checkbox" value="checkbox"></container>
+		<container name="text_field" value="text_field"></container>
+		<container name="text_area" value="text_area"></container>
+
+	</list>
+
+</specification>
+ 

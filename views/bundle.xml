@@ -1,0 +1,13 @@
+<specification>
+
+	<value name="class" />
+	<value name="title" />
+	<value name="link_id" field="id" target="href" op="append" />
+	
+	<value name="list-grid" id="list-grid" field="related_all" include="list_grid.html"/>
+	<value name="grid-related-all-url" target="data-url" />
+	
+	<value name="related-list-grid" id="related-list-grid" field="related_items" include="list_grid.html"/>
+	<value name="grid-related-items-url" target="data-url" />
+
+</specification>
