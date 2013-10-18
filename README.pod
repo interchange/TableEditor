@@ -71,7 +71,7 @@ You also have to set Dancers DBCI connection in config.yml
 
 =head1 USE
 
-Whit basic configuration done you can start using Table Edit. You will probably want to fine tune it a bit though.
+With basic configuration done you can start using Table Edit. You will probably want to fine tune it a bit though.
 
 =head1 FINE TUNE
 
