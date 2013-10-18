@@ -181,7 +181,6 @@ Only set resultset_attributes once, or it will be overwritten!
 	});
 	
 =head2 Grid visible columns
-
 Often you don't care about all columns when you browse though rows or there are simply to many. 
 You can specify a list of columns that will appear on grid. 
 Only set resultset_attributes once, or it will be overwritten! 
