@@ -75,8 +75,6 @@ With basic configuration done you can start using Table Edit. You will probably 
 
 =head1 FINE TUNE
 
-Make sure you set all additional info below # DO NOT MODIFY THIS OR ANYTHING ABOVE! line in L<DBIx::Class> model.
-
 For this example we will use folowing model.
 
 	use utf8;
