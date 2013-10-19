@@ -38,7 +38,7 @@ Table Edit lets you edit database data. It uses L<DBIx::Class> models for databa
 You need a database and L<DBIx::Class> models for this module to work. You can 
 write your own L<DBIx::Class> models, or use schema loader.
 
-For now it only works with branched version of Tamplate::Flute available on https://github.com/gregapompe/Template-Flute.
+For now it only works with branched version of Template::Flute available on https://github.com/gregapompe/Template-Flute.
 
 To make sure app uses this version of Flute, set appropriate path in app.pm
 
@@ -56,7 +56,7 @@ for you.
 
 =head2 Database config
 
-You also have to set Dancers DBCI connection in config.yml
+You also have to set Dancers DBIC connection in config.yml
 
 	plugins: 
 	   DBIC:
@@ -75,7 +75,7 @@ With basic configuration done you can start using Table Edit. You will probably 
 
 =head1 FINE TUNE
 
-For this example we will use folowing model.
+For this example we will use following model.
 
 	use utf8;
 	package TableEdit::Schema::Result::User;
@@ -142,7 +142,7 @@ You can override column label by specifying it
 =head2 Object / Row string representation
 
 Row often has to be represented as string (titles, drop-down selectors, ...) so it is a good idea to 
-define a custum, human redable strigification method. For example users username, his id in parentheses 
+define a custom, human readable stringification method. For example users username, his id in parentheses 
 and company if he / she has one. It could be just username or something much complicated.
 
 	use overload fallback => 1,
@@ -156,7 +156,7 @@ and company if he / she has one. It could be just username or something much com
 
 =head2 Hidden columns
 
-Some columns are used only internaly and you never want to see them in TableEdit. You can hide them.
+Some columns are used only internally and you never want to see them in TableEdit. You can hide them.
 
 	__PACKAGE__->columns_info->{internal_code}->{hidden} = 1;
 
@@ -168,7 +168,7 @@ You can set a column to be readonly
 
 =head2 Many to many
 
-"Has many" and "belongs_to" is automaticly detected. However, many to many DBIx::Class information 
+"Has many" and "belongs_to" is automatically detected. However, many to many DBIx::Class information 
 doesn't provide enough information, so you have to specify it manualy.
 Only set resultset_attributes once, or it will be overwritten! 
 
