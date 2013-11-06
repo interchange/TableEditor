@@ -16,265 +16,50 @@ use DBIx::Class::ResultClass::HashRefInflator;
 my $layout = {};
 my $as_hash = 'DBIx::Class::ResultClass::HashRefInflator';
 my $dropdown_treshold = 100;
-my $page_size = 5;
+my $page_size = 10;
 
 
-get '/admin/:class/add' => sub {
-	my (@languages, $errorMessage);
-	my $class = params->{class};
-	my $all_columns = all_columns($class); 
-	my ($columns, $relationships) = columns_and_relationships_info($class);	
-
-	template 'form', { 
-		error => $errorMessage, 
-		form_action => 'save', 
-		fields => $columns,
-		class => $class,
-		bread_crumbs => [{label=> ucfirst($class), link => "list"}, {label=> 'Add'}], 
-	}, 
-	$layout;
-};
-
-
-get '/admin/:class/edit/:id/:related/add/:related_id' => sub {
-	my $id = params->{id};
-	my $class = params->{class};
-	my $related = params->{related};
-	my $related_id = params->{related_id};
-	
-	my $result_source = schema->resultset(ucfirst($class))->result_source;	
-	my $relationship_info = $result_source->relationship_info($related) ? 
-		$result_source->relationship_info($related) :
-		$result_source->resultset_attributes->{many_to_many}->{$related};
-	my $relationship_class_name = $relationship_info->{class};
-	my $relationship_class = schema->class_mappings->{$relationship_class_name};
-	
-	my $object = schema->resultset($class)->find($id);
-	my $related_object = schema->resultset($relationship_class)->find($related_id);
-	
-	# Has many
-	if($relationship_info->{cond}){
-		my $column_name;
-		for my $cond (keys %{$relationship_info->{cond}}){
-			$column_name = [split('\.', "$cond")]->[-1];
-			last;
-		}		
-		$related_object->$column_name($id);
-		$related_object->update;
-	}
-	# Many to Many
-	else {
-		my $add_method = "add_to_$related"; 
-		$object->$add_method($related_object);	
-	}
-		
-	return redirect request->referer;
-};
-
-
-get '/admin/:class/edit/:id/:related/remove/:related_id' => sub {
-	my $id = params->{id};
-	my $class = params->{class};
-	my $related = params->{related};
-	my $related_id = params->{related_id};
-	
-	my $result_source = schema->resultset(ucfirst($class))->result_source;	
-	my $relationship_info = $result_source->relationship_info($related) ? 
-		$result_source->relationship_info($related) :
-		$result_source->resultset_attributes->{many_to_many}->{$related};
-	my $relationship_class_name = $relationship_info->{class};
-	my $relationship_class = schema->class_mappings->{$relationship_class_name};
-	
-	my $object = schema->resultset($class)->find($id);
-	my $related_object = schema->resultset($relationship_class)->find($related_id);
-	
-	# Has many
-	if($relationship_info->{cond}){ 
-		my $column_name;
-		for my $cond (keys %{$relationship_info->{cond}}){
-			$column_name = [split('\.', "$cond")]->[-1];
-			last;
-		}		
-		$related_object->$column_name(undef);
-		$related_object->update;
-	}
-	# Many to Many
-	else {
-		my $add_method = "remove_from_$related"; 
-		$object->$add_method($related_object);	
-	}
-
-	return redirect request->referer;
-};
-
-
-get '/admin/:class/delete/:id' => sub {
-	my $id = params->{id};
-	my $class = params->{class};
-	my $object = schema->resultset(ucfirst($class))->find($id);
-	$object->delete;
-	my ($path, $query_params) = Params::parseUri(request->referer);	
-	return redirect request->uri_for($path, $query_params);
-};
-
-
-get '/admin/:class/edit/:id/:related/list' => sub {
-	my $id = params->{id};
-	my $class = params->{class};
-	my $related = params->{related};
-	my ($current_object, $errorMessage, $data, %data, $page, $page_size, $sort);
-	my $get_params = params('query');
-	my $post_params = params('body');
-	my $where ||= {};
-	
-	my $result_source = schema->resultset(ucfirst($class))->result_source;	
-	my $relationship_info = $result_source->relationship_info($related) ? 
-		$result_source->relationship_info($related) :
-		$result_source->resultset_attributes->{many_to_many}->{$related};
-	return redirect '/404' unless ( defined $relationship_info );	
-	my $relationship_class_name = $relationship_info->{class};
-	my $relationship_class = schema->class_mappings->{$relationship_class_name};
-	# Object lookup
-	$current_object = schema->resultset($class)->find($id);
-	my $related_items = $current_object->$related;
-	
-	return redirect '/404' unless ( defined $current_object );	
-	$data->{'id'} = $id;
-	$data->{'class'} = $relationship_class;
-	$data->{'table-title'} = "Search ".$relationship_class;
-	$data->{'title'} = "$current_object - $relationship_class";
-	$data->{'grid-related-all-url'} = "/grid-related-all/$relationship_class";
-	$data->{'grid-related-items-url'} = "/grid-related-items/$class/$id/$related/$relationship_class";
-	
-	# Related all
-	$data->{related_all} = grid_template_params($relationship_class, $post_params, $get_params, \&related_search_actions);
-	# Related bind
-	$data->{related_items} = grid_related_template_params($relationship_class, $related_items, $post_params, $get_params, \&related_actions);
-	
-	$data->{bread_crumbs} = [{label=> ucfirst($class), link => "../list"}, {label => $data->{title}}];
-	return 
-	template 'bundle', $data, $layout;
-};
-
-
-post qr{/admin/:class/bundle/([^/]*)(.*)} => sub {
-	my ($id, $url) = splat;
-	my $params = params;
-	return redirect_filters( "/bundle/$id/", $url, $params );
-};
-
-
-get '/admin/:class/edit/:id' => sub {
-	my ($data);
-	my $id = params->{id};
-	my $class = params->{class};
-	my $all_columns = all_columns($class); 
-	my ($columns, $relationships) = columns_and_relationships_info($class);
-	
-	$data->{fields} = $columns;
-	$data->{pk} = $id;
-
-	# Object lookup
-	my $object = schema->resultset(ucfirst($class))->find($id);
-	my $object_data = {$object->get_columns};
-	return redirect '/404' unless defined $object_data;	
-	$data->{title} = "$object";
-	$data->{id} = $object_data->{id};
-	add_values($columns, $object_data, $object);
-		
-	# Multi
-	my $sub_menu = []; 
-	for my $relationship(@$relationships){
-		next unless $relationship->{foreign_type} and ($relationship->{foreign_type} eq 'has_many');
-		push $sub_menu, {label=> $relationship->{label}, link=>"$id/$relationship->{foreign}/list"}
-	}
-	$data->{sub_menu} = $sub_menu;
-	$data->{bread_crumbs} = [{label=> ucfirst($class), link => "../list"}, {label => $data->{title}}];
-	
-	template 'form', $data, $layout;
-};
-
-
-#get '/admin/:class/sort/:field' => sub {
-#	my $field = params->{field};
-#	my ($path, $query_params) = Params::parseUri(request->referer);	
-#	$query_params->{'sort'} = ($query_params->{'sort'} and $query_params->{'sort'} eq $field) ? "$field desc" : $field;
-#	return redirect request->uri_for($path, $query_params);
-#};
-
-
-get '/admin/:class/list' => sub {
+get '/api/:class/list' => sub {
 	my $class = params->{class};
 	my $get_params = params('query');
 	my $post_params = params('body');
-			
+	my $grid_params;		
 	# Grid
-	my $grid_params = grid_template_params($class, $post_params, $get_params);
+	$grid_params = grid_template_params($class, $post_params, $get_params);
 	
-	$grid_params->{'grid-url'} = "/grid/$class";
+	$grid_params->{'grid_url'} = "/grid/$class";
 	$grid_params->{default_actions} = 1;
-	$grid_params->{'table-title'} = ucfirst($class)."s";
-
-	return template 'list', $grid_params, $layout;
-};
-
-ajax '/grid/:class' => sub {
-	my $class = params->{class};
-	my $get_params = params('query');
-	my $post_params = params('body');
-			
-	# Grid
-	my $grid_params = grid_template_params($class, $post_params, $get_params);
+	$grid_params->{'grid_title'} = ucfirst($class)."s";
 	
-	$grid_params->{'table-title'} = ucfirst($class)."s";			
-	$grid_params->{class} = lc($class);		
-	return template 'list_grid', $grid_params, {layout => undef};
+	content_type 'application/json';
+	#$grid_params->{field_list}->[8] = undef;
+	return to_json $grid_params;
 };
 
 
-ajax '/grid-related-all/:class' => sub {
-	my $class = params->{class};
-	my $get_params = params('query');
-	my $post_params = params('body');
-			
-	# Grid
-	my $grid_params = grid_template_params($class, $post_params, $get_params, \&related_search_actions);
-	
-	$grid_params->{'table-title'} = ucfirst($class)."s";			
-	$grid_params->{class} = lc($class);		
-	return template 'list_grid', $grid_params, {layout => undef};
+get '/api/menu' => sub {
+	content_type 'application/json';
+	return to_json [map {name=> class_label($_), url=>"#/$_/list"}, @{classes()}];;
 };
 
 
-ajax '/grid-related-items/:class/:id/:related/:relationship_class' => sub {
-	my $class = params->{class};
-	my $id = params->{id};
-	my $related = params->{related};
-	my $relationship_class = params->{relationship_class};
-	my $get_params = params('query');
-	my $post_params = params('body');
-
-	my $related_items = schema->resultset($class)->find($id)->$related;
-			
-	# Grid
-	my $grid_params = grid_related_template_params($relationship_class, $related_items, $post_params, $get_params, \&related_actions);
-	
-	$grid_params->{'table-title'} = ucfirst($class)."s";			
-	$grid_params->{class} = lc($class);		
-	return template 'list_grid', $grid_params, {layout => undef};
-};
+sub classes {
+	my $classes = [sort values schema->{class_mappings}];
+	my $classes_with_pk = [];
+	for my $class (@$classes){
+		my @pk = schema->source($class)->primary_columns;
+		push $classes_with_pk, $class if (@pk == 1);
+	}
+	return $classes_with_pk;
+}
 
 
-post '/admin/:class/save' => sub {
-	my $class = params->{class};
-	my $rs = schema->resultset(ucfirst($class));
-	my $values = params('body');
-	clean_values($values);
-	delete $values->{pk};
-	$rs->update_or_create( $values ); 
-
-	return redirect "/admin/$class/list";
-};
+sub class_label {
+	my $class = shift;
+	$class =~ s/(?<! )([A-Z])/ $1/g; # Search for "(?<!pattern)" in perldoc perlre 
+	$class =~ s/^ (?=[A-Z])//; # Strip out extra starting whitespace followed by A-Z
+	return $class;
+}
 
 
 sub all_columns {

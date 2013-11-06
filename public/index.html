@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="crudApp" ng-controller="ContainerCtrl" >
+<head>
+
+<!-- Title and other stuffs -->
+	<title class="site-title">Administration</title>
+
+	<link href="/metro/style/bootstrap.css" rel="stylesheet">
+	<!-- Main stylesheet -->
+	<link href="/metro/style/style.css" rel="stylesheet">
+	<!-- Widgets stylesheet -->
+	<link href="/metro/style/widgets.css" rel="stylesheet">
+
+	<script src="/javascripts/angular.js"></script>
+	<script src="/javascripts/angular-route.js"></script>
+	<script src="/app.js"></script>
+	<script src="/controllers.js"></script>
+</head>
+
+<body>
+
+	<div class="navbar navbar-fixed-top navbar-inverse">
+		<div class="navbar-inner">
+			<div class="container">
+				<!-- Menu button for smallar screens -->
+				<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse"> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
+				</a>
+				<!-- Site name for smallar screens -->
+				<a href="/metro/index.html" class="site-title brand">{{data.site_title}}</a>
+
+				<!-- Navigation starts -->
+				<div class="nav-collapse collapse">
+
+					<!-- Links -->
+					<ul class="nav pull-right">
+						<li class="dropdown pull-right"><a data-toggle="dropdown" class="dropdown-toggle" href="#"> <img src="/metro/img/user.jpg" alt="" class="nav-user-pic" /> <span class="username">Administrator</span> <b class="caret"></b>
+						</a> <!-- Dropdown menu -->
+							<ul class="dropdown-menu">
+								<li style="display: none;"><a href="#"><i class="icon-user"></i> Profile</a></li>
+								<li style="display: none;"><a href="#"><i class="icon-cogs"></i> Settings</a></li>
+								<li><a href="/logout"><i class="icon-off"></i> Logout</a></li>
+							</ul></li>
+					</ul>
+
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+
+	<!-- Main content starts -->
+
+	<div class="content" >
+
+		<!-- Sidebar -->
+		<div class="sidebar" ng-controller="SidebarCtrl" >
+			<div class="sidebar-dropdown">
+				<a href="#">Navigation</a>
+			</div>
+
+			<div class="sidebar-inner">
+
+
+
+				<!-- Search form -->
+				<div class="sidebar-widget">
+					<form class="form-inline">
+						<div class="input-append row-fluid">
+							<input type="text" class="span8" placeholder="Search">
+							<button type="submit" class="btn btn-info">Search</button>
+						</div>
+					</form>
+				</div>
+
+				<!--- Sidebar navigation -->
+				<!-- If the main navigation has sub navigation, then add the class "has_submenu" to "li" of main navigation. -->
+				<ul class="navi">
+
+					<!-- Use the class nred, ngreen, nblue, nlightblue, nviolet or norange to add background color. You need to use this in <li> tag. -->
+
+					<li ng-repeat="link in menu" class="nred" data-active-link="">
+						<a href="{{link.url}}" class="link"><i class="icon-table"></i>{{link.name}}</a>
+					</li>
+
+				</ul>
+
+			</div>
+
+		</div>
+
+		<!-- Sidebar ends -->
+
+		<!-- Main bar -->
+		<div class="mainbar" ng-controller="MainCtrl" ng-view>
+			<h1>Database Administration</h1>
+
+		</div>
+
+		<!-- Mainbar ends -->
+		<div class="clearfix"></div>
+
+	</div>
+	<!-- Content ends -->
+
+	<!-- Scroll to top -->
+	<span class="totop"><a href="#"><i class="icon-chevron-up"></i></a></span>
+
+
+
+</body>
+</html>

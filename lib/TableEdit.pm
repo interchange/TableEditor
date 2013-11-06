@@ -4,6 +4,8 @@ use Dancer ':syntax';
 our $VERSION = '0.1';
 
 use TableEdit::Admin;
+use TableEdit::API;
+use TableEdit::Routes;
 use TableEdit::CRUD;
 use TableEdit::Schema;
 use Dancer::Plugin::DBIC qw(schema resultset rset);
@@ -120,7 +122,7 @@ For this example we will use folowing model.
 	
 	__PACKAGE__->has_many(
 	  "user_items",
-	  "eShopAdmin::Schema::Result::UserItem",
+	  "TableEdit::Schema::Result::UserItem",
 	  { "foreign.approval_id" => "self.approval_id" },
 	  { cascade_copy => 0, cascade_delete => 0 },
 	);
@@ -176,7 +178,7 @@ Only set resultset_attributes once, or it will be overwritten!
 
 	__PACKAGE__->resultset_attributes({ 
 		many_to_many => {
-			items => {class => 'eShopAdmin::Schema::Result::Item', where => {inactive => 'false'}},  
+			items => {class => 'TableEdit::Schema::Result::Item', where => {inactive => 'false'}},  
 		},		
 	});
 	

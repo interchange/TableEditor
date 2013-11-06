@@ -1554,7 +1554,7 @@ border:1px solid #eee;
 
 /* Custum nitesi */
 
-.selected, .selected a {
+.selected, .selected a, .active, .active a {
 	font-weight: bold;
 }
 
@@ -1620,6 +1620,7 @@ list-style: none;
 
 .column-search input[type=text] {
 	width: 100%;
+	box-sizing: border-box;
 }
 
 .table thead {
@@ -1641,4 +1642,8 @@ list-style: none;
 .actions [class*=" icon-"] {
 	padding: 5px;
 	margin: 1px;
+}
+
+.mainbar{
+	padding: 20px;
 }

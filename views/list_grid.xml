@@ -14,7 +14,7 @@
 
 	<list name="object-table-row" iterator="rows">
 		<list name="object-table-value" iterator="row">
-			<param name="object-table-value" class="value" field="value" />
+			<param name="object-table-value" class="value" field="value"  filter="nobreak_single" />
 		</list>
 		<list name="action" iterator="actions">
 			<param name="action_class" class="action" field="css" target="class" op="append" />

@@ -32,12 +32,21 @@ session: YAML
 session_expires: 8 hours
 
 plugins: 
+#   DBIC:
+#    default:
+#      dsn: dbi:mysql:dbname=bizi;host=localhost;port=3306
+#      schema_class: TableEdit::Schema
+#      user: root
+#      pass: toor
+#      options:
+#        RaiseError: 1
+#        PrintError: 1  
    DBIC:
     default:
-      dsn: dbi:mysql:dbname=bizi;host=localhost;port=3306
+      dsn: dbi:Pg:dbname=iro;host=localhost;port=8948
       schema_class: TableEdit::Schema
-      user: root
-      pass: toor
+      user: interch
+      pass: 94daq2rix
       options:
         RaiseError: 1
         PrintError: 1
