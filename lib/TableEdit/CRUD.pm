@@ -18,6 +18,7 @@ my $as_hash = 'DBIx::Class::ResultClass::HashRefInflator';
 my $dropdown_treshold = 100;
 my $page_size = 5;
 
+prefix '/';
 
 get '/admin/:class/add' => sub {
 	my (@languages, $errorMessage);

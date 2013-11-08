@@ -3,6 +3,7 @@ package TableEdit::Admin;
 use Dancer ':syntax';
 use Dancer::Plugin::DBIC qw(schema resultset rset);
 
+prefix '/';
 
 hook 'before_template_render' => sub {
     my $tokens = shift;

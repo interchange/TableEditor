@@ -1,14 +1,11 @@
 package TableEdit::CRUD;
 
 use Dancer ':syntax';
-use Dancer::Plugin::Form;
+use POSIX;
 
 use Array::Utils qw(:all);
 use Digest::SHA qw(sha256_hex);
 use Dancer::Plugin::Ajax;
-
-use Pager;
-use Params;
 
 use Dancer::Plugin::DBIC qw(schema resultset rset);
 use DBIx::Class::ResultClass::HashRefInflator;
@@ -18,14 +15,15 @@ my $as_hash = 'DBIx::Class::ResultClass::HashRefInflator';
 my $dropdown_treshold = 100;
 my $page_size = 10;
 
+prefix '/api';
 
-get '/api/:class/list' => sub {
+
+get '/:class/list' => sub {
 	my $class = params->{class};
 	my $get_params = params('query');
-	my $post_params = params('body');
 	my $grid_params;		
 	# Grid
-	$grid_params = grid_template_params($class, $post_params, $get_params);
+	$grid_params = grid_template_params($class, $get_params);
 	
 	$grid_params->{'grid_url'} = "/grid/$class";
 	$grid_params->{default_actions} = 1;
@@ -37,9 +35,49 @@ get '/api/:class/list' => sub {
 };
 
 
-get '/api/menu' => sub {
+del '/:class' => sub {
+	my $id = params->{id};
+	my $class = params->{class};
+	my $object = schema->resultset(ucfirst($class))->find($id);
+	$object->delete;
+	return 1;
+};
+
+
+get '/menu' => sub {
 	content_type 'application/json';
 	return to_json [map {name=> class_label($_), url=>"#/$_/list"}, @{classes()}];;
+};
+
+
+post '/:class' => sub {
+	my $class = params->{class};
+	my $body = from_json request->body;
+	my $item = $body->{item};
+	clean_values($item);
+	delete $item->{pk};
+
+	my $rs = schema->resultset(ucfirst($class));
+	$rs->update_or_create( $item ); 
+
+	return 1;
+};
+
+
+get '/:class' => sub {
+	my (@languages, $errorMessage);
+	my $class = params->{class};
+	my $all_columns = all_columns($class); 
+	my ($columns, $relationships) = columns_and_relationships_info($class);	
+
+	content_type 'application/json';
+	return to_json { 
+		error => $errorMessage, 
+		form_action => 'save', 
+		fields => $columns,
+		class => $class,
+		bread_crumbs => [{label=> ucfirst($class), link => "list"}, {label=> 'Add'}], 
+	}; 
 };
 
 
@@ -275,18 +313,20 @@ sub grid_actions {
 
 
 sub grid_template_params {
-	my ($class, $post_params, $get_params, $actions) = @_;
+	my ($class, $get_params, $actions) = @_;
 	my $template_params;
 	my $where ||= {};	
 	# Grid
 	$template_params->{field_list} = grid_columns_info($class, $get_params->{sort});
-	grid_where($template_params->{field_list}, $where, $post_params);
-	add_values($template_params->{field_list}, $post_params);
+	my $where_params = from_json $get_params->{q};
+	grid_where($template_params->{field_list}, $where, $where_params);
+	add_values($template_params->{field_list}, $where_params);
 	
 	my $rs = schema->resultset(ucfirst($class));
 	my ($primary_column) = schema->source(ucfirst($class))->primary_columns;
 	my $page = $get_params->{page} || 1;
 	my $sort = $get_params->{sort};
+	$sort .= ' DESC' if $sort and $get_params->{descending};
 	
 	my $objects = $rs->search(
 	$where,
@@ -309,10 +349,11 @@ sub grid_template_params {
 	);
 	
 	$template_params->{class} = $class;
-	
-	# Pager
-	my $pager = new Pager(pageSize => $page_size, url => "/grid/$class",);
-	$template_params->{pagination} = $pager->getHtml($page, $count, {url_params => $get_params});
+	$template_params->{page} = $page;
+	$template_params->{pages} = ceil($count / $page_size);
+	$template_params->{count} = $count;
+	$template_params->{page_size} = $page_size;
+
 	return $template_params;
 }
 

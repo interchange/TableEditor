@@ -1,0 +1,93 @@
+.selected, .selected a, .active, .active a {
+	font-weight: bold;
+}
+
+.pagination li.active a {
+	background-color: grey;
+	border-color: grey;
+	color: white;
+}
+
+.leftbar-filters ul {
+	margin: 0px 10px 10px 10px;
+list-style: none;
+}
+
+.leftbar-filters input[type=text] {
+	width: 180px;
+}
+
+.leftbar-filters #slider-range {
+	width: 90%;
+	margin: 0 auto;
+}
+
+.leftbar-widget .remove-label {
+	margin-left: 5px;
+}
+
+.leftbar-filters  .month {
+	width: 26px;
+	display: inline-block;
+	text-align: center;
+	background: whitesmoke;
+	padding: 2px;
+	margin: 2px;
+}
+
+.leftbar-widget {
+	display: inline-block;
+	vertical-align: top;
+	width: 160px;
+	margin: 10px;
+}
+
+.leftbar-widget form {
+	margin: 0;
+}
+
+.product-bundle-page #search * {
+	display: inline;
+}
+
+.leftbar-filters .search-widget {
+	display: none;
+}
+
+.alert-box ul {
+	margin-bottom: 0;
+	list-style: none;
+}
+
+
+.column-search input[type=text] {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.table thead {
+	background: whitesmoke;
+}
+
+.table tbody {
+	background: white;
+}
+
+.grid table {
+	word-break: break-word;
+}
+
+.actions {
+	word-break: normal;
+}
+
+.actions [class*=" icon-"] {
+	padding: 5px;
+	margin: 1px;
+}
+
+.mainbar{
+	padding: 20px;
+}
+
+.padded { padding: 10px; }
