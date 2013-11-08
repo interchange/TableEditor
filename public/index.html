@@ -9,8 +9,6 @@
 <link href="/css/crud.css" rel="stylesheet">
 <script src="/metro/js/jquery.js"></script>
 <!-- jQuery -->
-<script src="http://docs.angularjs.org/components/bootstrap/css/bootstrap.min.js"></script>
-<!-- Bootstrap -->
 
 
 <script src="/javascripts/angular.js"></script>
@@ -24,10 +22,26 @@
 
 
 	<!-- Main content starts -->
+	<header class="jumbotron">
+		<div class="container">
+			<form class="form-search pull-right">
+				<div class="input-append">
+					<input type="text" class="span2 search-query">
+					<button type="submit" class="btn btn-primary">Search</button>
+				</div>
+			</form>
+			<h1>Table Editor</h1>
+
+			<!-- Breadcrumb -->
+			<div ng-controller="BreadcrumbsCtrl">
+				<a href="/"><i class="icon-home"></i> Home</a>
+				<!-- Divider -->
+				<span ng-repeat="crumb in breadcrumbs" class="crumb"> / <a ng-if="crumb.link" href="{{crumb.link}}">{{crumb.label}}</a> <span ng-if="!crumb.link" class="bread-current class link">{{crumb.label}}</span>
+				</span>
+			</div>
+		</div>
+	</header>
 	<div class="container">
-	<div class="row-fluid">
-		<h1>Table Editor</h1>
-	</div>
 		<div class="row-fluid">
 
 			<!-- Sidebar -->
@@ -38,24 +52,12 @@
 
 				<div class="sidebar-inner">
 
-
-
-					<!-- Search form -->
-					<div class="sidebar-widget">
-						<form class="form-inline">
-							<div class="input-append row-fluid">
-								<input type="text" class="span8" placeholder="Search">
-								<button type="submit" class="btn btn-info">Search</button>
-							</div>
-						</form>
-					</div>
-
 					<!--- Sidebar navigation -->
 					<!-- If the main navigation has sub navigation, then add the class "has_submenu" to "li" of main navigation. -->
-					<div class="well">
+					<div class="well well-small">
 						<ul class="nav nav-list bs-docs-sidenav affix">
 							<!-- Use the class nred, ngreen, nblue, nlightblue, nviolet or norange to add background color. You need to use this in <li> tag. -->
-							<li class="nav-header">Tabels</li>
+							<li class="nav-header">Tables</li>
 							<li data-active-link=""><a ng-repeat="link in menu" href="{{link.url}}" class="list-group-item">{{link.name}}</a></li>
 						</ul>
 					</div>
@@ -73,5 +75,6 @@
 			</div>
 
 		</div>
+	</div>
 </body>
 </html>

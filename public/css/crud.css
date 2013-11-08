@@ -1,3 +1,9 @@
+header {
+	background: whitesmoke;
+	margin-bottom: 20px;
+	padding: 20px;
+}
+
 .selected, .selected a, .active, .active a {
 	font-weight: bold;
 }
@@ -60,9 +66,12 @@ list-style: none;
 }
 
 
-.column-search input[type=text] {
+.column-search input, .column-search select {
 	width: 100%;
 	box-sizing: border-box;
+}
+.column-search input[type="checkbox"] {
+	width: initial;
 }
 
 .table thead {
@@ -73,7 +82,7 @@ list-style: none;
 	background: white;
 }
 
-.grid table {
+.grid table .object-table-value, .grid table .field{
 	word-break: break-word;
 }
 

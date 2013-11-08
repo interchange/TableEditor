@@ -16,7 +16,10 @@ my $dropdown_treshold = 100;
 my $page_size = 10;
 
 prefix '/api';
-
+any '**' => sub {
+	content_type 'application/json';
+	pass;
+};
 
 get '/:class/list' => sub {
 	my $class = params->{class};
@@ -25,12 +28,9 @@ get '/:class/list' => sub {
 	# Grid
 	$grid_params = grid_template_params($class, $get_params);
 	
-	$grid_params->{'grid_url'} = "/grid/$class";
 	$grid_params->{default_actions} = 1;
 	$grid_params->{'grid_title'} = ucfirst($class)."s";
 	
-	content_type 'application/json';
-	#$grid_params->{field_list}->[8] = undef;
 	return to_json $grid_params;
 };
 
@@ -45,7 +45,6 @@ del '/:class' => sub {
 
 
 get '/menu' => sub {
-	content_type 'application/json';
 	return to_json [map {name=> class_label($_), url=>"#/$_/list"}, @{classes()}];;
 };
 
@@ -54,8 +53,6 @@ post '/:class' => sub {
 	my $class = params->{class};
 	my $body = from_json request->body;
 	my $item = $body->{item};
-	clean_values($item);
-	delete $item->{pk};
 
 	my $rs = schema->resultset(ucfirst($class));
 	$rs->update_or_create( $item ); 
@@ -64,18 +61,47 @@ post '/:class' => sub {
 };
 
 
+get '/:class/:id' => sub {
+	my ($data);
+	my $id = params->{id};
+	my $class = params->{class};
+	my $all_columns = all_columns($class); 
+	my ($columns, $relationships) = columns_and_relationships_info($class);
+	
+	$data->{fields} = $columns;
+	$data->{pk} = $id;
+
+	# Object lookup
+	my $object = schema->resultset(ucfirst($class))->find($id);
+	my $object_data = {$object->get_columns};
+	$data->{title} = "$object";
+	$data->{id} = $object_data->{id};
+	$data->{values} = $object_data;
+	add_values($columns, $object_data, $object);
+	
+	$data->{bread_crumbs} = [{label=> ucfirst($class), link => "../list"}, {label => $data->{title}}];
+	
+	return to_json $data;
+};
+
+
 get '/:class' => sub {
 	my (@languages, $errorMessage);
 	my $class = params->{class};
 	my $all_columns = all_columns($class); 
 	my ($columns, $relationships) = columns_and_relationships_info($class);	
+	
+	# Multi
+	my $sub_menu = []; 
+	for my $relationship(@$relationships){
+		next unless $relationship->{foreign_type} and ($relationship->{foreign_type} eq 'has_many');
+		push $sub_menu, $relationship;
+	}
 
-	content_type 'application/json';
 	return to_json { 
-		error => $errorMessage, 
-		form_action => 'save', 
 		fields => $columns,
 		class => $class,
+		sub_menu => $sub_menu,
 		bread_crumbs => [{label=> ucfirst($class), link => "list"}, {label=> 'Add'}], 
 	}; 
 };
@@ -318,7 +344,7 @@ sub grid_template_params {
 	my $where ||= {};	
 	# Grid
 	$template_params->{field_list} = grid_columns_info($class, $get_params->{sort});
-	my $where_params = from_json $get_params->{q};
+	my $where_params = from_json $get_params->{q} if $get_params->{q};
 	grid_where($template_params->{field_list}, $where, $where_params);
 	add_values($template_params->{field_list}, $where_params);
 	

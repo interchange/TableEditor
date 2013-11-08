@@ -40,3 +40,5 @@ sessions
 nytprof
 lib/TableEdit/Schema
 lib/TableEdit/Schema.pm
+/nbproject/private/
+nbproject/

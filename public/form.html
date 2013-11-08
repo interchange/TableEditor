@@ -1,15 +1,9 @@
 <!-- Page heading -->
 <div class="page-head">
 	<!-- Page heading -->
-	<h2 class="title">New {{ data.class }}</h2>
+	<h2 ng-if="!item.title" class="title">New {{ data.class }}</h2>
+	<h2 ng-if="item.title" class="title">{{ data.class }}: {{ item.title }}</h2>
 	<!-- Breadcrumb -->
-	<div>
-		<a href="/"><i class="icon-home"></i> Home</a>
-		<!-- Divider -->
-		<span class="crumb">
-			<span class="divider">/</span> <a class="bread-current class link">Objects</a>
-		</span>
-	</div>
 
 	<div class="clearfix"></div>
 
@@ -24,7 +18,7 @@
 		</div>
 		<ul class="nav nav-tabs">
 			<li class="active"><a href="#">General</a></li>
-			<li class="sub-menu-item"><a class="sub-menu-link" href="#">Categories</a></li>
+			<li class="sub-menu-item" ng-repeat="link in data.sub_menu"><a class="sub-menu-link" ng-click="related()">{{link.label}}</a></li>
 		</ul>
 		<div class="row-fluid">
 			<div class="span12">
@@ -45,22 +39,22 @@
 							
 			
 								<div class="text_field" ng-if="field.field_type == 'text_field'">
-									<input class="form-control" ng-required="field.is_nullable == 0" ng-model="item[field.name]" type="text" >
+									<input class="form-control" ng-required="field.is_nullable == 0" ng-model="item.values[field.name]" type="text" >
 								</div>
 
 								<div ng-if="field.field_type == 'text_area'" >
-									<textarea class="form-control" rows="10" cols="30" ng-model="item[field.name]">
+									<textarea class="form-control" rows="10" cols="30" ng-model="item.values[field.name]">
 									</textarea>
 								</div>
 								
 								<div ng-if="field.field_type == 'dropdown'">
-									<select class="form-control" id="media_format" ng-model="item[field.name]">
+									<select class="form-control" id="media_format" ng-model="item.values[field.name]">
 										<option class="option input-dropdown"></option>
 									</select>
 								</div>
 								
 								<div ng-if="field.field_type == 'checkbox'" >
-									<input class="form-control" type="checkbox" ng-model="item[field.name]"/>										
+									<input class="form-control" type="checkbox" ng-model="item.values[field.name]"/>										
 								</div>
 							</div>
 						</div>
@@ -68,7 +62,7 @@
 						
 						<div class="control-group">
 							<div class="controls">
-								<button ng-disabled="form.$invalid || isUnchanged(item[field.name])" ng-click="save()" class="btn btn-success pull-right">Save</button>
+								<button ng-disabled="form.$invalid || isUnchanged(values[field.name])" ng-click="save()" class="btn btn-success pull-right">Save</button>
 							</div>
 						</div>
 

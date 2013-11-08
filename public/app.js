@@ -8,6 +8,8 @@ var CrudApp = angular.module('CrudApp', ['ngResource', 'ngRoute']).
 	     when('/', { templateUrl: 'list_grid.html', controller: 'ContainerCtrl' }).
 	     when('/:class/list', { templateUrl: 'list_grid.html', controller: 'ListCtrl' }).
 	     when('/:class/new', { templateUrl: 'form.html', controller: 'CreateCtrl' }).
+	     when('/:class/edit/:id', { templateUrl: 'form.html', controller: 'EditCtrl' }).
+	     when('/:class/:id/:related/list', { templateUrl: 'form.html', controller: 'RelatedListCtrl' }).
 	     otherwise({redirectTo: '/'});
 });
 
@@ -31,21 +33,40 @@ CrudApp.directive('activeLink', function($location) {
         link: link
     };
 });
+// Factories
 
-CrudApp.factory('Class', function($resource) {
-    return $resource('/api/:class/list', { class: '@class' });
+CrudApp.factory('Class', function($resource) { 
+	return $resource('/api/:class/list', { class: '@class' });}
+);
+CrudApp.factory('RelatedListCtrl', function($resource) { 
+	return $resource('/api/:class/:id/:related/list', { class: '@class' });
 });
 
 CrudApp.factory('ClassItem', function($resource) {
 	return $resource('/api/:class', { class: '@class' });
 });
 
+CrudApp.factory('Item', function($resource) {
+	return $resource('/api/:class/:id', { class: '@class', id: '@id' });
+});
+
 CrudApp.factory('Menu', function($resource) {
 	return $resource('/api/menu');
 });
+CrudApp.factory("Breadcrumbs", function(){
+	 return {links: [{label: 'Test crumb'}]};
+});
 
 
+// Controllers
+
+var BreadcrumbsCtrl = function ($scope, $routeParams, $location, $rootScope) {
+	$rootScope.breadcrumbs = [];
+}
 var ContainerCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
+	
+}
+var RelatedListCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
 	
 }
 var CreateCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
@@ -62,25 +83,56 @@ var CreateCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
 	);
 	
 	$scope.save = function(){
-		//var newItem = new ClassItem;
-		//newItem.values = this.item;
-		//newItem.class = $routeParams.class;
-		//newItem.$save();
-		
+	
 		var item = this.item;
 		ClassItem.item
 		ClassItem.save({
 			class: $routeParams.class,
 			item: item,
-			testAtt: 'junk'
 	    	},
 	    	// Success
 	    	function(data) {
 	    		$location.path('/'+$routeParams.class+'/list');
 	    	}
 		);
-	}
+	};
 };
+
+var EditCtrl = function ($scope, $routeParams, $location, Item, ClassItem, $rootScope) {
+	$scope.item = Item.get({
+		class: $routeParams.class, 
+		id: $routeParams.id}
+	);
+	$scope.data = ClassItem.get({
+		class: $routeParams.class,
+		},
+		// Success
+		function(data) {
+			$rootScope.breadcrumbs = data.bread_crumbs;
+		}
+	);
+	
+	$scope.save = function(){
+		
+		//ClassItem.item
+		ClassItem.save({
+			class: $routeParams.class,
+			item: this.item.values,
+		},
+		// Success
+		function(data) {
+			$location.path('/'+$routeParams.class+'/list');
+		}
+		);
+	};
+
+	
+	$scope.related = function(){
+		var related = this.link.name;
+		$location.path('/'+$routeParams.class+'/'+$routeParams.id+'/'+related+'/list');
+	};
+};
+
 
 var ListCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
 	//$scope.data = Class.get({class: $routeParams.class});
@@ -108,9 +160,12 @@ var ListCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
         $scope.search();
 
     };
+    
+    
     $scope.del = function () {
     	if (confirm('Do you realy want to delete '+this.row.id)){
     		var id = this.row.id;
+    		$location.path('/'+$routeParams.class+'/list');
     		ClassItem.delete(
     				{id: id, class: $routeParams.class},
     				// On success
@@ -119,6 +174,12 @@ var ListCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
     				}
     		);
     	}
+    };
+
+    
+    $scope.edit = function () {
+		var id = this.row.id;
+		$location.path('/'+$routeParams.class+'/edit/'+id);		
     };
     
     $scope.search = function() {    	
