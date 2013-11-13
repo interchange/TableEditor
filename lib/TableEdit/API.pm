@@ -9,6 +9,8 @@ use Dancer::Plugin::Ajax;
 
 use Dancer::Plugin::DBIC qw(schema resultset rset);
 use DBIx::Class::ResultClass::HashRefInflator;
+use DBIx::Class::Schema::Loader qw/ make_schema_at /;
+use YAML::Tiny;
 
 my $layout = {};
 my $as_hash = 'DBIx::Class::ResultClass::HashRefInflator';
@@ -21,6 +23,59 @@ any '**' => sub {
 	pass;
 };
 
+get '/schema' => sub {
+	my $schema_info = {};
+	
+	my $db = config->{plugins}->{DBIC}->{default};
+	if($db){
+		$schema_info->{db_info} = $db;
+	}
+
+	if(eval{schema->storage->dbh}){
+		if(%{schema->{class_mappings}}){
+			$schema_info->{classes} = scalar keys %{schema->{class_mappings}};
+		}
+		else{
+			# Automaticly generate schema
+			make_schema_at(
+			    $db->{schema_class},
+			    { dump_directory => '../lib', debug => 1 },
+			    [ $db->{dsn}, $db->{user}, $db->{pass} ],
+			);
+		}
+	}
+	else{
+		$schema_info->{db_connection} = 0;
+	}
+	
+	if(%{schema->{class_mappings}}){
+		$schema_info->{schema} = scalar keys %{schema->{class_mappings}};
+	}
+	
+    # Create a YAML file
+    my $yaml = YAML::Tiny->new;
+
+    # Open the config
+    my $config_path = '../config.yml';
+    $yaml = YAML::Tiny->read( $config_path );
+
+    # Reading properties
+    my $db = $yaml->[0]->{plugins}->{DBIC}->{default};
+    $db->{dsn} = 'dbi:Pg:dbname=iro;host=localhost;port=8948';
+    $db->{options} = {};
+    $db->{user} = 'interch';
+    $db->{pass} = '94daq2rix';
+    $db->{schema_class} = 'TableEdit::Schema';
+
+    # Save the file
+    #$yaml->write( $config_path );
+	
+	$schema_info->{ready} = %{schema->{class_mappings}} ? 1 : 0;
+	$schema_info->{db_info}->{pass} = '******';
+	
+	
+	return to_json $schema_info;
+};
 
 get '/:class/:id/:related/list' => sub {
 	my $id = params->{id};
@@ -82,9 +137,9 @@ post '/:class/:id/:related/:related_id' => sub {
 		my $add_method = "add_to_$related"; 
 		$object->$add_method($related_object);	
 	}
-		
 	return 1;
 };
+
 
 del '/:class/:id/:related/:related_id' => sub {
 	my $id = params->{id};

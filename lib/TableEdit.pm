@@ -3,10 +3,7 @@ use Dancer ':syntax';
 
 our $VERSION = '0.1';
 
-use TableEdit::Admin;
 use TableEdit::API;
-use TableEdit::Routes;
-#use TableEdit::CRUD;
 use TableEdit::Schema;
 use Dancer::Plugin::DBIC qw(schema resultset rset);
 
@@ -16,9 +13,7 @@ hook 'before_template_render' => sub {
 };
 
 
-get '/' => sub {
-    return template 'index';
-};
+get '/' => sub {	return '/index.html'; };
 
 true;
 

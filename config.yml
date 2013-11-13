@@ -4,49 +4,17 @@
 
 # Your application's name
 appname: "TableEdit"
-
-# The default layout to use for your application (located in
-# views/layouts/main.tt)
-layout: "main"
-
-# when the charset is set to UTF-8 Dancer will handle for you
-# all the magic of encoding and decoding. You should not care
-# about unicode within your app when this setting is set (recommended).
 charset: "UTF-8"
-
-# template engine
-# simple: default and very basic template engine
-# template_toolkit: TT
-
-#template: "simple"
-template: "template_flute"
-
-# template: "template_toolkit"
-# engines:
-#   template_toolkit:
-#     encoding:  'utf8'
-#     start_tag: '[%'
-#     end_tag:   '%]'
-
 session: YAML
 session_expires: 8 hours
 
 plugins: 
-#   DBIC:
-#    default:
-#      dsn: dbi:mysql:dbname=bizi;host=localhost;port=3306
-#      schema_class: TableEdit::Schema
-#      user: root
-#      pass: toor
-#      options:
-#        RaiseError: 1
-#        PrintError: 1  
    DBIC:
     default:
-      dsn: dbi:Pg:dbname=iro;host=localhost;port=8948
+      dsn: dbi:Pg:dbname=__DATABASE_NAME__;host=localhost;port=__PORT__
       schema_class: TableEdit::Schema
-      user: interch
-      pass: 94daq2rix
+      user: __USERNAME__
+      pass: __PASSWORD__
       options:
         RaiseError: 1
         PrintError: 1

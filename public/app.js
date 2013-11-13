@@ -5,7 +5,7 @@
 var CrudApp = angular.module('CrudApp', ['ngResource', 'ngRoute']).
 	config(function($routeProvider) {
 		$routeProvider.
-	     when('/', { templateUrl: 'list_grid.html', controller: 'ContainerCtrl' }).
+	     when('/', { templateUrl: 'home.html', controller: 'IndexCtrl' }).
 	     when('/:class/list', { templateUrl: 'list.html', controller: 'ListCtrl' }).
 	     when('/:class/new', { templateUrl: 'form.html', controller: 'CreateCtrl' }).
 	     when('/:class/edit/:id', { templateUrl: 'form.html', controller: 'EditCtrl' }).
@@ -37,6 +37,9 @@ CrudApp.directive('activeLink', function($location) {
 
 CrudApp.factory('Class', function($resource) { 
 	return $resource('/api/:class/list', { class: '@class' });
+});
+CrudApp.factory('Schema', function($resource) { 
+	return $resource('/api/schema',{},{query: {isArray: false}});
 });
 CrudApp.factory('RelatedListCtrl', function($resource) { 
 	return $resource('/api/:class/:id/:related/list', { class: '@class' });
@@ -225,9 +228,13 @@ var RelatedItemsCtrl = function ($scope, $routeParams, $location, $rootScope, Re
 var BreadcrumbsCtrl = function ($scope, $routeParams, $location, $rootScope) {
 	$rootScope.breadcrumbs = [];
 };
-var ContainerCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
-	
+
+
+var IndexCtrl = function ($scope, Schema, Menu) {
+	$scope.schema = Schema.get();
 };
+
+
 var RelatedListCtrl = function ($scope, $routeParams, $location, $rootScope, Class, ClassItem, RelatedListCtrl) {
 	$scope.data = RelatedListCtrl.get({
 		class: $routeParams.class,
@@ -240,7 +247,9 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, $rootScope, Cla
 	);
 	
 	
-}
+};
+
+
 var CreateCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
 	$scope.item = {};
 	$scope.data = ClassItem.get(

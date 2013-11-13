@@ -10,6 +10,10 @@ header {
 	margin-right: 20px;
 }
 
+#main h1 {
+	margin-top: 10px;
+}
+
 .selected, .selected a, .active, .active a {
 	font-weight: bold;
 }

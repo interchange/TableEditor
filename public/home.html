@@ -1,0 +1,12 @@
+<div ng-show="schema.ready">
+	<h1>You are all set!</h1>
+	<p>You can start using table editor by choosing model on the left</p>
+</div>
+
+<div ng-show="!schema.ready">
+	<h1>Configuration</h1>
+	<p>Things to do:</p>
+	<div ng-class="{'alert-success': schema.db_info, 'alert-danger': !schema.db_info}" class="alert">Database configuration</div>
+	<div ng-class="{'alert-success': schema.db_connection, 'alert-danger': !schema.db_connection}" class="alert">Live connection to DB</div>
+	<div ng-class="{'alert-success': schema.schema, 'alert-danger': !schema.schema}" class="alert">DBIx Schema</div>
+</div>
