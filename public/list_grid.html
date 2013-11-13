@@ -1,66 +1,54 @@
-<h1>List</h1>
-	<div class="panel panel-primary">
+<div class="well well-small">
 
-		<div class="panel-heading">
-          <h3 class="panel-title">{{data.grid_title}}</h3>
-        </div>
+	<form class="form-search grid" style="margin: 0px">
+		<table class="table table-striped table-responsive" ng-model="data.query">
+			<thead>
+				<tr>
+					<th class="field" ng-repeat="field in data.field_list"><a ng-class="{active: field.name==sort_column}" ng-click="sort('{{field.name}}')" class="field-label">{{field.label}}</a></th>
+					<th></th>
+				</tr>
+				<tr>
+					<th class="column-search" ng-repeat="field in data.field_list">
+						<div class="field-search">
+							<div ng-show="field.text_field">
+								<input ng-model="q[field.name]" type="text">
+							</div>
 
-		<div class="well well-small">
+							<div ng-show="field.text_area">
+								<textarea rows="10" cols="30"></textarea>
+							</div>
 
-			<form class="form-search grid" style="margin: 0px">
-				<table class="table table-striped table-responsive" ng-model="data.query">
-					<thead>
-						<tr>
-							<th class="field" ng-repeat="field in data.field_list"><a ng-class="{active: field.name==sort_column}" ng-click="sort('{{field.name}}')" class="field-label">{{field.label}}</a></th>
-							<th></th>
-						</tr>
-						<tr>
-							<th class="column-search" ng-repeat="field in data.field_list">
-								<div class="field-search">
-									<div  ng-show="field.text_field">
-										<input ng-model="q[field.name]" type="text">
-									</div>
+							<div ng-show="field.dropdown">
+								<select id="media_format" name="options">
+									<option class="option input-dropdown"></option>
+								</select>
+							</div>
 
-									<div  ng-show="field.text_area">
-										<textarea rows="10" cols="30"></textarea>
-									</div>
+							<div ng-show="field.checkbox">
+								<input type="checkbox" />
+							</div>
+						</div>
+					</th>
+					<th><button class="btn btn-default" ng-click="reset()">Filter</button></th>
+				</tr>
+			</thead>
+			<tbody>
 
-									<div  ng-show="field.dropdown">
-										<select id="media_format" name="options">
-											<option class="option input-dropdown"></option>
-										</select>
-									</div>
+				<tr class="object-table-row" ng-repeat="row in data.rows" id="row-{{row.id}}">
+					<td class="object-table-value" ng-repeat="field in row.row">{{ field.value }}</td>
+					<td class="actions" ng-include="actions"></td>
+				</tr>
+			</tbody>
+		</table>
 
-									<div ng-show="field.checkbox">
-										<input type="checkbox" />
-									</div>
-								</div>
-							</th>
-							<th><button class="btn btn-default" ng-click="reset()">Filter</button></th>
-						</tr>
-					</thead>
-					<tbody>
+	</form>
 
-						<tr class="object-table-row" ng-repeat="row in data.rows" id="row-{{row.id}}">
-							<td class="object-table-value" ng-repeat="field in row.row">{{ field.value }}</td>
-							<td class="actions">
-								<a ng-click="del()"><i class="icon-remove" ></i></a>
-								<a ng-click="edit()"><i class="icon-edit" ></i></a>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-				<a href="#/{{data.class}}/new"><i class="icon-plus"></i> Add {{data.class}}</a>
-			</form>
+</div>
 
-		</div>
+<ul ng-if="data.pages > 1" class="pagination">
+	<li ng-if="data.page > 1"><a ng-click="go_to_page('{{ data.page - 1 }}')">«</a></li>
+	<li ng-class="{active: page==data.page}" ng-repeat="page in page_list"><a ng-click="go_to_page( page )">{{ page }}</a></li>
+	<li ng-if="data.page < data.pages"><a ng-click="go_to_page('{{ data.page + 1 }}')">»</a></li>
+</ul>
+<span class="label label-default"> Page {{ data.page }} / {{ data.pages }} </span>
 
-			<ul ng-if="data.pages > 1" class="pagination">
-				<li ng-if="data.page > 1"><a ng-click="go_to_page('{{ data.page - 1 }}')">«</a></li>
-				<li ng-class="{active: page==data.page}" ng-repeat="page in page_list"><a ng-click="go_to_page( page )">{{ page }}</a></li>
-				<li ng-if="data.page < data.pages"><a ng-click="go_to_page('{{ data.page + 1 }}')">»</a></li>
-			</ul>
-				<span class="label label-default">
-					Page {{ data.page }} / {{ data.pages }}
-				</span>
-	</div>

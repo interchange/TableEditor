@@ -4,6 +4,12 @@ header {
 	padding: 20px;
 }
 
+.container {
+	width: initial;
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
 .selected, .selected a, .active, .active a {
 	font-weight: bold;
 }

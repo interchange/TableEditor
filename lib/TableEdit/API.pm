@@ -21,6 +21,133 @@ any '**' => sub {
 	pass;
 };
 
+
+get '/:class/:id/:related/list' => sub {
+	my $id = params->{id};
+	my $class = params->{class};
+	my $related = params->{related};
+	my ($current_object, $data);
+	
+	my $result_source = schema->resultset(ucfirst($class))->result_source;	
+	my $relationship_info = $result_source->relationship_info($related) ? 
+		$result_source->relationship_info($related) :
+		$result_source->resultset_attributes->{many_to_many}->{$related};
+	return '{}' unless ( defined $relationship_info );	
+	my $relationship_class_name = $relationship_info->{class};
+	my $relationship_class = schema->class_mappings->{$relationship_class_name};
+	# Object lookup
+	$current_object = schema->resultset($class)->find($id);
+	my $related_items = $current_object->$related;
+	
+	return '{}' unless ( defined $current_object );	
+	$data->{'id'} = $id;
+	$data->{'class'} = $class;
+	$data->{'related_class'} = $relationship_class;
+	$data->{'table-title'} = "Search ".$relationship_class;
+	$data->{'title'} = "$current_object - $relationship_class";
+	
+	$data->{bread_crumbs} = [{label=> ucfirst($class), link => "../list"}, {label => $data->{title}}];
+	return to_json $data;
+};
+
+
+post '/:class/:id/:related/:related_id' => sub {
+	my $id = params->{id};
+	my $class = params->{class};
+	my $related = params->{related};
+	my $related_id = params->{related_id};
+	
+	my $result_source = schema->resultset(ucfirst($class))->result_source;	
+	my $relationship_info = $result_source->relationship_info($related) ? 
+		$result_source->relationship_info($related) :
+		$result_source->resultset_attributes->{many_to_many}->{$related};
+	my $relationship_class_name = $relationship_info->{class};
+	my $relationship_class = schema->class_mappings->{$relationship_class_name};
+	
+	my $object = schema->resultset($class)->find($id);
+	my $related_object = schema->resultset($relationship_class)->find($related_id);
+	
+	# Has many
+	if($relationship_info->{cond}){
+		my $column_name;
+		for my $cond (keys %{$relationship_info->{cond}}){
+			$column_name = [split('\.', "$cond")]->[-1];
+			last;
+		}		
+		$related_object->$column_name($id);
+		$related_object->update;
+	}
+	# Many to Many
+	else {
+		my $add_method = "add_to_$related"; 
+		$object->$add_method($related_object);	
+	}
+		
+	return 1;
+};
+
+del '/:class/:id/:related/:related_id' => sub {
+	my $id = params->{id};
+	my $class = params->{class};
+	my $related = params->{related};
+	my $related_id = params->{related_id};
+	
+	my $result_source = schema->resultset(ucfirst($class))->result_source;	
+	my $relationship_info = $result_source->relationship_info($related) ? 
+		$result_source->relationship_info($related) :
+		$result_source->resultset_attributes->{many_to_many}->{$related};
+	my $relationship_class_name = $relationship_info->{class};
+	my $relationship_class = schema->class_mappings->{$relationship_class_name};
+	
+	my $object = schema->resultset($class)->find($id);
+	my $related_object = schema->resultset($relationship_class)->find($related_id);
+	
+	# Has many
+	if($relationship_info->{cond}){ 
+		my $column_name;
+		for my $cond (keys %{$relationship_info->{cond}}){
+			$column_name = [split('\.', "$cond")]->[-1];
+			last;
+		}		
+		$related_object->$column_name(undef);
+		$related_object->update;
+	}
+	# Many to Many
+	else {
+		my $add_method = "remove_from_$related"; 
+		$object->$add_method($related_object);	
+	}
+
+	return 1;
+};
+
+
+get '/:class/:id/:related/items' => sub {
+	my $id = params->{id};
+	my $class = params->{class};
+	my $related = params->{related};
+	my ($current_object, $data);
+	my $get_params = params('query') || {};
+	
+	my $result_source = schema->resultset(ucfirst($class))->result_source;	
+	my $relationship_info = $result_source->relationship_info($related) ? 
+		$result_source->relationship_info($related) :
+		$result_source->resultset_attributes->{many_to_many}->{$related};
+	return '{}' unless ( defined $relationship_info );	
+	my $relationship_class_name = $relationship_info->{class};
+	my $relationship_class = schema->class_mappings->{$relationship_class_name};
+	# Object lookup
+	$current_object = schema->resultset($class)->find($id);
+	my $related_items = $current_object->$related;
+	
+	return '{}' unless ( defined $current_object );	
+	# Related bind
+	$data = grid_related_template_params($relationship_class, $related_items, $get_params, \&related_actions);
+	
+	return to_json $data;
+};
+
+
 get '/:class/list' => sub {
 	my $class = params->{class};
 	my $get_params = params('query');
@@ -385,16 +512,16 @@ sub grid_template_params {
 
 
 sub grid_related_template_params {
-	my ($class, $related_items, $post_params, $get_params, $actions) = @_;
+	my ($class, $related_items, $get_params, $actions) = @_;
 	my $template_params;
 	my $where ||= {};	
 	# Grid
 	my $columns_info = grid_columns_info($class, $get_params->{sort});
-	grid_where($columns_info, $where, $post_params, $related_items->{attrs}->{alias});
-	add_values($columns_info, $post_params);
+	grid_where($columns_info, $where, $get_params, $related_items->{attrs}->{alias});
+	add_values($columns_info, $get_params);
 	
 	my ($primary_column) = schema->source(ucfirst($class))->primary_columns;
-	$get_params->{page} ||= 0;
+	my $page = $get_params->{page} || 1;
 	
 	my $objects = $related_items->search(	
 	$where,
@@ -418,11 +545,11 @@ sub grid_related_template_params {
 	);
 	
 	$template_params->{class} = $class;
+	$template_params->{page} = $page;
+	$template_params->{pages} = ceil($count / $page_size);
+	$template_params->{count} = $count;
+	$template_params->{page_size} = $page_size;
 	
-	# Pager
-	my $pager = new Pager(pageSize => $page_size, url => "/grid/$class",);
-	$template_params->{pagination} = $pager->getHtml($get_params->{page}, $count, {url_params => $get_params});
-	$template_params->{field_list} = $columns_info;
 	return $template_params;
 }
 
