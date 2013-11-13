@@ -3,8 +3,8 @@ use Dancer ':syntax';
 
 our $VERSION = '0.1';
 
-use TableEdit::API;
 use TableEdit::Schema;
+use TableEdit::API;
 use Dancer::Plugin::DBIC qw(schema resultset rset);
 
 hook 'before_template_render' => sub {
@@ -12,8 +12,8 @@ hook 'before_template_render' => sub {
 	$tokens->{'site-title'} = 'Table Edit';
 };
 
-
-get '/' => sub {	return '/index.html'; };
+prefix '/';
+get '/' => sub { return redirect '/index.html'};
 
 true;
 

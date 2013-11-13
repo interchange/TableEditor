@@ -1,4 +1,4 @@
-package TableEdit::CRUD;
+package TableEdit::API;
 
 use Dancer ':syntax';
 use POSIX;
@@ -32,10 +32,8 @@ get '/schema' => sub {
 	}
 
 	if(eval{schema->storage->dbh}){
-		if(%{schema->{class_mappings}}){
-			$schema_info->{classes} = scalar keys %{schema->{class_mappings}};
-		}
-		else{
+		$schema_info->{db_connection} = 1;
+		unless(%{schema->{class_mappings}}){
 			# Automaticly generate schema
 			make_schema_at(
 			    $db->{schema_class},
@@ -51,28 +49,29 @@ get '/schema' => sub {
 	if(%{schema->{class_mappings}}){
 		$schema_info->{schema} = scalar keys %{schema->{class_mappings}};
 	}
+
+	# TODO: Input db data through form 	
+	if(0){
+	    # Create a YAML file
+	    my $yaml = YAML::Tiny->new;
 	
-    # Create a YAML file
-    my $yaml = YAML::Tiny->new;
-
-    # Open the config
-    my $config_path = '../config.yml';
-    $yaml = YAML::Tiny->read( $config_path );
-
-    # Reading properties
-    my $db = $yaml->[0]->{plugins}->{DBIC}->{default};
-    $db->{dsn} = 'dbi:Pg:dbname=iro;host=localhost;port=8948';
-    $db->{options} = {};
-    $db->{user} = 'interch';
-    $db->{pass} = '94daq2rix';
-    $db->{schema_class} = 'TableEdit::Schema';
-
-    # Save the file
-    #$yaml->write( $config_path );
+	    # Open the config
+	    my $config_path = '../config.yml';
+	    $yaml = YAML::Tiny->read( $config_path );
 	
-	$schema_info->{ready} = %{schema->{class_mappings}} ? 1 : 0;
+	    # Reading properties
+	    my $db = $yaml->[0]->{plugins}->{DBIC}->{default};
+	    $db->{dsn} = 'dbi:Pg:dbname=iro;host=localhost;port=8948';
+	    $db->{options} = {};
+	    $db->{user} = 'interch';
+	    $db->{pass} = '94daq2rix';
+	    $db->{schema_class} = 'TableEdit::Schema';
+	
+	    # Save the file
+	    #$yaml->write( $config_path );
+	}
+	
 	$schema_info->{db_info}->{pass} = '******';
-	
 	
 	return to_json $schema_info;
 };
