@@ -13,7 +13,7 @@ hook 'before_template_render' => sub {
 };
 
 prefix '/';
-get '/' => sub { return redirect '/index.html'};
+get '/' => sub { return forward '/index.html'};
 
 true;
 

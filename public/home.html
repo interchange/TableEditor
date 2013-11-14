@@ -8,5 +8,6 @@
 	<p>Things to do:</p>
 	<div ng-class="{'alert-success': schema.db_info, 'alert-danger': !schema.db_info}" class="alert">Database configuration</div>
 	<div ng-class="{'alert-success': schema.db_connection, 'alert-danger': !schema.db_connection}" class="alert">Live connection to DB</div>
+	<div ng-show="schema.schema_created" class="alert ">DBIx Schema has just been created. Please restart dancer.</div>
 	<div ng-class="{'alert-success': schema.schema, 'alert-danger': !schema.schema}" class="alert">DBIx Schema</div>
 </div>

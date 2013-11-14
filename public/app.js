@@ -38,6 +38,9 @@ CrudApp.directive('activeLink', function($location) {
 CrudApp.factory('Class', function($resource) { 
 	return $resource('/api/:class/list', { class: '@class' });
 });
+CrudApp.factory('RelatedClass', function($resource) { 
+	return $resource('/api/:class/:related/list', { class: '@class', related: '@related' });
+});
 CrudApp.factory('Schema', function($resource) { 
 	return $resource('/api/schema',{},{query: {isArray: false}});
 });
@@ -82,7 +85,7 @@ CrudApp.factory("RelatedItem", function($resource){
 
 // Controllers
 
-var RelatedClassCtrl = function ($scope, $routeParams, $location, RelatedItem,Class, ClassItem) {
+var RelatedClassCtrl = function ($scope, $routeParams, $location, RelatedItem,RelatedClass, ClassItem) {
 	$scope.sort_column = '';
 	$scope.data = {};
 	$scope.q = {};
@@ -126,8 +129,9 @@ var RelatedClassCtrl = function ($scope, $routeParams, $location, RelatedItem,Cl
     
     $scope.search = function() {    	
     	
-    	$scope.data = Class.get({
+    	$scope.data = RelatedClass.get({
     		class: $routeParams.class,
+    		related: $routeParams.related,
     		q: JSON.stringify($scope.q),
     		sort: $scope.sort_column, 
     		descending: $scope.sort_desc ? 1 : 0,
@@ -252,6 +256,7 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, $rootScope, Cla
 
 var CreateCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
 	$scope.item = {};
+	$scope.item.values = {};
 	$scope.data = ClassItem.get(
 		{	class: $routeParams.class,   	},
     	// Success
@@ -260,6 +265,7 @@ var CreateCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
     		;
     	}
 	);
+	$scope.create = 1;
 	
 	$scope.save = function(){
 	
@@ -296,7 +302,7 @@ var EditCtrl = function ($scope, $routeParams, $location, Item, ClassItem, $root
 		// ClassItem.item
 		ClassItem.save({
 			class: $routeParams.class,
-			item: this.item.values,
+			item: this.item,
 		},
 		// Success
 		function(data) {

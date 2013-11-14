@@ -8,12 +8,11 @@ use Digest::SHA qw(sha256_hex);
 use Dancer::Plugin::Ajax;
 
 use Dancer::Plugin::DBIC qw(schema resultset rset);
-use DBIx::Class::ResultClass::HashRefInflator;
 use DBIx::Class::Schema::Loader qw/ make_schema_at /;
 use YAML::Tiny;
+use Scalar::Util 'blessed';
 
 my $layout = {};
-my $as_hash = 'DBIx::Class::ResultClass::HashRefInflator';
 my $dropdown_treshold = 100;
 my $page_size = 10;
 
@@ -31,15 +30,25 @@ get '/schema' => sub {
 		$schema_info->{db_info} = $db;
 	}
 
-	if(eval{schema->storage->dbh}){
+	if( eval{schema->storage->dbh} ){
 		$schema_info->{db_connection} = 1;
 		unless(%{schema->{class_mappings}}){
+			
 			# Automaticly generate schema
 			make_schema_at(
 			    $db->{schema_class},
-			    { dump_directory => '../lib', debug => 1 },
+			    { dump_directory => '../lib', debug => 1, filter_generated_code => sub{
+			    	my ( $type, $class, $text ) = @_;
+			    	if($type eq 'result'){
+				    	return "$text"; # by TabelEdit Grega Pompe 2013
+			    	}
+			    	else {
+			    		return $text;
+			    	}
+			    }},
 			    [ $db->{dsn}, $db->{user}, $db->{pass} ],
 			);
+			$schema_info->{schema_created} = 1;
 		}
 	}
 	else{
@@ -98,7 +107,7 @@ get '/:class/:id/:related/list' => sub {
 	$data->{'class'} = $class;
 	$data->{'related_class'} = $relationship_class;
 	$data->{'table-title'} = "Search ".$relationship_class;
-	$data->{'title'} = "$current_object - $relationship_class";
+	$data->{'title'} = object_to_string($current_object);
 	
 	$data->{bread_crumbs} = [{label=> ucfirst($class), link => "../list"}, {label => $data->{title}}];
 	return to_json $data;
@@ -202,6 +211,20 @@ get '/:class/:id/:related/items' => sub {
 };
 
 
+get '/:class/:related/list' => sub {
+	my $class = params->{class};
+	my $related = params->{related};
+	my $result_source = schema->resultset(ucfirst($class))->result_source;	
+	my $relationship_info = $result_source->relationship_info($related) ? 
+		$result_source->relationship_info($related) :
+		$result_source->resultset_attributes->{many_to_many}->{$related};
+	my $relationship_class_name = $relationship_info->{class};
+	my $relationship_class = schema->class_mappings->{$relationship_class_name};
+	
+	return forward "/api/$relationship_class/list"; 	
+};
+
+
 get '/:class/list' => sub {
 	my $class = params->{class};
 	my $get_params = params('query');
@@ -236,7 +259,7 @@ post '/:class' => sub {
 	my $item = $body->{item};
 
 	my $rs = schema->resultset(ucfirst($class));
-	$rs->update_or_create( $item ); 
+	$rs->update_or_create( $item->{values} ); 
 
 	return 1;
 };
@@ -255,7 +278,7 @@ get '/:class/:id' => sub {
 	# Object lookup
 	my $object = schema->resultset(ucfirst($class))->find($id);
 	my $object_data = {$object->get_columns};
-	$data->{title} = "$object";
+	$data->{title} = object_to_string($object);
 	$data->{id} = $object_data->{id};
 	$data->{values} = $object_data;
 	add_values($columns, $object_data, $object);
@@ -286,6 +309,15 @@ get '/:class' => sub {
 		bread_crumbs => [{label=> ucfirst($class), link => "list"}, {label=> 'Add'}], 
 	}; 
 };
+
+
+sub object_to_string {
+	my $object = shift;
+	my $class = $object->result_source->{source_name};
+	my ($pk) = $object->result_source->primary_columns;
+	my $id = $object->$pk;
+	return eval{$object->to_string} ? $object->to_string : "$id - $class";
+}
 
 
 sub classes {
@@ -418,6 +450,7 @@ sub column_add_info {
 	$column_info->{original} = undef;
 	$column_info->{name} ||= $column_name; # Column database name
 	$column_info->{label} ||= label($column_name); #Human label
+	$column_info->{foreign_label} ||= label($column_info->{foreign}) if $column_info->{foreign}; #Human label 
 	$column_info->{$column_info->{field_type}} = 1; # For Flute containers
 	$column_info->{required} ||= 'required' if defined $column_info->{is_nullable} and $column_info->{is_nullable} == 0;
 	
@@ -474,11 +507,11 @@ sub label {
 
 sub dropdown {
 	my ($result_set, $selected) = @_;
-	my $items = [{option_label=>''}];
+	my $items = [];
 	for my $object (@$result_set){
 		my $id_column = $object->result_source->_primaries->[0];
 		my $id = $object->$id_column;
-		my $name = "$object";
+		my $name = object_to_string($object);
 		push $items, {option_label=>$name, value=>$id};
 	}
 	return $items;
@@ -638,7 +671,7 @@ sub grid_rows {
 		for my $column (@$columns_info){
 			my $column_name = $column->{foreign} ? "$column->{foreign}" : "$column->{name}";
 			my $value = $row->$column_name;
-			$value = "$value" if $value;
+			$value = object_to_string($value) if blessed($value);
 			push $row_data, {value => $value};
 		}
 		my $actions = $actions_function ? $actions_function->($id) : undef;

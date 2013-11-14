@@ -1,8 +1,8 @@
 <!-- Page heading -->
 <div class="page-head">
 	<!-- Page heading -->
-	<h2 ng-if="!item.title" class="title">New {{ data.class }}</h2>
-	<h2 ng-if="item.title" class="title">{{ data.class }}: {{ item.title }}</h2>
+	<h1 ng-if="!item.title" class="title">New {{ data.class }}</h1>
+	<h1 ng-if="item.title" class="title"><span class="grey super-title">{{ data.class }}</span> {{ item.title }}</h1>
 	<!-- Breadcrumb -->
 
 	<div class="clearfix"></div>
@@ -16,10 +16,11 @@
 		<div class="row-fluid">
 			<div class="alert-box span12"></div>
 		</div>
-		<ul class="nav nav-tabs">
+		<ul class="nav nav-tabs" ng-if="!create">
 			<li class="active"><a href="#">General</a></li>
-			<li class="sub-menu-item" ng-repeat="link in data.sub_menu"><a class="sub-menu-link" ng-click="related()">{{link.label}}</a></li>
+			<li class="sub-menu-item" ng-repeat="link in data.sub_menu"><a class="sub-menu-link" ng-click="related()">{{link.foreign_label}}</a></li>
 		</ul>
+
 		<div class="row-fluid">
 			<div class="span12">
 				<form name="form" method="post" enctype="multipart/form-data" class="form-horizontal form" novalidate>
@@ -31,41 +32,40 @@
 
 						<input name="pk" type="hidden" class="pk" />
 
-
 						<!-- Text input-->
 						<div class="control-group form-field" ng-repeat="field in data.fields">
+						<div ng-if="!(field.is_auto_increment && create)">
 							<label class="control-label ">{{ field.label }}</label>
 							<div class="controls">
 							
 			
 								<div class="text_field" ng-if="field.field_type == 'text_field'">
-									<input class="form-control" ng-required="field.is_nullable == 0" ng-model="item.values[field.name]" type="text" >
+									<input class="form-control" ng-required="!field.is_nullable" ng-model="item.values[field.name]" type="text" >
 								</div>
 
 								<div ng-if="field.field_type == 'text_area'" >
-									<textarea class="form-control" rows="10" cols="30" ng-model="item.values[field.name]">
+									<textarea class="form-control" rows="10" cols="30" ng-model="item.values[field.name]" ng-required="!field.is_nullable">
 									</textarea>
 								</div>
 								
-								<div ng-if="field.field_type == 'dropdown'">
-									<select class="form-control" id="media_format" ng-model="item.values[field.name]">
-										<option class="option input-dropdown"></option>
+								<div ng-if="field.field_type == 'dropdown'" ng-class="{'nullable': !field.is_nullable}">
+									<select class="form-control" id="media_format" ng-model="item.values[field.name]" ng-required="!field.is_nullable" ng-options="option.option_label for option in field.options">
 									</select>
 								</div>
 								
 								<div ng-if="field.field_type == 'checkbox'" >
-									<input class="form-control" type="checkbox" ng-model="item.values[field.name]"/>										
+									<input class="form-control" type="checkbox" ng-model="item.values[field.name]" />										
 								</div>
 							</div>
+						</div>
 						</div>
 
 						
 						<div class="control-group">
 							<div class="controls">
-								<button ng-disabled="form.$invalid || isUnchanged(values[field.name])" ng-click="save()" class="btn btn-success pull-right">Save</button>
+								<button ng-disabled="form.$invalid || isUnchanged(item)" ng-click="save()" class="btn btn-success pull-right">Save</button>
 							</div>
 						</div>
-
 					</fieldset>
 				</form>
 			</div>
