@@ -49,7 +49,7 @@
 								</div>
 								
 								<div ng-if="field.field_type == 'dropdown'" ng-class="{'nullable': !field.is_nullable}">
-									<select class="form-control" id="media_format" ng-model="item.values[field.name]" ng-required="!field.is_nullable" ng-options="option.option_label for option in field.options">
+									<select class="form-control" id="media_format" ng-model="item.values[field.name]" ng-required="!field.is_nullable" ng-options="option.value as option.option_label for option in field.options">
 									</select>
 								</div>
 								

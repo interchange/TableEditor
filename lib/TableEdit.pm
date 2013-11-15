@@ -3,9 +3,10 @@ use Dancer ':syntax';
 
 our $VERSION = '0.1';
 
+use Dancer::Plugin::DBIC qw(schema resultset rset);
+
 use TableEdit::Schema;
 use TableEdit::API;
-use Dancer::Plugin::DBIC qw(schema resultset rset);
 
 hook 'before_template_render' => sub {
 	my $tokens = shift;

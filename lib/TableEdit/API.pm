@@ -6,8 +6,9 @@ use POSIX;
 use Array::Utils qw(:all);
 use Digest::SHA qw(sha256_hex);
 use Dancer::Plugin::Ajax;
-
 use Dancer::Plugin::DBIC qw(schema resultset rset);
+use FindBin;
+use Cwd qw/realpath/;
 use DBIx::Class::Schema::Loader qw/ make_schema_at /;
 use YAML::Tiny;
 use Scalar::Util 'blessed';
@@ -33,22 +34,25 @@ get '/schema' => sub {
 	if( eval{schema->storage->dbh} ){
 		$schema_info->{db_connection} = 1;
 		unless(%{schema->{class_mappings}}){
-			
+			my $appdir=realpath( "$FindBin::Bin/..");
 			# Automaticly generate schema
-			make_schema_at(
-			    $db->{schema_class},
-			    { dump_directory => '../lib', debug => 1, filter_generated_code => sub{
-			    	my ( $type, $class, $text ) = @_;
-			    	if($type eq 'result'){
-				    	return "$text"; # by TabelEdit Grega Pompe 2013
-			    	}
-			    	else {
-			    		return $text;
-			    	}
-			    }},
-			    [ $db->{dsn}, $db->{user}, $db->{pass} ],
-			);
+			eval {
+				make_schema_at(
+				    $db->{schema_class},
+				    { dump_directory => "$appdir/lib", debug => 1, filter_generated_code => sub{
+				    	my ( $type, $class, $text ) = @_;
+				    	if($type eq 'result'){
+					    	return "$text"; # by TabelEdit Grega Pompe 2013
+				    	}
+				    	else {
+				    		return $text;
+				    	}
+				    }},
+				    [ $db->{dsn}, $db->{user}, $db->{pass} ],
+				);
+			};
 			$schema_info->{schema_created} = 1;
+			return to_json $schema_info;
 		}
 	}
 	else{
