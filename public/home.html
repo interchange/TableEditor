@@ -5,9 +5,24 @@
 
 <div ng-show="!schema.ready">
 	<h1>Configuration</h1>
-	<p>Things to do:</p>
-	<div ng-class="{'alert-success': schema.db_info, 'alert-danger': !schema.db_info}" class="alert">Database configuration</div>
-	<div ng-class="{'alert-success': schema.db_connection, 'alert-danger': !schema.db_connection}" class="alert">Live connection to DB</div>
-	<div ng-show="schema.schema_created" class="alert ">DBIx Schema has just been created. Please restart dancer.</div>
-	<div ng-class="{'alert-success': schema.schema, 'alert-danger': !schema.schema}" class="alert">DBIx Schema</div>
+	<div ng-class="{'alert-success': schema.return, 'alert-danger': !schema.return}" class="alert">
+		<h2>Application</h2>
+		<p ng-show="schema.return">Application is running.</p>
+		<p ng-show="!schema.return">Application is not responding.</p>
+	</div>
+	<div ng-class="{'alert-success': schema.db_info, 'alert-danger': schema.return && !schema.db_info}" class="alert">
+		<h2>Database configuration</h2>
+		<p ng-show="schema.db_info">Configuration exists.</p>
+	</div>
+	<div ng-class="{'alert-success': schema.return && !schema.db_connection_error, 'alert-danger': schema.db_connection_error}" class="alert">
+		<h2>Connection to DB</h2>
+		<p ng-show="schema.db_connection_error">{{schema.db_connection_error}}</p>
+		<p ng-show="schema.return && !schema.db_connection_error">Connected successfully!</p>
+	</div>
+	<div ng-class="{'alert-success': schema.schema, 'alert-danger': schema.return && schema.schema_error}" class="alert">
+		<h2>DBIx Schema</h2>
+		<p ng-show="schema.schema_error">{{schema.schema_error}}</p>
+		<p ng-show="schema.return && !schema.schema_error && !schema.schema">DBIx Schema has just been created! Please restart dancer.</p>
+		<p ng-show="schema.return && !schema.schema_error && schema.schema">DBIx Schema exists!</p>
+	</div>
 </div>

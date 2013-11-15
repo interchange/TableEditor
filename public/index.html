@@ -45,9 +45,9 @@
 		<div class="row-fluid">
 
 			<!-- Sidebar -->
-			<div class="span2" ng-controller="SidebarCtrl">
+			<div class="span2" ng-controller="SidebarCtrl" style="min-width: 130px;">
 				<div class="sidebar-dropdown">
-					<a href="#">Navigation</a>
+					<a href="#">Configuration</a>
 				</div>
 
 				<div class="sidebar-inner">
@@ -57,6 +57,8 @@
 					<div class="well well-small">
 						<ul class="nav nav-list bs-docs-sidenav affix">
 							<!-- Use the class nred, ngreen, nblue, nlightblue, nviolet or norange to add background color. You need to use this in <li> tag. -->
+							<li class="nav-header">Configuratin</li>
+							<a href="#/">Status</a>
 							<li class="nav-header">Tables</li>
 							<li ng-repeat="link in menu" data-active-link=""><a  href="{{link.url}}" class="list-group-item">{{link.name}}</a></li>
 						</ul>

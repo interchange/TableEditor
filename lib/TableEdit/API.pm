@@ -23,45 +23,52 @@ any '**' => sub {
 	pass;
 };
 
+sub make_schema {
+	my $db = shift;
+	# Automaticly generate schema
+	my $appdir=realpath( "$FindBin::Bin/..");
+	my $schema_report = eval {
+		make_schema_at(
+		    $db->{schema_class},
+		    { dump_directory => "$appdir/lib", debug => 1, filter_generated_code => sub{
+		    	my ( $type, $class, $text ) = @_;
+		    	if($type eq 'result'){
+			    	return "$text"; # by TabelEdit Grega Pompe 2013
+		    	}
+		    	else {
+		    		return $text;
+		    	}
+		    }},
+		    [ $db->{dsn}, $db->{user}, $db->{pass} ],
+		);
+	};
+	# Return error or enpty string if successfull
+	return "$@";
+}
+
 get '/schema' => sub {
-	my $schema_info = {};
+	my $schema_info = {return => 1};
 	
+	# Check if DB configuration exists
 	my $db = config->{plugins}->{DBIC}->{default};
 	if($db){
 		$schema_info->{db_info} = $db;
 	}
-
-	if( eval{schema->storage->dbh} ){
-		$schema_info->{db_connection} = 1;
-		unless(%{schema->{class_mappings}}){
-			my $appdir=realpath( "$FindBin::Bin/..");
-			# Automaticly generate schema
-			eval {
-				make_schema_at(
-				    $db->{schema_class},
-				    { dump_directory => "$appdir/lib", debug => 1, filter_generated_code => sub{
-				    	my ( $type, $class, $text ) = @_;
-				    	if($type eq 'result'){
-					    	return "$text"; # by TabelEdit Grega Pompe 2013
-				    	}
-				    	else {
-				    		return $text;
-				    	}
-				    }},
-				    [ $db->{dsn}, $db->{user}, $db->{pass} ],
-				);
-			};
-			$schema_info->{schema_created} = 1;
-			return to_json $schema_info;
-		}
+	
+	# Check for DB connection
+	my $db_test = eval{schema->storage->dbh};
+	$schema_info->{db_connection_error} = "$@";
+	return to_json $schema_info if $schema_info->{db_connection_error};
+	
+	# Check if DBIx class schema exists
+	if(%{schema->{class_mappings}}){
+		$schema_info->{schema} = scalar keys %{schema->{class_mappings}};		
 	}
-	else{
-		$schema_info->{db_connection} = 0;
+	# Schema doesn't exits. Try to generate it
+	else {
+		$schema_info->{schema_error} = make_schema($db);
 	}
 	
-	if(%{schema->{class_mappings}}){
-		$schema_info->{schema} = scalar keys %{schema->{class_mappings}};
-	}
 
 	# TODO: Input db data through form 	
 	if(0){
