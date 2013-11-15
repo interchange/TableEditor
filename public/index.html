@@ -33,7 +33,7 @@
 			<span id="site-title">Table Editor</span>
 
 			<!-- Breadcrumb -->
-			<div ng-controller="BreadcrumbsCtrl">
+			<div style="display:none" ng-controller="BreadcrumbsCtrl">
 				<a href="/"><i class="icon-home"></i> Home</a>
 				<!-- Divider -->
 				<span ng-repeat="crumb in breadcrumbs" class="crumb"> / <a ng-if="crumb.link" href="{{crumb.link}}">{{crumb.label}}</a> <span ng-if="!crumb.link" class="bread-current class link">{{crumb.label}}</span>
@@ -46,9 +46,7 @@
 
 			<!-- Sidebar -->
 			<div class="span2" ng-controller="SidebarCtrl" style="min-width: 130px;">
-				<div class="sidebar-dropdown">
-					<a href="#">Configuration</a>
-				</div>
+			
 
 				<div class="sidebar-inner">
 
@@ -57,7 +55,7 @@
 					<div class="well well-small">
 						<ul class="nav nav-list bs-docs-sidenav affix">
 							<!-- Use the class nred, ngreen, nblue, nlightblue, nviolet or norange to add background color. You need to use this in <li> tag. -->
-							<li class="nav-header">Configuratin</li>
+							<li class="nav-header">Configuration</li>
 							<a href="#/">Status</a>
 							<li class="nav-header">Tables</li>
 							<li ng-repeat="link in menu" data-active-link=""><a  href="{{link.url}}" class="list-group-item">{{link.name}}</a></li>

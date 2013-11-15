@@ -1,0 +1,32 @@
+<script type="text/javascript" src="/javascripts/list.js"></script>
+<!-- Page heading -->
+<div class="page-head">
+	<!-- Page heading -->
+	<h1 ng-if="item.title" class="title"><span class="grey super-title">{{ item.class }}</span> {{ item.title }}</h1>
+	<div class="clearfix"></div>
+
+</div>
+<!-- Page heading ends -->
+
+<!-- Matter -->
+
+<div class="matter bundle-page">
+
+	<ul class="nav nav-tabs">
+		<a ng-click="showRelatedClass = ! showRelatedClass" class="pull-right"><i class="icon-plus"></i> Add {{item.class}}</a>
+		<li><a class="link_id" href="/#/{{item.class}}/edit/{{item.id}}">General</a></li>
+		<li class="active"><a href="#"><span class="class">Active</span>s</a></li>
+	</ul>
+	<div class="row-fluid">
+
+		<h2>Related items</h2>
+		<div id="list-grid" ng-include='"views/list_grid.html"' ng-controller='RelatedItemsCtrl'></div>
+
+	</div>
+	<div class="row-fluid" ng-show="showRelatedClass">
+		<h2>Items</h2>
+
+		<div id="list-grid" ng-include='"views/list_grid.html"' ng-controller='RelatedClassCtrl'></div>
+
+	</div>
+</div>

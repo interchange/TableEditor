@@ -92,7 +92,6 @@ list-style: none;
 
 .column-search input, .column-search select {
 	width: 100%;
-	box-sizing: border-box;
 }
 .column-search input[type="checkbox"] {
 	width: initial;

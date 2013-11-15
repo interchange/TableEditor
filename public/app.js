@@ -5,11 +5,11 @@
 var CrudApp = angular.module('CrudApp', ['ngResource', 'ngRoute']).
 	config(function($routeProvider) {
 		$routeProvider.
-	     when('/', { templateUrl: 'home.html', controller: 'IndexCtrl' }).
-	     when('/:class/list', { templateUrl: 'list.html', controller: 'ListCtrl' }).
-	     when('/:class/new', { templateUrl: 'form.html', controller: 'CreateCtrl' }).
-	     when('/:class/edit/:id', { templateUrl: 'form.html', controller: 'EditCtrl' }).
-	     when('/:class/:id/:related/list', { templateUrl: 'related.html', controller: 'RelatedListCtrl' }).
+	     when('/', { templateUrl: 'views/home.html', controller: 'IndexCtrl' }).
+	     when('/:class/list', { templateUrl: 'views/list.html', controller: 'ListCtrl' }).
+	     when('/:class/new', { templateUrl: 'views/form.html', controller: 'CreateCtrl' }).
+	     when('/:class/edit/:id', { templateUrl: 'views/form.html', controller: 'EditCtrl' }).
+	     when('/:class/:id/:related/list', { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' }).
 	     otherwise({redirectTo: '/'});
 });
 
@@ -91,7 +91,7 @@ var RelatedClassCtrl = function ($scope, $routeParams, $location, RelatedItem,Re
 	$scope.q = {};
 	$scope.sort_desc = false;
 	$scope.current_page = 1;
-	$scope.actions = 'related_list.html';
+	$scope.actions = 'views/grid/actions/related_list.html';
 	
 	$scope.sort = function (ord) {
         if ($scope.sort_column == ord) { $scope.sort_desc = !$scope.sort_desc; }
@@ -162,7 +162,7 @@ var RelatedItemsCtrl = function ($scope, $routeParams, $location, $rootScope, Re
 	$scope.q = {};
 	$scope.sort_desc = false;
 	$scope.current_page = 1;
-	$scope.actions = 'related_class_list.html';
+	$scope.actions = 'views/grid/actions/related_class_list.html';
 
 	
 	$scope.sort = function (ord) {
@@ -240,7 +240,7 @@ var IndexCtrl = function ($scope, Schema, Menu) {
 
 
 var RelatedListCtrl = function ($scope, $routeParams, $location, $rootScope, Class, ClassItem, RelatedListCtrl) {
-	$scope.data = RelatedListCtrl.get({
+	$scope.item = RelatedListCtrl.get({
 		class: $routeParams.class,
 		id: $routeParams.id,
 		related: $routeParams.related},
@@ -326,7 +326,7 @@ var ListCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
 	$scope.q = {};
 	$scope.sort_desc = false;
 	$scope.current_page = 1;
-	$scope.actions = 'class_list.html';
+	$scope.actions = 'views/grid/actions/class_list.html';
 	
 	$scope.sort = function (ord) {
         if ($scope.sort_column == ord) { $scope.sort_desc = !$scope.sort_desc; }

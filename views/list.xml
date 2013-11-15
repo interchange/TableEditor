@@ -1,8 +1,0 @@
-<specification>
-	<value name="list-grid" id="list-grid" include="list_grid.html"/>
-
-	<value name="class" />
-	<value name="grid-url" target="data-url" />
-
-</specification>
- 

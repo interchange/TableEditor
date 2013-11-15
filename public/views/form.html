@@ -37,25 +37,7 @@
 						<div ng-if="!(field.is_auto_increment && create)">
 							<label class="control-label ">{{ field.label }}</label>
 							<div class="controls">
-							
-			
-								<div class="text_field" ng-if="field.field_type == 'text_field'">
-									<input class="form-control" ng-required="!field.is_nullable" ng-model="item.values[field.name]" type="text" >
-								</div>
-
-								<div ng-if="field.field_type == 'text_area'" >
-									<textarea class="form-control" rows="10" cols="30" ng-model="item.values[field.name]" ng-required="!field.is_nullable">
-									</textarea>
-								</div>
-								
-								<div ng-if="field.field_type == 'dropdown'" ng-class="{'nullable': !field.is_nullable}">
-									<select class="form-control" id="media_format" ng-model="item.values[field.name]" ng-required="!field.is_nullable" ng-options="option.value as option.option_label for option in field.options">
-									</select>
-								</div>
-								
-								<div ng-if="field.field_type == 'checkbox'" >
-									<input class="form-control" type="checkbox" ng-model="item.values[field.name]" />										
-								</div>
+								<div ng-include="'views/field/'+field.field_type+'.html'" ></div>
 							</div>
 						</div>
 						</div>
