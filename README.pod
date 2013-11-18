@@ -3,20 +3,18 @@ use Dancer ':syntax';
 
 our $VERSION = '0.1';
 
-use TableEdit::Admin;
-use TableEdit::CRUD;
-use TableEdit::Schema;
 use Dancer::Plugin::DBIC qw(schema resultset rset);
+
+use TableEdit::Schema;
+use TableEdit::API;
 
 hook 'before_template_render' => sub {
 	my $tokens = shift;
 	$tokens->{'site-title'} = 'Table Edit';
 };
 
-
-get '/' => sub {
-    return template 'index';
-};
+prefix '/';
+get '/' => sub { return forward '/index.html'};
 
 true;
 
@@ -38,11 +36,7 @@ Table Edit lets you edit database data. It uses L<DBIx::Class> models for databa
 You need a database and L<DBIx::Class> models for this module to work. You can 
 write your own L<DBIx::Class> models, or use schema loader.
 
-<<<<<<< HEAD
 For now it only works with branched version of Tamplate::Flute available on https://github.com/gregapompe/Template-Flute.
-=======
-For now it only works with branched version of Template::Flute available on https://github.com/gregapompe/Template-Flute.
->>>>>>> 46e824f3499f0195b553ec016ca51f5d0c459a28
 
 To make sure app uses this version of Flute, set appropriate path in app.pm
 
@@ -60,11 +54,7 @@ for you.
 
 =head2 Database config
 
-<<<<<<< HEAD
 You also have to set Dancers DBCI connection in config.yml
-=======
-You also have to set Dancers DBIC connection in config.yml
->>>>>>> 46e824f3499f0195b553ec016ca51f5d0c459a28
 
 	plugins: 
 	   DBIC:
@@ -79,7 +69,6 @@ You also have to set Dancers DBIC connection in config.yml
 
 =head1 USE
 
-<<<<<<< HEAD
 Whit basic configuration done you can start using Table Edit. You will probably want to fine tune it a bit though.
 
 =head1 FINE TUNE
@@ -87,13 +76,6 @@ Whit basic configuration done you can start using Table Edit. You will probably 
 Make sure you set all additional info below # DO NOT MODIFY THIS OR ANYTHING ABOVE! line in L<DBIx::Class> model.
 
 For this example we will use folowing model.
-=======
-With basic configuration done you can start using Table Edit. You will probably want to fine tune it a bit though.
-
-=head1 FINE TUNE
-
-For this example we will use following model.
->>>>>>> 46e824f3499f0195b553ec016ca51f5d0c459a28
 
 	use utf8;
 	package TableEdit::Schema::Result::User;
@@ -136,7 +118,7 @@ For this example we will use following model.
 	
 	__PACKAGE__->has_many(
 	  "user_items",
-	  "eShopAdmin::Schema::Result::UserItem",
+	  "TableEdit::Schema::Result::UserItem",
 	  { "foreign.approval_id" => "self.approval_id" },
 	  { cascade_copy => 0, cascade_delete => 0 },
 	);
@@ -160,15 +142,10 @@ You can override column label by specifying it
 =head2 Object / Row string representation
 
 Row often has to be represented as string (titles, drop-down selectors, ...) so it is a good idea to 
-<<<<<<< HEAD
 define a custum, human redable strigification method. For example users username, his id in parentheses 
-=======
-define a custom, human readable stringification method. For example users username, his id in parentheses 
->>>>>>> 46e824f3499f0195b553ec016ca51f5d0c459a28
 and company if he / she has one. It could be just username or something much complicated.
 
-	use overload fallback => 1,
-        '""' => \&to_string; 
+	use overload fallback => 1, '""' => \&to_string; 
 
 	sub to_string {
 		my $self = shift;	
@@ -178,11 +155,7 @@ and company if he / she has one. It could be just username or something much com
 
 =head2 Hidden columns
 
-<<<<<<< HEAD
 Some columns are used only internaly and you never want to see them in TableEdit. You can hide them.
-=======
-Some columns are used only internally and you never want to see them in TableEdit. You can hide them.
->>>>>>> 46e824f3499f0195b553ec016ca51f5d0c459a28
 
 	__PACKAGE__->columns_info->{internal_code}->{hidden} = 1;
 
@@ -194,25 +167,18 @@ You can set a column to be readonly
 
 =head2 Many to many
 
-<<<<<<< HEAD
 "Has many" and "belongs_to" is automaticly detected. However, many to many DBIx::Class information 
-=======
-"Has many" and "belongs_to" is automatically detected. However, many to many DBIx::Class information 
->>>>>>> 46e824f3499f0195b553ec016ca51f5d0c459a28
 doesn't provide enough information, so you have to specify it manualy.
 Only set resultset_attributes once, or it will be overwritten! 
 
 	__PACKAGE__->resultset_attributes({ 
 		many_to_many => {
-			items => {class => 'eShopAdmin::Schema::Result::Item', where => {inactive => 'false'}},  
+			items => {class => 'TableEdit::Schema::Result::Item', where => {inactive => 'false'}},  
 		},		
 	});
 	
 =head2 Grid visible columns
-<<<<<<< HEAD
-=======
 
->>>>>>> 46e824f3499f0195b553ec016ca51f5d0c459a28
 Often you don't care about all columns when you browse though rows or there are simply to many. 
 You can specify a list of columns that will appear on grid. 
 Only set resultset_attributes once, or it will be overwritten! 
@@ -221,8 +187,25 @@ Only set resultset_attributes once, or it will be overwritten!
 		grid_columns => ['approval_id', 'item_id', 'notify', 'is_approved'],
 	});
 	
-<<<<<<< HEAD
+=head2 Model name / label
+
+You can set user friendly name of the table.
+
+	__PACKAGE__->resultset_attributes({ 	
+		label => 'Employees',
+	});
+	
+=head2 Field data type
+
+Fileds have basic data types based on types in db. You can override them to use differen form element.
+
+	__PACKAGE__->columns_info->{email}->{data_type} = 'text';
+	
+You can also set them to use your custum widget. You create html file with the matching name in /public/views/field directory.
+For example 	/public/views/field/email_widget.html
+	
+	__PACKAGE__->columns_info->{email}->{data_type} = 'email_widget';
+	
+These fied types are used on detail view and on list search. 	
+	
 =cut	
-=======
-=cut	
->>>>>>> 46e824f3499f0195b553ec016ca51f5d0c459a28
