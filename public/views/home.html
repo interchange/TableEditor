@@ -19,10 +19,10 @@
 		<p ng-show="schema.db_connection_error">{{schema.db_connection_error}}</p>
 		<p ng-show="schema.return && !schema.db_connection_error">Connected successfully!</p>
 	</div>
-	<div ng-class="{'alert-success': schema.schema, 'alert-danger': schema.return && schema.schema_error}" class="alert">
+	<div ng-class="{'alert-success': schema.schema, 'alert-danger': schema.schema_error}" class="alert">
 		<h2>DBIx Schema</h2>
 		<p ng-show="schema.schema_error">{{schema.schema_error}}</p>
-		<p ng-show="schema.return && !schema.schema_error && !schema.schema">DBIx Schema has just been created! Please restart dancer.</p>
-		<p ng-show="schema.return && !schema.schema_error && schema.schema">DBIx Schema exists!</p>
+		<p ng-show="schema.schema_created">DBIx Schema has just been created! Please restart dancer.</p>
+		<p ng-show="schema.schema">DBIx Schema exists!</p>
 	</div>
 </div>

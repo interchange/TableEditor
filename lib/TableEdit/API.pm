@@ -16,6 +16,7 @@ use Scalar::Util 'blessed';
 my $layout = {};
 my $dropdown_treshold = 100;
 my $page_size = 10;
+my $appdir = realpath( "$FindBin::Bin/..");
 
 prefix '/api';
 any '**' => sub {
@@ -26,7 +27,6 @@ any '**' => sub {
 sub make_schema {
 	my $db = shift;
 	# Automaticly generate schema
-	my $appdir=realpath( "$FindBin::Bin/..");
 	my $schema_report = eval {
 		make_schema_at(
 		    $db->{schema_class},
@@ -67,6 +67,7 @@ get '/schema' => sub {
 	# Schema doesn't exits. Try to generate it
 	else {
 		$schema_info->{schema_error} = make_schema($db);
+		$schema_info->{schema_created} = $schema_info->{schema_error} ? 1 : 0;
 	}
 	
 
@@ -243,8 +244,13 @@ get '/:class/list' => sub {
 	# Grid
 	$grid_params = grid_template_params($class, $get_params);
 	
+	# Remove required field properties
+	for my $field (@{$grid_params->{field_list}}){
+		$field->{is_nullable} = 1 ;
+	}
+	
 	$grid_params->{default_actions} = 1;
-	$grid_params->{'grid_title'} = ucfirst($class)."s";
+	$grid_params->{'class_label'} = class_label($class);
 	
 	return to_json $grid_params;
 };
@@ -294,7 +300,7 @@ get '/:class/:id' => sub {
 	$data->{values} = $object_data;
 	add_values($columns, $object_data, $object);
 	
-	$data->{bread_crumbs} = [{label=> ucfirst($class), link => "../list"}, {label => $data->{title}}];
+	$data->{bread_crumbs} = [{label=> class_label($class), link => "../list"}, {label => $data->{title}}];
 	
 	return to_json $data;
 };
@@ -316,15 +322,16 @@ get '/:class' => sub {
 	return to_json { 
 		fields => $columns,
 		class => $class,
+		class_label => class_label($class),
 		sub_menu => $sub_menu,
-		bread_crumbs => [{label=> ucfirst($class), link => "list"}, {label=> 'Add'}], 
+		bread_crumbs => [{label=> class_label($class), link => "list"}, {label=> 'Add'}], 
 	}; 
 };
 
 
 sub object_to_string {
 	my $object = shift;
-	my $class = $object->result_source->{source_name};
+	my $class = class_label($object->result_source->{source_name});
 	my ($pk) = $object->result_source->primary_columns;
 	my $id = $object->$pk;
 	return eval{$object->to_string} ? $object->to_string : "$id - $class";
@@ -344,6 +351,8 @@ sub classes {
 
 sub class_label {
 	my $class = shift;
+	my $label = schema->resultset(ucfirst($class))->result_source->resultset_attributes->{label};
+	return $label if $label;
 	$class =~ s/(?<! )([A-Z])/ $1/g; # Search for "(?<!pattern)" in perldoc perlre 
 	$class =~ s/^ (?=[A-Z])//; # Strip out extra starting whitespace followed by A-Z
 	return $class;
@@ -464,6 +473,7 @@ sub column_add_info {
 	$column_info->{foreign_label} ||= label($column_info->{foreign}) if $column_info->{foreign}; #Human label 
 	$column_info->{$column_info->{field_type}} = 1; # For Flute containers
 	$column_info->{required} ||= 'required' if defined $column_info->{is_nullable} and $column_info->{is_nullable} == 0;
+	$column_info->{required} ||= 'required' if defined $column_info->{foreign} and $column_info->{is_nullable} != 1;
 	
 	# Remove size info if select
 	delete $column_info->{size} if $column_info->{field_type} eq 'dropdown';
@@ -501,11 +511,27 @@ sub add_values {
 sub field_type {
 	my $field = shift;
 	my $data_type = $field->{data_type};
-	my $field_type = {
-		boolean => 'checkbox',
-		text => 'text_area',
-	}; 
-	return (($data_type and $field_type->{$data_type}) ? $field_type->{$data_type} : 'text_field');
+	my $types = field_types();
+	$data_type = 'varchar' unless $data_type ~~ @$types;
+	return $data_type;
+}
+
+
+sub field_types {
+	my $dir = $appdir.'/public/views/field';
+	my @types;
+    opendir(DIR, $dir) or die $!;
+
+    while (my $file = readdir(DIR)) {
+        # Use a regular expression to ignore files beginning with a period
+        next if ($file =~ m/^\./);
+        # remove .html
+        $file =~ s/\.html//;
+        $file =~ s/\.htm//;
+		push @types, $file;
+    }
+    closedir(DIR);
+    return \@types;
 }
 
 
@@ -658,7 +684,7 @@ sub grid_where {
 	for my $field (@$columns) {
 		# Search
 		my $name = $field->{name};
-		if( $params->{$name} ){
+		if( defined $params->{$name} ){
 			if ($field->{data_type} and ($field->{data_type} eq 'text' or $field->{data_type} eq 'varchar')){
 				$where->{"LOWER($alias.$name)"} = {'LIKE' => "%".lc($params->{$name})."%"};
 			}

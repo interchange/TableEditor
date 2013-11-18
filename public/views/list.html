@@ -2,15 +2,9 @@
 	<h1>Loading...</h1>
 </div>
 <div ng-if="data.field_list">
-	<h1>{{data.class}} - List of items</h1>
-
-		<p style="text-align: right"><a href="#/{{data.class}}/new" class=""><i class="icon-plus"></i>New {{data.class}}</a></p>
+	<h1>{{data.class_label}} - List of items</h1>
+		<p style="text-align: right"><a href="#/{{data.class}}/new" class=""><i class="icon-plus"></i>New {{data.class_label}}</a></p>
 		<div class="panel panel-primary">
-		
 			<div id="list-grid" ng-include="'views/list_grid.html'" ></div>
 		</div>
-
-	
-	
-
 </div>

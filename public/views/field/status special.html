@@ -1,8 +1,10 @@
+Very special!
 <select 
 	class="form-control" 
 	id="media_format" 
 	ng-model="item.values[field.name]" 
-	ng-required="field.required" 
-	ng-options="option.value as option.option_label for option in field.options">
+	ng-required="!field.is_nullable" >
 	<option></option>
+	<option value="0">No</option>
+	<option value="1">Yes</option>
 </select>

@@ -124,11 +124,11 @@ list-style: none;
 
 .padded { padding: 10px; }
 
-.ng-invalid {
+#details .ng-invalid {
 	border: #d9534f 1px solid;
 	box-shadow: inset 0 1px 1px rgba(0,0,0,0.075),0 0 8px #d9534f;
 }
-form.ng-invalid {
+#details form.ng-invalid {
 	border: initial;
 	box-shadow: initial;
 }

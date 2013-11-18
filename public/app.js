@@ -85,78 +85,17 @@ CrudApp.factory("RelatedItem", function($resource){
 
 // Controllers
 
-var RelatedClassCtrl = function ($scope, $routeParams, $location, RelatedItem,RelatedClass, ClassItem) {
-	$scope.sort_column = '';
-	$scope.data = {};
-	$scope.q = {};
-	$scope.sort_desc = false;
-	$scope.current_page = 1;
-	$scope.actions = 'views/grid/actions/related_list.html';
-	
-	$scope.sort = function (ord) {
-        if ($scope.sort_column == ord) { $scope.sort_desc = !$scope.sort_desc; }
-        else { $scope.sort_desc = false; }
-        $scope.sort_column = ord;
-        $scope.reset();
-    };
-    
-    $scope.go_to_page = function (set_page) {
-    	$scope.current_page = parseInt(set_page);
-    	$scope.reset();
-    };
-    
-    $scope.reset = function () {
-        $scope.page = 1;
-        $scope.items = [];
-        $scope.search();
 
-    };
-
-    $scope.add = function(){
-    	
-		RelatedItem.add({
-			class: $routeParams.class,
-			id: $routeParams.id,
-    		related: $routeParams.related,
-    		related_id: this.row.id,
-	    	},
-	    	// Success
-	    	function(data) {
-	    	}
-		);
-	};
-    
-    
-    $scope.search = function() {    	
-    	
-    	$scope.data = RelatedClass.get({
-    		class: $routeParams.class,
-    		related: $routeParams.related,
-    		q: JSON.stringify($scope.q),
-    		sort: $scope.sort_column, 
-    		descending: $scope.sort_desc ? 1 : 0,
-			page: $scope.current_page,
-	    	},
-	    	// Success
-	    	function(data) {
-	    		// Pagination
-	    		var page_scope = 5;
-	    		var current_page = $scope.data.page = parseInt($scope.data.page);
-	    		var pages = $scope.data.pages = parseInt($scope.data.pages);
-	    		var from_page = (current_page - page_scope > 0) ? (current_page - page_scope) : 1;
-	    		var to_page = (current_page + page_scope < pages) ? (current_page + page_scope) : pages;
-
-	    		$scope.page_list = []; 
-	    		for (var i = from_page; i <= to_page; i++) {
-	    			$scope.page_list.push(i);
-	    		}
-	    	}
-		);
-    };
-    
-    $scope.reset();
-}
-var RelatedItemsCtrl = function ($scope, $routeParams, $location, $rootScope, RelatedItem, RelatedItems) {
+var RelatedListCtrl = function ($scope, $routeParams, $location, $rootScope, Class, ClassItem, RelatedListCtrl,  RelatedItem, RelatedItems) {
+	$scope.item = RelatedListCtrl.get({
+		class: $routeParams.class,
+		id: $routeParams.id,
+		related: $routeParams.related},
+		// Success
+		function(data) {
+			$rootScope.breadcrumbs = data.bread_crumbs;
+		}
+	);
 	$scope.sort_column = '';
 	$scope.data = {};
 	$scope.q = {};
@@ -169,15 +108,15 @@ var RelatedItemsCtrl = function ($scope, $routeParams, $location, $rootScope, Re
         if ($scope.sort_column == ord) { $scope.sort_desc = !$scope.sort_desc; }
         else { $scope.sort_desc = false; }
         $scope.sort_column = ord;
-        $scope.reset();
+        $scope.reset_items();
     };
     
     $scope.go_to_page = function (set_page) {
     	$scope.current_page = parseInt(set_page);
-    	$scope.reset();
+    	$scope.reset_items();
     };
     
-    $scope.reset = function () {
+    $scope.reset_items = function () {
         $scope.page = 1;
         $scope.items = [];
         $scope.search();
@@ -227,7 +166,84 @@ var RelatedItemsCtrl = function ($scope, $routeParams, $location, $rootScope, Re
 		);
     };
     
+    $scope.reset_items();
+};
+
+
+var RelatedClassCtrl = function ($scope, $routeParams, $location, RelatedItem, RelatedClass, ClassItem, RelatedItems) {
+	$scope.actions = 'views/grid/actions/related_list.html';
+	$scope.sort_column = '';
+	$scope.data = {};
+	$scope.q = {};
+	$scope.sort_desc = false;
+	$scope.current_page = 1;
+	
+	$scope.sort = function (ord) {
+        if ($scope.sort_column == ord) { $scope.sort_desc = !$scope.sort_desc; }
+        else { $scope.sort_desc = false; }
+        $scope.sort_column = ord;
+        $scope.reset();
+    };
+    
+    $scope.go_to_page = function (set_page) {
+    	$scope.current_page = parseInt(set_page);
+    	$scope.reset();
+    };
+    
+    $scope.reset = function () {
+        $scope.page = 1;
+        $scope.items = [];
+        $scope.search();
+
+    };
+
+    $scope.add = function(){
+    	
+		RelatedItem.add({
+			class: $routeParams.class,
+			id: $routeParams.id,
+    		related: $routeParams.related,
+    		related_id: this.row.id,
+	    	},
+	    	// Success
+	    	function(data) {
+	    		$scope.reset_items();
+	    	}
+		);
+	};
+    
+    
+    $scope.search = function() {    	
+    	
+    	$scope.data = RelatedClass.get({
+    		class: $routeParams.class,
+    		related: $routeParams.related,
+    		q: JSON.stringify($scope.q),
+    		sort: $scope.sort_column, 
+    		descending: $scope.sort_desc ? 1 : 0,
+			page: $scope.current_page,
+	    	},
+	    	// Success
+	    	function(data) {
+	    		// Pagination
+	    		var page_scope = 5;
+	    		var current_page = $scope.data.page = parseInt($scope.data.page);
+	    		var pages = $scope.data.pages = parseInt($scope.data.pages);
+	    		var from_page = (current_page - page_scope > 0) ? (current_page - page_scope) : 1;
+	    		var to_page = (current_page + page_scope < pages) ? (current_page + page_scope) : pages;
+
+	    		$scope.page_list = []; 
+	    		for (var i = from_page; i <= to_page; i++) {
+	    			$scope.page_list.push(i);
+	    		}
+	    	}
+		);
+    };
+    
     $scope.reset();
+};
+var RelatedItemsCtrl = function ($scope, $routeParams, $location, $rootScope, RelatedItem, RelatedItems) {
+	
 };
 var BreadcrumbsCtrl = function ($scope, $routeParams, $location, $rootScope) {
 	$rootScope.breadcrumbs = [];
@@ -236,21 +252,6 @@ var BreadcrumbsCtrl = function ($scope, $routeParams, $location, $rootScope) {
 
 var IndexCtrl = function ($scope, Schema, Menu) {
 	$scope.schema = Schema.get();
-};
-
-
-var RelatedListCtrl = function ($scope, $routeParams, $location, $rootScope, Class, ClassItem, RelatedListCtrl) {
-	$scope.item = RelatedListCtrl.get({
-		class: $routeParams.class,
-		id: $routeParams.id,
-		related: $routeParams.related},
-		// Success
-		function(data) {
-			$rootScope.breadcrumbs = data.bread_crumbs;
-		}
-	);
-	
-	
 };
 
 
@@ -323,7 +324,8 @@ var ListCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
 	// $scope.data = Class.get({class: $routeParams.class});
 	$scope.sort_column = '';
 	$scope.data = {};
-	$scope.q = {};
+	$scope.item = {};
+	$scope.item.values = {};
 	$scope.sort_desc = false;
 	$scope.current_page = 1;
 	$scope.actions = 'views/grid/actions/class_list.html';
@@ -344,7 +346,6 @@ var ListCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
         $scope.page = 1;
         $scope.items = [];
         $scope.search();
-
     };
     
     
@@ -372,7 +373,7 @@ var ListCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
     	
     	$scope.data = Class.get({
     		class: $routeParams.class,
-    		q: JSON.stringify($scope.q),
+    		q: JSON.stringify($scope.item.values),
     		sort: $scope.sort_column, 
     		descending: $scope.sort_desc ? 1 : 0,
 			page: $scope.current_page,

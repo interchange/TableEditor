@@ -145,8 +145,7 @@ Row often has to be represented as string (titles, drop-down selectors, ...) so 
 define a custum, human redable strigification method. For example users username, his id in parentheses 
 and company if he / she has one. It could be just username or something much complicated.
 
-	use overload fallback => 1,
-        '""' => \&to_string; 
+	use overload fallback => 1, '""' => \&to_string; 
 
 	sub to_string {
 		my $self = shift;	
@@ -187,5 +186,26 @@ Only set resultset_attributes once, or it will be overwritten!
 	__PACKAGE__->resultset_attributes({ 	
 		grid_columns => ['approval_id', 'item_id', 'notify', 'is_approved'],
 	});
+	
+=head2 Model name / label
+
+You can set user friendly name of the table.
+
+	__PACKAGE__->resultset_attributes({ 	
+		label => 'Employees',
+	});
+	
+=head2 Field data type
+
+Fileds have basic data types based on types in db. You can override them to use differen form element.
+
+	__PACKAGE__->columns_info->{email}->{data_type} = 'text';
+	
+You can also set them to use your custum widget. You create html file with the matching name in /public/views/field directory.
+For example 	/public/views/field/email_widget.html
+	
+	__PACKAGE__->columns_info->{email}->{data_type} = 'email_widget';
+	
+These fied types are used on detail view and on list search. 	
 	
 =cut	

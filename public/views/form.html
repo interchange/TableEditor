@@ -1,8 +1,8 @@
 <!-- Page heading -->
 <div class="page-head">
 	<!-- Page heading -->
-	<h1 ng-if="!item.title" class="title">New {{ data.class }}</h1>
-	<h1 ng-if="item.title" class="title"><span class="grey super-title">{{ data.class }}</span> {{ item.title }}</h1>
+	<h1 ng-if="!item.title" class="title">New {{ data.class_label }}</h1>
+	<h1 ng-if="item.title" class="title"><span class="grey super-title">{{ data.class_label }}</span> {{ item.title }}</h1>
 	<!-- Breadcrumb -->
 
 	<div class="clearfix"></div>
@@ -11,13 +11,13 @@
 <!-- Page heading ends -->
 
 <!-- Matter -->
-<div class="matter">
+<div class="matter" id="details">
 	<div class="container-fluid">
 		<div class="row-fluid">
 			<div class="alert-box span12"></div>
 		</div>
-		<ul class="nav nav-tabs" ng-if="!create">
-			<li class="active"><a href="#">General</a></li>
+		<ul ng-show="data.sub_menu" class="nav nav-tabs" ng-if="!create">
+			<li class="active" ><a href="#">General</a></li>
 			<li class="sub-menu-item" ng-repeat="link in data.sub_menu"><a class="sub-menu-link" ng-click="related()">{{link.foreign_label}}</a></li>
 		</ul>
 
