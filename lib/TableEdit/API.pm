@@ -463,17 +463,20 @@ sub columns_and_relationships_info {
 
 
 sub column_add_info {
-	my ($column_name, $column_info) = @_;
+	my ($column_name, $column_info, $class) = @_;
+	my @pk = schema->source($class)->primary_columns;
+	
 	return undef if $column_info->{hidden};
+	
+	# Coulumn calculated properties - can be overwritten in model
 	$column_info->{field_type} ||= field_type($column_info);
 	$column_info->{default_value} = ${$column_info->{default_value}} if ref($column_info->{default_value}) eq 'SCALAR' ;
 	$column_info->{original} = undef;
 	$column_info->{name} ||= $column_name; # Column database name
 	$column_info->{label} ||= label($column_name); #Human label
 	$column_info->{foreign_label} ||= label($column_info->{foreign}) if $column_info->{foreign}; #Human label 
-	$column_info->{$column_info->{field_type}} = 1; # For Flute containers
-	$column_info->{required} ||= 'required' if defined $column_info->{is_nullable} and $column_info->{is_nullable} == 0;
-	$column_info->{required} ||= 'required' if defined $column_info->{foreign} and $column_info->{is_nullable} != 1;
+	$column_info->{required} ||= required_field($column_info);	
+	$column_info->{primary_key} ||= 1 if $column_name ~~ @pk;	
 	
 	# Remove size info if select
 	delete $column_info->{size} if $column_info->{field_type} eq 'dropdown';
@@ -483,6 +486,15 @@ sub column_add_info {
 			
 	return undef if index($column_info->{field_type}, 'timestamp') != -1;
 	
+}
+
+
+sub required_field {
+	my $field_info = shift;
+	my $required;
+	$required = 'required' if defined $field_info->{is_nullable} and !defined $field_info->{default_value} and $field_info->{is_nullable} == 0;
+	$required = 'required' if defined $field_info->{foreign} and $field_info->{is_nullable} != 1;
+	return $required;
 }
 
 
