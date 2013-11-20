@@ -25,10 +25,9 @@ for my $class (@{classes()}){
 	($schema->{$class}->{primary}) = schema->source($class)->primary_columns;
 	$schema->{$class}->{label} = class_label($class);
 	$schema->{$class}->{columns} = class_columns($class);
-	$schema->{$class}->{columns_info} = columns_info($class);
+	$schema->{$class}->{columns_info} = columns_static_info($class);
 	$schema->{$class}->{relationships} = relationships_info($class);	
 	$schema->{$class}->{fields} = relationships_info($class);	
-	$schema->{$class}->{grid_columns_info} = grid_columns_info($class);	
 	$schema->{$class}->{attributes} = class_source($class)->resultset_attributes;	
 
 	for my $related (@{$schema->{$class}->{relationships}}){
@@ -174,7 +173,6 @@ get '/:class/list' => sub {
 	my $grid_params;		
 	# Grid
 	$grid_params = grid_template_params($class, $get_params);
-	
 	$grid_params->{'class_label'} = $schema->{$class}->{label};
 	
 	return to_json $grid_params;
@@ -211,7 +209,7 @@ get '/:class/:id' => sub {
 	my ($data);
 	my $id = params->{id};
 	my $class = params->{class};
-	my $columns = $schema->{$class}->{columns_info}; 
+	my $columns = columns_info($class); 
 	
 	$data->{fields} = $columns;
 	$data->{pk} = $id;
@@ -233,7 +231,7 @@ get '/:class/:id' => sub {
 get '/:class' => sub {
 	my (@languages, $errorMessage);
 	my $class = params->{class};
-	my $columns = $schema->{$class}->{columns_info}; 
+	my $columns = columns_info($class); 
 	my $relationships = $schema->{$class}->{relationships};	
 	
 	# Multi
@@ -256,7 +254,7 @@ get '/:class' => sub {
 
 =head2 model_to_string
 
-Retruns string representation of model object
+Returns string representation of model object
 
 =cut
 
@@ -271,7 +269,7 @@ sub model_to_string {
 
 =head2 classes
 
-Retruns all classes that have primary key as one column (requirement)
+Returns all usable classes (tables that have primary one column key, CRUD requirement)
 
 =cut
 
@@ -288,7 +286,7 @@ sub classes {
 
 =head2 classes
 
-Retruns all classes that have primary key as one column (requirement)
+Returns all classes that have primary key as one column (requirement)
 
 =cut
 
@@ -309,11 +307,23 @@ sub class_label {
 }
 
 
+=head2 class_columns
+
+Returns plain array of all table columns 
+
+=cut
+
 sub class_columns {
 	my $class = shift;		
 	return [class_source($class)->columns]; 
 }
 
+
+=head2 class_columns
+
+Returns array of hashes with metadata for grid of all table columns 
+
+=cut
 
 sub grid_columns_info {
 	my ($class) = @_;
@@ -327,20 +337,26 @@ sub grid_columns_info {
 			($col->{data_type} and $col->{data_type} eq 'text') or
 			($col->{size} and $col->{size} > 255)
 		){
-			push $defuault_columns, $col 
+			push $defuault_columns, \%{$col} 
 		};
 	}
 	
 	# Remove required field properties
 	for my $col (@$defuault_columns){
-		$col->{required} = 0 ;
+		#$col->{required} = 0 ;
 	}
 	
 	return $defuault_columns; 
 }
 
 
-sub columns_info {
+=head2 class_columns
+
+Returns array of hashes with metadata for form of all table columns 
+
+=cut
+
+sub columns_static_info {
 	my ($class, $selected_columns) = @_;
 	my $result_source = class_source($class);
 	my $columns = $result_source->columns_info; 
@@ -365,7 +381,8 @@ sub columns_info {
 		my $rel_type = $relationship_info->{attrs}->{accessor};
 		# Belongs to or Has one
 		if( $rel_type eq 'single' or $rel_type eq 'filter' ){
-			$relationship_info->{foreign_type} = 'belongs_to';
+			$relationship_info->{foreign_type} = 'belongs_to' if $rel_type eq 'filter';
+			$relationship_info->{foreign_type} = 'might_have' if $rel_type eq 'single';
 			if ($count <= $dropdown_treshold){
 				$relationship_info->{field_type} = 'dropdown';
 				
@@ -390,6 +407,31 @@ sub columns_info {
 	} 
 	
 	return $columns_info;
+}
+
+
+sub columns_info {
+	my ($class) = @_;
+	my $result_source = class_source($class);
+	my $columns = $result_source->columns_info; 
+	my $columns_info = $schema->{$class}->{columns_info};
+	
+	for my $column_info(@$columns_info){
+		next unless defined $column_info->{foreign_type};
+		# Belongs to or Has one
+		if( $column_info->{foreign_type} eq 'belongs_to' or $column_info->{foreign_type} eq 'might_have' ){
+			my $count = schema->resultset($column_info->{source})->count;
+			if ($count <= $dropdown_treshold){
+				$column_info->{field_type} = 'dropdown';
+				my @foreign_objects = schema->resultset($column_info->{source})->all;
+				$column_info->{options} = dropdown(\@foreign_objects);
+			}
+			else {
+				$column_info->{field_type} = 'varchar';
+			} 
+		}
+	}
+	return $schema->{$class}->{columns_info};
 }
 
 
@@ -468,16 +510,12 @@ sub column_add_info {
 	$column_info->{default_value} = ${$column_info->{default_value}} if ref($column_info->{default_value}) eq 'SCALAR' ;
 	$column_info->{original} = undef;
 	$column_info->{name} ||= $column_name; # Column database name
-	$column_info->{label} ||= label($column_name); #Human label
-	$column_info->{foreign_label} ||= label($column_info->{foreign}) if $column_info->{foreign}; #Human label 
+	$column_info->{label} ||= $column_info->{foreign} ? label($column_info->{foreign}) : label($column_name); #Human label
 	$column_info->{required} ||= required_field($column_info);	
 	$column_info->{primary_key} ||= 1 if $column_name eq $schema->{$class}->{primary};	  
 	
 	# Remove size info if select
 	delete $column_info->{size} if $column_info->{field_type} eq 'dropdown';
-			
-	# Remove not null if checkbox			
-	delete $column_info->{is_nullable} if $column_info->{field_type} eq 'checkbox';
 			
 	return undef if index($column_info->{field_type}, 'timestamp') != -1;
 	
@@ -487,7 +525,10 @@ sub column_add_info {
 sub required_field {
 	my $field_info = shift;
 	return 'required' if defined $field_info->{is_nullable} and !defined $field_info->{default_value} and $field_info->{is_nullable} == 0;
-	return 'required' if defined $field_info->{is_nullable} and defined $field_info->{foreign} and $field_info->{is_nullable} != 1;
+	if(defined $field_info->{foreign}){
+		return undef if $field_info->{foreign_type} eq 'might_have';
+		return 'required' unless defined $field_info->{is_nullable} and $field_info->{is_nullable} != 1;
+	}
 	return undef;
 }
 
@@ -567,7 +608,7 @@ sub grid_template_params {
 	my $grid_params;
 	my $where ||= {};	
 	# Grid
-	$grid_params->{field_list} = $schema->{$class}->{grid_columns_info}; 
+	$grid_params->{field_list} = grid_columns_info($class); 
 	my $where_params = from_json $get_params->{q} if $get_params->{q};
 	grid_where($grid_params->{field_list}, $where, $where_params);
 	add_values($grid_params->{field_list}, $where_params);
@@ -615,7 +656,7 @@ sub grid_where {
 	for my $field (@$columns) {
 		# Search
 		my $name = $field->{name};
-		if( defined $params->{$name} ){
+		if( defined $params->{$name} and $params->{$name} ne '' ){
 			if ($field->{data_type} and ($field->{data_type} eq 'text' or $field->{data_type} eq 'varchar')){
 				$where->{"LOWER($alias.$name)"} = {'LIKE' => "%".lc($params->{$name})."%"};
 			}
