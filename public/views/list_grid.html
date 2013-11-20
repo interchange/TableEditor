@@ -28,6 +28,7 @@
 		<div ng-if="data.count == 0">No results</div>
 	</form>
 
+<div style="text-align: center;"> Page {{ data.page }} / {{ data.pages }} </div>
 </div>
 
 <ul ng-if="data.pages > 1" class="pagination">
@@ -35,5 +36,4 @@
 	<li ng-class="{active: page==data.page}" ng-repeat="page in page_list"><a ng-click="go_to_page( page )">{{ page }}</a></li>
 	<li ng-if="data.page < data.pages"><a ng-click="go_to_page('{{ data.page + 1 }}')">»</a></li>
 </ul>
-<span class="label label-default"> Page {{ data.page }} / {{ data.pages }} </span>
 

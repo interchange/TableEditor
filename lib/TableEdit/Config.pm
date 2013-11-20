@@ -3,9 +3,9 @@ package TableEdit::Config;
 use Dancer ':syntax';
 
 use Dancer::Plugin::DBIC qw(schema resultset rset);
+use DBIx::Class::Schema::Loader qw/ make_schema_at /;
 use FindBin;
 use Cwd qw/realpath/;
-use TableEdit::Schema qw/make_schema/;
 
 my $appdir = realpath( "$FindBin::Bin/..");
 
@@ -66,4 +66,28 @@ get '/schema' => sub {
 	
 	return to_json $schema_info;
 };
+
+sub make_schema {
+	my $db = shift;
+	# Automaticly generate schema
+	my $schema_report = eval {
+		make_schema_at(
+		    $db->{schema_class},
+		    { dump_directory => "$appdir/lib", debug => 1, filter_generated_code => sub{
+		    	my ( $type, $class, $text ) = @_;
+		    	if($type eq 'result'){
+			    	return "$text"; # by TabelEdit Grega Pompe 2013
+		    	}
+		    	else {
+		    		return $text;
+		    	}
+		    }},
+		    [ $db->{dsn}, $db->{user}, $db->{pass} ],
+		);
+	};
+	# Return error or enpty string if successfull
+	return "$@";
+}
+
+1;
 

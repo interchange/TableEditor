@@ -87,7 +87,7 @@ CrudApp.factory("RelatedItem", function($resource){
 
 
 var RelatedListCtrl = function ($scope, $routeParams, $location, $rootScope, Class, ClassItem, RelatedListCtrl,  RelatedItem, RelatedItems) {
-	$scope.item = RelatedListCtrl.get({
+	$scope.org_item = RelatedListCtrl.get({
 		class: $routeParams.class,
 		id: $routeParams.id,
 		related: $routeParams.related},
@@ -96,9 +96,10 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, $rootScope, Cla
 			$rootScope.breadcrumbs = data.bread_crumbs;
 		}
 	);
+	$scope.item = {};
+	$scope.item.values = {};
 	$scope.sort_column = '';
 	$scope.data = {};
-	$scope.q = {};
 	$scope.sort_desc = false;
 	$scope.current_page = 1;
 	$scope.actions = 'views/grid/actions/related_class_list.html';
@@ -144,7 +145,7 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, $rootScope, Cla
     		class: $routeParams.class,
     		id: $routeParams.id,
     		related: $routeParams.related,
-    		q: JSON.stringify($scope.q),
+    		q: JSON.stringify($scope.item.values),
     		sort: $scope.sort_column, 
     		descending: $scope.sort_desc ? 1 : 0,
 			page: $scope.current_page,
@@ -173,8 +174,9 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, $rootScope, Cla
 var RelatedClassCtrl = function ($scope, $routeParams, $location, RelatedItem, RelatedClass, ClassItem, RelatedItems) {
 	$scope.actions = 'views/grid/actions/related_list.html';
 	$scope.sort_column = '';
+	$scope.item = {};
+	$scope.item.values = {};
 	$scope.data = {};
-	$scope.q = {};
 	$scope.sort_desc = false;
 	$scope.current_page = 1;
 	
@@ -218,7 +220,7 @@ var RelatedClassCtrl = function ($scope, $routeParams, $location, RelatedItem, R
     	$scope.data = RelatedClass.get({
     		class: $routeParams.class,
     		related: $routeParams.related,
-    		q: JSON.stringify($scope.q),
+    		q: JSON.stringify($scope.item.values),
     		sort: $scope.sort_column, 
     		descending: $scope.sort_desc ? 1 : 0,
 			page: $scope.current_page,
