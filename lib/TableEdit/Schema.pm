@@ -14,7 +14,32 @@ __PACKAGE__->load_namespaces;
 
 # Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-10-30 11:27:15
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:SnXIWQgJ5Y95wDQTq/QWMg
+use DBIx::Class::Schema::Loader qw/ make_schema_at /;
+use Cwd qw/realpath/;
 
+my $appdir = realpath( "$FindBin::Bin/..");
+
+sub make_schema {
+	my $db = shift;
+	# Automaticly generate schema
+	my $schema_report = eval {
+		make_schema_at(
+		    $db->{schema_class},
+		    { dump_directory => "$appdir/lib", debug => 1, filter_generated_code => sub{
+		    	my ( $type, $class, $text ) = @_;
+		    	if($type eq 'result'){
+			    	return "$text"; # by TabelEdit Grega Pompe 2013
+		    	}
+		    	else {
+		    		return $text;
+		    	}
+		    }},
+		    [ $db->{dsn}, $db->{user}, $db->{pass} ],
+		);
+	};
+	# Return error or enpty string if successfull
+	return "$@";
+}
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
 1;

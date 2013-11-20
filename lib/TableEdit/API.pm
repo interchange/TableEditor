@@ -9,7 +9,6 @@ use Dancer::Plugin::Ajax;
 use Dancer::Plugin::DBIC qw(schema resultset rset);
 use FindBin;
 use Cwd qw/realpath/;
-use DBIx::Class::Schema::Loader qw/ make_schema_at /;
 use YAML::Tiny;
 use Scalar::Util 'blessed';
 
@@ -18,84 +17,37 @@ my $dropdown_treshold = 100;
 my $page_size = 10;
 my $appdir = realpath( "$FindBin::Bin/..");
 
+# Compile schema metadata
+my $menu = to_json [map {name=> class_label($_), url=>"#/$_/list"}, @{classes()}];
+my $field_types = field_types();
+my $schema = {};
+for my $class (@{classes()}){
+	($schema->{$class}->{primary}) = schema->source($class)->primary_columns;
+	$schema->{$class}->{label} = class_label($class);
+	$schema->{$class}->{columns} = class_columns($class);
+	$schema->{$class}->{columns_info} = columns_info($class);
+	$schema->{$class}->{relationships} = relationships_info($class);	
+	$schema->{$class}->{fields} = relationships_info($class);	
+	$schema->{$class}->{grid_columns_info} = grid_columns_info($class);	
+	$schema->{$class}->{attributes} = class_source($class)->resultset_attributes;	
+
+	for my $related (@{$schema->{$class}->{relationships}}){
+		$schema->{$class}->{relation}->{$related->{foreign}} = relationship_info($class, $related->{foreign});	
+	}
+}
+
+hook 'before' => sub {
+	 my $route_handler = shift;
+        var note => 'Hi there';
+        
+    };
+
 prefix '/api';
 any '**' => sub {
 	content_type 'application/json';
 	pass;
 };
 
-sub make_schema {
-	my $db = shift;
-	# Automaticly generate schema
-	my $schema_report = eval {
-		make_schema_at(
-		    $db->{schema_class},
-		    { dump_directory => "$appdir/lib", debug => 1, filter_generated_code => sub{
-		    	my ( $type, $class, $text ) = @_;
-		    	if($type eq 'result'){
-			    	return "$text"; # by TabelEdit Grega Pompe 2013
-		    	}
-		    	else {
-		    		return $text;
-		    	}
-		    }},
-		    [ $db->{dsn}, $db->{user}, $db->{pass} ],
-		);
-	};
-	# Return error or enpty string if successfull
-	return "$@";
-}
-
-get '/schema' => sub {
-	my $schema_info = {return => 1};
-	
-	# Check if DB configuration exists
-	my $db = config->{plugins}->{DBIC}->{default};
-	if($db){
-		$schema_info->{db_info} = $db;
-	}
-	
-	# Check for DB connection
-	my $db_test = eval{schema->storage->dbh};
-	$schema_info->{db_connection_error} = "$@";
-	return to_json $schema_info if $schema_info->{db_connection_error};
-	
-	# Check if DBIx class schema exists
-	if(%{schema->{class_mappings}}){
-		$schema_info->{schema} = scalar keys %{schema->{class_mappings}};		
-	}
-	# Schema doesn't exits. Try to generate it
-	else {
-		$schema_info->{schema_error} = make_schema($db);
-		$schema_info->{schema_created} = $schema_info->{schema_error} ? 1 : 0;
-	}
-	
-
-	# TODO: Input db data through form 	
-	if(0){
-	    # Create a YAML file
-	    my $yaml = YAML::Tiny->new;
-	
-	    # Open the config
-	    my $config_path = '../config.yml';
-	    $yaml = YAML::Tiny->read( $config_path );
-	
-	    # Reading properties
-	    my $db = $yaml->[0]->{plugins}->{DBIC}->{default};
-	    $db->{dsn} = 'dbi:Pg:dbname=iro;host=localhost;port=8948';
-	    $db->{options} = {};
-	    $db->{user} = 'interch';
-	    $db->{pass} = '94daq2rix';
-	    $db->{schema_class} = 'TableEdit::Schema';
-	
-	    # Save the file
-	    #$yaml->write( $config_path );
-	}
-	
-	$schema_info->{db_info}->{pass} = '******';
-	
-	return to_json $schema_info;
-};
 
 get '/:class/:id/:related/list' => sub {
 	my $id = params->{id};
@@ -103,13 +55,8 @@ get '/:class/:id/:related/list' => sub {
 	my $related = params->{related};
 	my ($current_object, $data);
 	
-	my $result_source = schema->resultset(ucfirst($class))->result_source;	
-	my $relationship_info = $result_source->relationship_info($related) ? 
-		$result_source->relationship_info($related) :
-		$result_source->resultset_attributes->{many_to_many}->{$related};
-	return '{}' unless ( defined $relationship_info );	
-	my $relationship_class_name = $relationship_info->{class};
-	my $relationship_class = schema->class_mappings->{$relationship_class_name};
+	my $relationship_info = $schema->{$class}->{relation}->{$related};
+	my $relationship_class = $relationship_info->{class_name};
 	# Object lookup
 	$current_object = schema->resultset($class)->find($id);
 	my $related_items = $current_object->$related;
@@ -119,7 +66,7 @@ get '/:class/:id/:related/list' => sub {
 	$data->{'class'} = $class;
 	$data->{'related_class'} = $relationship_class;
 	$data->{'table-title'} = "Search ".$relationship_class;
-	$data->{'title'} = object_to_string($current_object);
+	$data->{'title'} = model_to_string($current_object);
 	
 	$data->{bread_crumbs} = [{label=> ucfirst($class), link => "../list"}, {label => $data->{title}}];
 	return to_json $data;
@@ -132,15 +79,12 @@ post '/:class/:id/:related/:related_id' => sub {
 	my $related = params->{related};
 	my $related_id = params->{related_id};
 	
-	my $result_source = schema->resultset(ucfirst($class))->result_source;	
-	my $relationship_info = $result_source->relationship_info($related) ? 
-		$result_source->relationship_info($related) :
-		$result_source->resultset_attributes->{many_to_many}->{$related};
-	my $relationship_class_name = $relationship_info->{class};
-	my $relationship_class = schema->class_mappings->{$relationship_class_name};
+	my $relationship_info = $schema->{$class}->{relation}->{$related};
+	my $relationship_class = $relationship_info->{class_name};
+	my $related_object = schema->resultset($relationship_class)->find($related_id);
 	
 	my $object = schema->resultset($class)->find($id);
-	my $related_object = schema->resultset($relationship_class)->find($related_id);
+	
 	
 	# Has many
 	if($relationship_info->{cond}){
@@ -161,18 +105,15 @@ post '/:class/:id/:related/:related_id' => sub {
 };
 
 
+
 del '/:class/:id/:related/:related_id' => sub {
 	my $id = params->{id};
 	my $class = params->{class};
 	my $related = params->{related};
 	my $related_id = params->{related_id};
 	
-	my $result_source = schema->resultset(ucfirst($class))->result_source;	
-	my $relationship_info = $result_source->relationship_info($related) ? 
-		$result_source->relationship_info($related) :
-		$result_source->resultset_attributes->{many_to_many}->{$related};
-	my $relationship_class_name = $relationship_info->{class};
-	my $relationship_class = schema->class_mappings->{$relationship_class_name};
+	my $relationship_info = $schema->{$class}->{relation}->{$related};
+	my $relationship_class = $relationship_info->{class_name};
 	
 	my $object = schema->resultset($class)->find($id);
 	my $related_object = schema->resultset($relationship_class)->find($related_id);
@@ -204,20 +145,15 @@ get '/:class/:id/:related/items' => sub {
 	my ($current_object, $data);
 	my $get_params = params('query') || {};
 	
-	my $result_source = schema->resultset(ucfirst($class))->result_source;	
-	my $relationship_info = $result_source->relationship_info($related) ? 
-		$result_source->relationship_info($related) :
-		$result_source->resultset_attributes->{many_to_many}->{$related};
-	return '{}' unless ( defined $relationship_info );	
-	my $relationship_class_name = $relationship_info->{class};
-	my $relationship_class = schema->class_mappings->{$relationship_class_name};
+	my $relationship_info = $schema->{$class}->{relation}->{$related};
+	my $relationship_class = $relationship_info->{class_name};
 	# Object lookup
 	$current_object = schema->resultset($class)->find($id);
 	my $related_items = $current_object->$related;
 	
 	return '{}' unless ( defined $current_object );	
 	# Related bind
-	$data = grid_related_template_params($relationship_class, $related_items, $get_params, \&related_actions);
+	$data = grid_template_params($relationship_class, $get_params, $related_items);
 	
 	return to_json $data;
 };
@@ -226,13 +162,8 @@ get '/:class/:id/:related/items' => sub {
 get '/:class/:related/list' => sub {
 	my $class = params->{class};
 	my $related = params->{related};
-	my $result_source = schema->resultset(ucfirst($class))->result_source;	
-	my $relationship_info = $result_source->relationship_info($related) ? 
-		$result_source->relationship_info($related) :
-		$result_source->resultset_attributes->{many_to_many}->{$related};
-	my $relationship_class_name = $relationship_info->{class};
-	my $relationship_class = schema->class_mappings->{$relationship_class_name};
-	
+	my $relationship_info = $schema->{$class}->{relation}->{$related};
+	my $relationship_class = $relationship_info->{class_name};
 	return forward "/api/$relationship_class/list"; 	
 };
 
@@ -244,13 +175,7 @@ get '/:class/list' => sub {
 	# Grid
 	$grid_params = grid_template_params($class, $get_params);
 	
-	# Remove required field properties
-	for my $field (@{$grid_params->{field_list}}){
-		$field->{is_nullable} = 1 ;
-	}
-	
-	$grid_params->{default_actions} = 1;
-	$grid_params->{'class_label'} = class_label($class);
+	$grid_params->{'class_label'} = $schema->{$class}->{label};
 	
 	return to_json $grid_params;
 };
@@ -266,7 +191,7 @@ del '/:class' => sub {
 
 
 get '/menu' => sub {
-	return to_json [map {name=> class_label($_), url=>"#/$_/list"}, @{classes()}];;
+	return $menu;
 };
 
 
@@ -286,8 +211,7 @@ get '/:class/:id' => sub {
 	my ($data);
 	my $id = params->{id};
 	my $class = params->{class};
-	my $all_columns = all_columns($class); 
-	my ($columns, $relationships) = columns_and_relationships_info($class);
+	my $columns = $schema->{$class}->{columns_info}; 
 	
 	$data->{fields} = $columns;
 	$data->{pk} = $id;
@@ -295,12 +219,12 @@ get '/:class/:id' => sub {
 	# Object lookup
 	my $object = schema->resultset(ucfirst($class))->find($id);
 	my $object_data = {$object->get_columns};
-	$data->{title} = object_to_string($object);
+	$data->{title} = model_to_string($object);
 	$data->{id} = $object_data->{id};
 	$data->{values} = $object_data;
 	add_values($columns, $object_data, $object);
 	
-	$data->{bread_crumbs} = [{label=> class_label($class), link => "../list"}, {label => $data->{title}}];
+	$data->{bread_crumbs} = [{label=> $schema->{$class}->{label}, link => "../list"}, {label => $data->{title}}];
 	
 	return to_json $data;
 };
@@ -309,8 +233,8 @@ get '/:class/:id' => sub {
 get '/:class' => sub {
 	my (@languages, $errorMessage);
 	my $class = params->{class};
-	my $all_columns = all_columns($class); 
-	my ($columns, $relationships) = columns_and_relationships_info($class);	
+	my $columns = $schema->{$class}->{columns_info}; 
+	my $relationships = $schema->{$class}->{relationships};	
 	
 	# Multi
 	my $sub_menu = []; 
@@ -322,21 +246,34 @@ get '/:class' => sub {
 	return to_json { 
 		fields => $columns,
 		class => $class,
-		class_label => class_label($class),
+		class_label => $schema->{$class}->{label},
 		sub_menu => $sub_menu,
-		bread_crumbs => [{label=> class_label($class), link => "list"}, {label=> 'Add'}], 
+		bread_crumbs => [{label=> $schema->{$class}->{label}, link => "list"}, {label=> 'Add'}], 
 	}; 
 };
 
+=head1 Fuctions
 
-sub object_to_string {
+=head2 model_to_string
+
+Retruns string representation of model object
+
+=cut
+
+sub model_to_string {
 	my $object = shift;
-	my $class = class_label($object->result_source->{source_name});
+	my $class = $object->result_source->{source_name};
 	my ($pk) = $object->result_source->primary_columns;
 	my $id = $object->$pk;
-	return eval{$object->to_string} ? $object->to_string : "$id - $class";
+	return eval{$object->to_string} ? $object->to_string : "$id - ".class_label($class);
 }
 
+
+=head2 classes
+
+Retruns all classes that have primary key as one column (requirement)
+
+=cut
 
 sub classes {
 	my $classes = [sort values schema->{class_mappings}];
@@ -349,67 +286,73 @@ sub classes {
 }
 
 
+=head2 classes
+
+Retruns all classes that have primary key as one column (requirement)
+
+=cut
+
+sub class_source {
+	my $class = shift;
+	return schema->resultset(ucfirst($class))->result_source;
+}
+
+
 sub class_label {
 	my $class = shift;
-	my $label = schema->resultset(ucfirst($class))->result_source->resultset_attributes->{label};
+	my $label = class_source($class)->resultset_attributes->{label};
 	return $label if $label;
-	$class =~ s/(?<! )([A-Z])/ $1/g; # Search for "(?<!pattern)" in perldoc perlre 
+	$class =~ s/_/ /g;	
+	$class =~ s/(?<! )([A-Z])/ $1/g; # Add space in front of Capital leters 
 	$class =~ s/^ (?=[A-Z])//; # Strip out extra starting whitespace followed by A-Z
 	return $class;
 }
 
 
-sub all_columns {
+sub class_columns {
 	my $class = shift;		
-	return [schema->resultset(ucfirst($class))->result_source->columns]; 
+	return [class_source($class)->columns]; 
 }
 
 
 sub grid_columns_info {
-	my ($class, $sort) = @_;
+	my ($class) = @_;
 	my $defuault_columns = [];
-	my ($columns, $relationships) = columns_and_relationships_info(
+	my $columns = columns_info(
 		$class, 
-		schema->resultset(ucfirst($class))->result_source->resultset_attributes->{grid_columns}
+		class_source($class)->resultset_attributes->{grid_columns}
 	);
 	for my $col (@$columns){
 		unless (
 			($col->{data_type} and $col->{data_type} eq 'text') or
 			($col->{size} and $col->{size} > 255)
 		){
-			$col->{class} = 'selected' if $sort and ($sort eq $_ or $sort eq "$_ desc");
 			push $defuault_columns, $col 
 		};
 	}
+	
+	# Remove required field properties
+	for my $col (@$defuault_columns){
+		$col->{required} = 0 ;
+	}
+	
 	return $defuault_columns; 
 }
 
 
-sub columns_and_relationships_info {
-	my ($class, $simple_columns) = @_;
-	my $result_source = schema->resultset(ucfirst($class))->result_source;
+sub columns_info {
+	my ($class, $selected_columns) = @_;
+	my $result_source = class_source($class);
 	my $columns = $result_source->columns_info; 
-	my $relationships = [$result_source->relationships];
-	my $many_to_manys = $result_source->resultset_attributes->{many_to_many};
-	$simple_columns ||= all_columns($class);
 	my $columns_info = [];
-	my $relationships_info = [];
 	
-	for my $many_to_many (keys %$many_to_manys){
-		my ($relationship_info);
-		$relationship_info->{foreign} = $many_to_many;
-		$relationship_info->{foreign_type} = 'has_many';
-		column_add_info($many_to_many, $relationship_info );
-		push $relationships_info, $relationship_info;
-	}
-	
-	for my $relationship(@$relationships){
+	for my $relationship($result_source->relationships){
 		my $column_name;
 		my $relationship_info = $result_source->relationship_info($relationship);
-		my $relationship_class_name = $relationship_info->{class};
-		#next unless grep $_ eq $relationship, @$simple_columns;
+		my $relationship_class_package = $relationship_info->{class};
+		#next unless grep $_ eq $relationship, @$selected_columns;
 		next if $relationship_info->{hidden};
-		my $relationship_class = schema->class_mappings->{$relationship_class_name};
+		my $relationship_class = schema->class_mappings->{$relationship_class_package};
 		my $count = schema->resultset($relationship_class)->count;
 		
 		for (values $relationship_info->{cond}){
@@ -420,7 +363,7 @@ sub columns_and_relationships_info {
 		$relationship_info->{foreign} = $relationship;
 
 		my $rel_type = $relationship_info->{attrs}->{accessor};
-		# Belongs to
+		# Belongs to or Has one
 		if( $rel_type eq 'single' or $rel_type eq 'filter' ){
 			$relationship_info->{foreign_type} = 'belongs_to';
 			if ($count <= $dropdown_treshold){
@@ -430,41 +373,93 @@ sub columns_and_relationships_info {
 				$relationship_info->{options} = dropdown(\@foreign_objects);
 			}
 			else {
-				$relationship_info->{field_type} = 'text_field';
+				$relationship_info->{field_type} = 'varchar';
 			} 
-			column_add_info($column_name, $relationship_info );
+			column_add_info($column_name, $relationship_info, $class );
 			push $columns_info, $relationship_info;
 		}
+	}
+	
+	$selected_columns ||= class_columns($class);
+	for (@$selected_columns){
+		my $column_info = $columns->{$_};
+		next if $column_info->{is_foreign_key} or $column_info->{hidden};
+		column_add_info($_, $column_info, $class);
 		
+		push $columns_info, $column_info;
+	} 
+	
+	return $columns_info;
+}
+
+
+sub relationship_info {
+	my ($class, $related) = @_;
+	my $result_source = class_source($class);
+	my $relationship_info = $result_source->relationship_info($related) ? 
+		$result_source->relationship_info($related) :
+		$result_source->resultset_attributes->{many_to_many}->{$related};
+	
+	my $relationship_class_package = $relationship_info->{class};
+	$relationship_info->{class_name} = schema->class_mappings->{$relationship_class_package};
+	return $relationship_info;
+}
+
+
+sub relationships_info {
+	my ($class) = @_;
+	my $result_source = class_source($class);
+	my $columns = $result_source->columns_info; 
+	my $relationships = [$result_source->relationships];
+	my $many_to_manys = $result_source->resultset_attributes->{many_to_many};
+	my $relationships_info = [];
+	
+	for my $many_to_many (keys %$many_to_manys){
+		my ($relationship_info);
+		$relationship_info->{foreign} = $many_to_many;
+		$relationship_info->{foreign_type} = 'has_many';
+		column_add_info($many_to_many, $relationship_info, $class );
+		push $relationships_info, $relationship_info;
+	}
+	
+	for my $relationship(@$relationships){
+		my $column_name;
+		my $relationship_info = $result_source->relationship_info($relationship);
+		my $relationship_class_package = $relationship_info->{class};
+		#next unless grep $_ eq $relationship, @$selected_columns;
+		next if $relationship_info->{hidden};
+		my $relationship_class = schema->class_mappings->{$relationship_class_package};
+		my $count = schema->resultset($relationship_class)->count;
+		
+		for (values $relationship_info->{cond}){
+			$column_name ||= [split('\.', "$_")]->[-1];
+			last;
+		}
+		my $column_info = $columns->{$column_name};
+		$relationship_info->{foreign} = $relationship;
+
+		my $rel_type = $relationship_info->{attrs}->{accessor};
+				
 		# Has many
-		elsif( $rel_type eq 'multi' ){
+		if( $rel_type eq 'multi' ){
 			# Only tables with one PK
 			my @pk = schema->source($relationship_class)->primary_columns;
 			next unless scalar @pk == 1;
 			
 			$relationship_info->{foreign_type} = 'has_many';
 			
-			column_add_info($column_name, $relationship_info );
+			column_add_info($column_name, $relationship_info, $class );
 			push $relationships_info, $relationship_info;
 		}
 		
 	}
 	
-	for (@$simple_columns){
-		my $column_info = $columns->{$_};
-		next if $column_info->{is_foreign_key} or $column_info->{hidden};
-		column_add_info($_, $column_info);
-		
-		push $columns_info, $column_info;
-	} 
-	
-	return ($columns_info, $relationships_info);
+	return $relationships_info;
 }
 
 
 sub column_add_info {
 	my ($column_name, $column_info, $class) = @_;
-	my @pk = schema->source($class)->primary_columns;
 	
 	return undef if $column_info->{hidden};
 	
@@ -476,7 +471,7 @@ sub column_add_info {
 	$column_info->{label} ||= label($column_name); #Human label
 	$column_info->{foreign_label} ||= label($column_info->{foreign}) if $column_info->{foreign}; #Human label 
 	$column_info->{required} ||= required_field($column_info);	
-	$column_info->{primary_key} ||= 1 if $column_name ~~ @pk;	
+	$column_info->{primary_key} ||= 1 if $column_name eq $schema->{$class}->{primary};	  
 	
 	# Remove size info if select
 	delete $column_info->{size} if $column_info->{field_type} eq 'dropdown';
@@ -491,10 +486,9 @@ sub column_add_info {
 
 sub required_field {
 	my $field_info = shift;
-	my $required;
-	$required = 'required' if defined $field_info->{is_nullable} and !defined $field_info->{default_value} and $field_info->{is_nullable} == 0;
-	$required = 'required' if defined $field_info->{foreign} and $field_info->{is_nullable} != 1;
-	return $required;
+	return 'required' if defined $field_info->{is_nullable} and !defined $field_info->{default_value} and $field_info->{is_nullable} == 0;
+	return 'required' if defined $field_info->{is_nullable} and defined $field_info->{foreign} and $field_info->{is_nullable} != 1;
+	return undef;
 }
 
 
@@ -523,8 +517,7 @@ sub add_values {
 sub field_type {
 	my $field = shift;
 	my $data_type = $field->{data_type};
-	my $types = field_types();
-	$data_type = 'varchar' unless $data_type ~~ @$types;
+	$data_type = 'varchar' unless $data_type ~~ @$field_types;
 	return $data_type;
 }
 
@@ -550,6 +543,8 @@ sub field_types {
 sub label {
 	my $field = shift;
 	$field =~ s/_/ /g;	
+	$field =~ s/(?<! )([A-Z])/ $1/g; # Add space in front of Capital leters 
+	$field =~ s/^ (?=[A-Z])//; # Strip out extra starting whitespace followed by A-Z
 	return ucfirst($field);
 }
 
@@ -560,133 +555,57 @@ sub dropdown {
 	for my $object (@$result_set){
 		my $id_column = $object->result_source->_primaries->[0];
 		my $id = $object->$id_column;
-		my $name = object_to_string($object);
+		my $name = model_to_string($object);
 		push $items, {option_label=>$name, value=>$id};
 	}
 	return $items;
 }
 
 
-sub clean_values {
-	my $values = shift;
-	for my $key (keys %$values){
-		$values->{$key} = undef if $values->{$key} eq '';
-	}
-	
-}
-
-
-sub related_search_actions {
-	my $id = shift;
-	return [
-		{name => 'Add', link => "add/$id"}, 
-	]
-}
-
-
-sub related_actions {
-	my $id = shift;
-	return [
-		{name => 'Remove', link => "remove/$id"}
-	]
-}
-
-
-sub grid_actions {
-	my $id = shift;
-	return [
-		{name => '', link => "edit/$id", css=> 'icon-pencil btn-warning'}, 
-		{name => '', link => "delete/$id", css=> 'icon-remove btn-danger'}
-	];
-}
-
-
 sub grid_template_params {
-	my ($class, $get_params, $actions) = @_;
-	my $template_params;
+	my ($class, $get_params, $related_items) = @_;
+	my $grid_params;
 	my $where ||= {};	
 	# Grid
-	$template_params->{field_list} = grid_columns_info($class, $get_params->{sort});
+	$grid_params->{field_list} = $schema->{$class}->{grid_columns_info}; 
 	my $where_params = from_json $get_params->{q} if $get_params->{q};
-	grid_where($template_params->{field_list}, $where, $where_params);
-	add_values($template_params->{field_list}, $where_params);
+	grid_where($grid_params->{field_list}, $where, $where_params);
+	add_values($grid_params->{field_list}, $where_params);
 	
-	my $rs = schema->resultset(ucfirst($class));
-	my ($primary_column) = schema->source(ucfirst($class))->primary_columns;
+	my $rs = $related_items || schema->resultset(ucfirst($class));
+	my $primary_column = $schema->{$class}->{primary};
 	my $page = $get_params->{page} || 1;
-	my $sort = $get_params->{sort};
-	$sort .= ' DESC' if $sort and $get_params->{descending};
 	
 	my $objects = $rs->search(
 	$where,
 	  {
 	    page => $page,  # page to return (defaults to 1)
 	    rows => $page_size, # number of results per page
-	    order_by => $sort,
+	    order_by => grid_sort($get_params),	
 	  },);
 	my $count = $rs->search($where)->count;
-	  
-	unless ( $count ) {
-		session error => 'Sorry, no results matching your filter(s). Try altering your filters.';
-	}
-	
-	$template_params->{rows} = grid_rows(
+
+	$grid_params->{rows} = grid_rows(
 		[$objects->all], 
-		$template_params->{field_list} , 
+		$grid_params->{field_list} , 
 		$primary_column, 
-		$actions || \&grid_actions,		
 	);
 	
-	$template_params->{class} = $class;
-	$template_params->{page} = $page;
-	$template_params->{pages} = ceil($count / $page_size);
-	$template_params->{count} = $count;
-	$template_params->{page_size} = $page_size;
-
-	return $template_params;
+	$grid_params->{class} = $class;
+	$grid_params->{page} = $page;
+	$grid_params->{pages} = ceil($count / $page_size);
+	$grid_params->{count} = $count;
+	$grid_params->{page_size} = $page_size;
+	
+	return $grid_params;
 }
 
 
-sub grid_related_template_params {
-	my ($class, $related_items, $get_params, $actions) = @_;
-	my $template_params;
-	my $where ||= {};	
-	# Grid
-	my $columns_info = grid_columns_info($class, $get_params->{sort});
-	grid_where($columns_info, $where, $get_params, $related_items->{attrs}->{alias});
-	add_values($columns_info, $get_params);
-	
-	my ($primary_column) = schema->source(ucfirst($class))->primary_columns;
-	my $page = $get_params->{page} || 1;
-	
-	my $objects = $related_items->search(	
-	$where,
-	  {
-	    page => $get_params->{page},  # page to return (defaults to 1)
-	    rows => $page_size, # number of results per page
-	    order_by => $get_params->{sort},
-	  }
-	  ,);
-	my $count = $related_items->search($where)->count;
-	  
-	unless ( $count ) {
-		session error => 'Sorry, no results matching your filter(s). Try altering your filters.';
-	}
-	
-	$template_params->{rows} = grid_rows(
-		[$objects->all], 
-		$columns_info, 
-		$primary_column, 
-		$actions || \&grid_actions,		
-	);
-	
-	$template_params->{class} = $class;
-	$template_params->{page} = $page;
-	$template_params->{pages} = ceil($count / $page_size);
-	$template_params->{count} = $count;
-	$template_params->{page_size} = $page_size;
-	
-	return $template_params;
+sub grid_sort {
+	my $get_params = shift;
+	my $sort = $get_params->{sort};
+	$sort .= $get_params->{descending} ? ' DESC' : '' if $sort;
+	return $sort;
 }
 
 
@@ -710,7 +629,7 @@ sub grid_where {
 
 
 sub grid_rows {
-	my ($rows, $columns_info, $primary_column, $actions_function, $args) = @_;
+	my ($rows, $columns_info, $primary_column, $args) = @_;
 	
 	my @table_rows; 
 	for my $row (@$rows){
@@ -720,11 +639,10 @@ sub grid_rows {
 		for my $column (@$columns_info){
 			my $column_name = $column->{foreign} ? "$column->{foreign}" : "$column->{name}";
 			my $value = $row->$column_name;
-			$value = object_to_string($value) if blessed($value);
+			$value = model_to_string($value) if blessed($value);
 			push $row_data, {value => $value};
 		}
-		my $actions = $actions_function ? $actions_function->($id) : undef;
-		push @table_rows, {row => $row_data, id => $id, actions => $actions };
+		push @table_rows, {row => $row_data, id => $id };
 	}
 	return \@table_rows;
 }
