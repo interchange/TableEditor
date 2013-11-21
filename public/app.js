@@ -259,7 +259,15 @@ var IndexCtrl = function ($scope, Schema, SchemaCreate, Menu) {
 	$scope.schema = Schema.get({},
 			function(data) {
 		if(data.make_schema == '1'){
-			SchemaCreate.get({}, function(data){$scope.schema.schema_created = 1});
+			SchemaCreate.get({}, function(data){
+				$scope.schema.make_schema = null;
+				if(data.make_schema_error){
+					$scope.schema.schema_error = data.make_schema_error;
+				}
+				else {
+					$scope.schema.schema_created = 1;
+				}
+			});
 		} 
 	});
 };

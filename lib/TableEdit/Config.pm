@@ -18,7 +18,7 @@ any '**' => sub {
 
 get '/create_schema' => sub {
 	my $db = config->{plugins}->{DBIC}->{default};
-	return make_schema($db);	
+	return to_json {make_schema_error => make_schema($db)};	
 };
 
 get '/schema' => sub {
