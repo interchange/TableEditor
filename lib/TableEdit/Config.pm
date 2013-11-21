@@ -16,6 +16,11 @@ any '**' => sub {
 };
 
 
+get '/create_schema' => sub {
+	my $db = config->{plugins}->{DBIC}->{default};
+	return make_schema($db);	
+};
+
 get '/schema' => sub {
 	my $schema_info = {return => 1};
 	
@@ -28,16 +33,24 @@ get '/schema' => sub {
 	# Check for DB connection
 	my $db_test = eval{schema->storage->dbh};
 	$schema_info->{db_connection_error} = "$@";
-	return to_json $schema_info if $schema_info->{db_connection_error};
 	
 	# Check if DBIx class schema exists
-	if(%{schema->{class_mappings}}){
-		$schema_info->{schema} = scalar keys %{schema->{class_mappings}};		
+	if (eval{schema}){
+		if(%{schema->{class_mappings}}){
+			$schema_info->{schema} = scalar keys %{schema->{class_mappings}};		
+		}
+		# Schema doesn't exits. Try to generate it
+		else {
+			$schema_info->{make_schema} = 1;
+			return to_json $schema_info;
+			$schema_info->{schema_error} = make_schema($db);
+			$schema_info->{schema_created} = $schema_info->{schema_error} ? 1 : 0;
+		}
 	}
-	# Schema doesn't exits. Try to generate it
-	else {
-		$schema_info->{schema_error} = make_schema($db);
-		$schema_info->{schema_created} = $schema_info->{schema_error} ? 1 : 0;
+	else{
+		$schema_info->{make_schema} = 1;
+		return to_json $schema_info;
+		$schema_info->{schema_error} = make_schema($db);	
 	}
 	
 
@@ -72,7 +85,7 @@ sub make_schema {
 	# Automaticly generate schema
 	my $schema_report = eval {
 		make_schema_at(
-		    $db->{schema_class},
+		    config->{plugins}->{DBIC}->{default}->{schema_class},
 		    { dump_directory => "$appdir/lib", debug => 1, filter_generated_code => sub{
 		    	my ( $type, $class, $text ) = @_;
 		    	if($type eq 'result'){

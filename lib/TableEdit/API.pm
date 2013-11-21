@@ -18,20 +18,24 @@ my $page_size = 10;
 my $appdir = realpath( "$FindBin::Bin/..");
 
 # Compile schema metadata
-my $menu = to_json [map {name=> class_label($_), url=>"#/$_/list"}, @{classes()}];
-my $field_types = field_types();
 my $schema = {};
-for my $class (@{classes()}){
-	($schema->{$class}->{primary}) = schema->source($class)->primary_columns;
-	$schema->{$class}->{label} = class_label($class);
-	$schema->{$class}->{columns} = class_columns($class);
-	$schema->{$class}->{columns_info} = columns_static_info($class);
-	$schema->{$class}->{relationships} = relationships_info($class);	
-	$schema->{$class}->{fields} = relationships_info($class);	
-	$schema->{$class}->{attributes} = class_source($class)->resultset_attributes;	
-
-	for my $related (@{$schema->{$class}->{relationships}}){
-		$schema->{$class}->{relation}->{$related->{foreign}} = relationship_info($class, $related->{foreign});	
+my $field_types;
+my $menu;
+if (eval {schema}){
+	$menu = to_json [map {name=> class_label($_), url=>"#/$_/list"}, @{classes()}];
+	$field_types = field_types();
+	for my $class (@{classes()}){
+		($schema->{$class}->{primary}) = schema->source($class)->primary_columns;
+		$schema->{$class}->{label} = class_label($class);
+		$schema->{$class}->{columns} = class_columns($class);
+		$schema->{$class}->{columns_info} = columns_static_info($class);
+		$schema->{$class}->{relationships} = relationships_info($class);	
+		$schema->{$class}->{fields} = relationships_info($class);	
+		$schema->{$class}->{attributes} = class_source($class)->resultset_attributes;	
+	
+		for my $related (@{$schema->{$class}->{relationships}}){
+			$schema->{$class}->{relation}->{$related->{foreign}} = relationship_info($class, $related->{foreign});	
+		}
 	}
 }
 

@@ -44,6 +44,9 @@ CrudApp.factory('RelatedClass', function($resource) {
 CrudApp.factory('Schema', function($resource) { 
 	return $resource('/api/schema',{},{query: {isArray: false}});
 });
+CrudApp.factory('SchemaCreate', function($resource) { 
+	return $resource('/api/create_schema',{},{query: {isArray: false}});
+});
 CrudApp.factory('RelatedListCtrl', function($resource) { 
 	return $resource('/api/:class/:id/:related/list', { class: '@class' });
 });
@@ -252,8 +255,13 @@ var BreadcrumbsCtrl = function ($scope, $routeParams, $location, $rootScope) {
 };
 
 
-var IndexCtrl = function ($scope, Schema, Menu) {
-	$scope.schema = Schema.get();
+var IndexCtrl = function ($scope, Schema, SchemaCreate, Menu) {
+	$scope.schema = Schema.get({},
+			function(data) {
+		if(data.make_schema == '1'){
+			SchemaCreate.get({}, function(data){$scope.schema.schema_created = 1});
+		} 
+	});
 };
 
 

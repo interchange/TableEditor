@@ -4,8 +4,6 @@ use Dancer ':syntax';
 our $VERSION = '0.1';
 
 use Dancer::Plugin::DBIC qw(schema resultset rset);
-
-use TableEdit::Schema;
 use TableEdit::Config;
 use TableEdit::API;
 
