@@ -19,6 +19,7 @@ my $appdir = realpath( "$FindBin::Bin/..");
 
 # Compile schema metadata
 my $schema = {};
+
 my $field_types;
 my $menu;
 if (eval {schema}){
