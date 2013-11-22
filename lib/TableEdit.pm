@@ -35,21 +35,10 @@ Table Edit lets you edit database data. It uses L<DBIx::Class> models for databa
 You need a database and L<DBIx::Class> models for this module to work. You can 
 write your own L<DBIx::Class> models, or use schema loader.
 
-For now it only works with branched version of Tamplate::Flute available on https://github.com/gregapompe/Template-Flute.
-
-To make sure app uses this version of Flute, set appropriate path in app.pm
-
-	#!/usr/bin/env perl
-	use lib '/home/Template-Flute/lib';
-	use Dancer;
-	use TableEdit;
-	dance;
 
 =head2 DBIx schema loader
 
-L<DBIx::Class::Schema::Loader> perl script is included in /bin folder. All you have 
-to do is set the database data and run it. This will create L<DBIx::Class> model files
-for you.
+You can use your existing DBIx schema or let schema loader make one for you.
 
 =head2 Database config
 
@@ -57,14 +46,12 @@ You also have to set Dancers DBCI connection in config.yml
 
 	plugins: 
 	   DBIC:
-	    default:
-	      dsn: dbi:mysql:dbname=myDbName;host=localhost;port=3306
-	      schema_class: TableEdit::Schema
-	      user: root
-	      pass: toor
-	      options:
-	        RaiseError: 1
-	        PrintError: 1
+	     default:
+	        dsn: dbi:Pg:dbname=__DATABASE_NAME__;host=localhost;port=__PORT__
+	        schema_class: TableEdit::Schema
+	        user: __USERNAME__
+	        pass: __PASSWORD__
+	        options:
 
 =head1 USE
 

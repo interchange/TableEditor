@@ -99,13 +99,23 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, $rootScope, Cla
 			$rootScope.breadcrumbs = data.bread_crumbs;
 		}
 	);
+	$scope.class = ClassItem.get({
+		class: $routeParams.class,
+		},
+		// Success
+		function(data) {
+			$rootScope.breadcrumbs = data.bread_crumbs;
+		}
+	);
+	
 	$scope.item = {};
 	$scope.item.values = {};
 	$scope.sort_column = '';
 	$scope.data = {};
 	$scope.sort_desc = false;
 	$scope.current_page = 1;
-	$scope.actions = 'views/grid/actions/related_class_list.html';
+	$scope.relation = $routeParams.related;
+	$scope.actions = 'views/grid/actions/many_to_many_items_list.html';
 
 	
 	$scope.sort = function (ord) {
@@ -170,12 +180,17 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, $rootScope, Cla
 		);
     };
     
+	$scope.related = function(){
+		var related = this.link.foreign;
+		$location.path('/'+$routeParams.class+'/'+$routeParams.id+'/'+related+'/list');
+	};
+    
     $scope.reset_items();
 };
 
 
 var RelatedClassCtrl = function ($scope, $routeParams, $location, RelatedItem, RelatedClass, ClassItem, RelatedItems) {
-	$scope.actions = 'views/grid/actions/related_list.html';
+	$scope.actions = 'views/grid/actions/many_to_many_list.html';
 	$scope.sort_column = '';
 	$scope.item = {};
 	$scope.item.values = {};

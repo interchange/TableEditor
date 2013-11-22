@@ -31,7 +31,6 @@ if (eval {schema}){
 		$schema->{$class}->{columns} = class_columns($class);
 		$schema->{$class}->{columns_info} = columns_static_info($class);
 		$schema->{$class}->{relationships} = relationships_info($class);	
-		$schema->{$class}->{fields} = relationships_info($class);	
 		$schema->{$class}->{attributes} = class_source($class)->resultset_attributes;	
 	
 		for my $related (@{$schema->{$class}->{relationships}}){
@@ -69,6 +68,7 @@ get '/:class/:id/:related/list' => sub {
 	$data->{'id'} = $id;
 	$data->{'class'} = $class;
 	$data->{'related_class'} = $relationship_class;
+	$data->{'related_type'} = $relationship_info->{foreign_type};
 	$data->{'table-title'} = "Search ".$relationship_class;
 	$data->{'title'} = model_to_string($current_object);
 	
@@ -115,7 +115,6 @@ del '/:class/:id/:related/:related_id' => sub {
 	my $class = params->{class};
 	my $related = params->{related};
 	my $related_id = params->{related_id};
-	
 	my $relationship_info = $schema->{$class}->{relation}->{$related};
 	my $relationship_class = $relationship_info->{class_name};
 	
@@ -238,19 +237,13 @@ get '/:class' => sub {
 	my $class = params->{class};
 	my $columns = columns_info($class); 
 	my $relationships = $schema->{$class}->{relationships};	
-	
-	# Multi
-	my $sub_menu = []; 
-	for my $relationship(@$relationships){
-		next unless $relationship->{foreign_type} and ($relationship->{foreign_type} eq 'has_many');
-		push $sub_menu, $relationship;
-	}
+	relationships_info($class);
 
 	return to_json { 
 		fields => $columns,
 		class => $class,
 		class_label => $schema->{$class}->{label},
-		sub_menu => $sub_menu,
+		relations => $relationships,
 		bread_crumbs => [{label=> $schema->{$class}->{label}, link => "list"}, {label=> 'Add'}], 
 	}; 
 };
@@ -338,17 +331,18 @@ sub grid_columns_info {
 		class_source($class)->resultset_attributes->{grid_columns}
 	);
 	for my $col (@$columns){
+		my %col_copy = %{$col};
 		unless (
-			($col->{data_type} and $col->{data_type} eq 'text') or
-			($col->{size} and $col->{size} > 255)
+			($col_copy{data_type} and $col_copy{data_type} eq 'text') or
+			($col_copy{size} and $col_copy{size} > 255)
 		){
-			push $defuault_columns, \%{$col} 
+			push $defuault_columns, \%col_copy; 
 		};
 	}
 	
 	# Remove required field properties
 	for my $col (@$defuault_columns){
-		#$col->{required} = 0 ;
+		$col->{required} = 0 ;
 	}
 	
 	return $defuault_columns; 
@@ -443,9 +437,14 @@ sub columns_info {
 sub relationship_info {
 	my ($class, $related) = @_;
 	my $result_source = class_source($class);
-	my $relationship_info = $result_source->relationship_info($related) ? 
-		$result_source->relationship_info($related) :
-		$result_source->resultset_attributes->{many_to_many}->{$related};
+	my $relationship_info;
+	if($result_source->relationship_info($related)){
+		$relationship_info = $result_source->relationship_info($related);
+	}
+	else {
+		$relationship_info = $result_source->resultset_attributes->{many_to_many}->{$related};
+		$relationship_info->{foreign_type} = 'many_to_many';
+	}
 	
 	my $relationship_class_package = $relationship_info->{class};
 	$relationship_info->{class_name} = schema->class_mappings->{$relationship_class_package};
@@ -464,7 +463,7 @@ sub relationships_info {
 	for my $many_to_many (keys %$many_to_manys){
 		my ($relationship_info);
 		$relationship_info->{foreign} = $many_to_many;
-		$relationship_info->{foreign_type} = 'has_many';
+		$relationship_info->{foreign_type} = 'many_to_many';
 		column_add_info($many_to_many, $relationship_info, $class );
 		push $relationships_info, $relationship_info;
 	}
@@ -519,9 +518,6 @@ sub column_add_info {
 	$column_info->{required} ||= required_field($column_info);	
 	$column_info->{primary_key} ||= 1 if $column_name eq $schema->{$class}->{primary};	  
 	
-	# Remove size info if select
-	delete $column_info->{size} if $column_info->{field_type} eq 'dropdown';
-			
 	return undef if index($column_info->{field_type}, 'timestamp') != -1;
 	
 }
@@ -540,30 +536,16 @@ sub required_field {
 
 sub add_values {
 	my ($columns_info, $values) = @_;
-	
 	for my $column_info (@$columns_info){
-		my $value = $values->{$column_info->{name}};
-		if( $column_info->{options} ){
-			next unless $value;
-			for my $option (@{ $column_info->{options} }){
-				next unless $option->{value};
-				if ($option->{value} == $value or $option->{value} eq $value){
-					$option->{selected} = 'selected';
-				}
-			}
-		}
-		else {
-			$column_info->{value} = $value;
-		}
+		$column_info->{value} =  $values->{$column_info->{name}}
 	}
-	
 }
 
 
 sub field_type {
 	my $field = shift;
 	my $data_type = $field->{data_type};
-	$data_type = 'varchar' unless $data_type ~~ @$field_types;
+	$data_type = 'varchar' unless grep( /^$data_type/, @$field_types );
 	return $data_type;
 }
 

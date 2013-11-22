@@ -12,11 +12,15 @@
 
 <div class="matter bundle-page">
 
-	<ul class="nav nav-tabs">
-		<a ng-click="showRelatedClass = ! showRelatedClass" class="pull-right"><i class="icon-plus"></i> Add {{org_item.related_class}}</a>
-		<li><a class="link_id" href="/#/{{org_item.class}}/edit/{{org_item.id}}">General</a></li>
-		<li class="active"><a href="#"><span class="class">Active</span>s</a></li>
-	</ul>
+	<ul ng-show="class.relations" class="nav nav-tabs" ng-if="!create">
+			<li ><a href="/#/{{org_item.class}}/edit/{{org_item.id}}/">General</a></li>
+			
+			<li ng-class="{active: link.foreign == relation}" class="sub-menu-item" ng-repeat="link in class.relations">
+				<a class="sub-menu-link" ng-click="related()">{{link.label}}</a>
+			</li>
+		</ul>
+	<a ng-show="org_item.related_type == 'many_to_many'" ng-click="showRelatedClass = ! showRelatedClass" class="pull-right"><i class="icon-plus"></i> Add {{org_item.related_class}}</a>
+	<a ng-show="org_item.related_type == 'has_many'" ng-click="showRelatedClass = ! showRelatedClass" class="pull-right"><i class="icon-plus"></i> New {{org_item.related_class}}</a>
 	<div class="row-fluid">
 
 		<h2>Related {{org_item.related_class}}</h2>
