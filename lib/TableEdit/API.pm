@@ -68,8 +68,9 @@ get '/:class/:id/:related/list' => sub {
 	$data->{'id'} = $id;
 	$data->{'class'} = $class;
 	$data->{'related_class'} = $relationship_class;
+	$data->{'related_class_label'} = $schema->{$relationship_class}->{label};
+	$data->{'related'} = $relationship_info;
 	$data->{'related_type'} = $relationship_info->{foreign_type};
-	$data->{'table-title'} = "Search ".$relationship_class;
 	$data->{'title'} = model_to_string($current_object);
 	
 	$data->{bread_crumbs} = [{label=> ucfirst($class), link => "../list"}, {label => $data->{title}}];
@@ -203,9 +204,9 @@ post '/:class' => sub {
 	my $item = $body->{item};
 
 	my $rs = schema->resultset(ucfirst($class));
-	$rs->update_or_create( $item->{values} ); 
+	#$rs->update_or_create( $item->{values} ); 
 
-	return 1;
+	return $rs->update_or_create( $item->{values} ); ;
 };
 
 
@@ -340,9 +341,10 @@ sub grid_columns_info {
 		};
 	}
 	
-	# Remove required field properties
+	# Remove required and readonly field properties
 	for my $col (@$defuault_columns){
 		$col->{required} = 0 ;
+		$col->{readonly} = 0 ;
 	}
 	
 	return $defuault_columns; 
@@ -365,7 +367,6 @@ sub columns_static_info {
 		my $column_name;
 		my $relationship_info = $result_source->relationship_info($relationship);
 		my $relationship_class_package = $relationship_info->{class};
-		#next unless grep $_ eq $relationship, @$selected_columns;
 		next if $relationship_info->{hidden};
 		my $relationship_class = schema->class_mappings->{$relationship_class_package};
 		my $count = schema->resultset($relationship_class)->count;
@@ -517,6 +518,7 @@ sub column_add_info {
 	$column_info->{label} ||= $column_info->{foreign} ? label($column_info->{foreign}) : label($column_name); #Human label
 	$column_info->{required} ||= required_field($column_info);	
 	$column_info->{primary_key} ||= 1 if $column_name eq $schema->{$class}->{primary};	  
+	$column_info->{readonly} ||= 1 if $column_info->{primary_key};	  
 	
 	return undef if index($column_info->{field_type}, 'timestamp') != -1;
 	

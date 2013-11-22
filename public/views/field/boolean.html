@@ -2,7 +2,10 @@
 	class="form-control" 
 	id="media_format" 
 	ng-model="item.values[field.name]" 
-	ng-required="!field.is_nullable" >
+	ng-required="!field.is_nullable" 
+	ng-readonly="field.readonly" 
+	>
+	
 	<option></option>
 	<option value="0">No</option>
 	<option value="1">Yes</option>

@@ -9,7 +9,9 @@ var CrudApp = angular.module('CrudApp', ['ngResource', 'ngRoute']).
 	     when('/:class/list', { templateUrl: 'views/list.html', controller: 'ListCtrl' }).
 	     when('/:class/new', { templateUrl: 'views/form.html', controller: 'CreateCtrl' }).
 	     when('/:class/edit/:id', { templateUrl: 'views/form.html', controller: 'EditCtrl' }).
-	     when('/:class/:id/:related/list', { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' }).
+	     when('/:class/:id/new/:related/:field/:value/', { templateUrl: 'views/form.html', controller: 'CreateRelatedCtrl' }).
+	     when('/:class/:id/:related/has_many', { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' }).
+	     when('/:class/:id/:related/many_to_many', { templateUrl: 'views/many_to_many.html', controller: 'RelatedListCtrl' }).
 	     otherwise({redirectTo: '/'});
 });
 
@@ -84,12 +86,16 @@ CrudApp.factory("RelatedItem", function($resource){
 	  });
 
 });
+CrudApp.factory('RelatedType', function () {
+	  return { type: "" };
+	});
 
 
 // Controllers
 
 
-var RelatedListCtrl = function ($scope, $routeParams, $location, $rootScope, Class, ClassItem, RelatedListCtrl,  RelatedItem, RelatedItems) {
+
+var RelatedListCtrl = function ($route, $scope, $routeParams, $location, $rootScope, Class, ClassItem, RelatedListCtrl,  RelatedItem, RelatedItems, RelatedType) {
 	$scope.org_item = RelatedListCtrl.get({
 		class: $routeParams.class,
 		id: $routeParams.id,
@@ -115,7 +121,6 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, $rootScope, Cla
 	$scope.sort_desc = false;
 	$scope.current_page = 1;
 	$scope.relation = $routeParams.related;
-	$scope.actions = 'views/grid/actions/many_to_many_items_list.html';
 
 	
 	$scope.sort = function (ord) {
@@ -151,6 +156,27 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, $rootScope, Cla
 	    	}
 		);
 	};
+	
+	$scope.del = function () {
+    	if (confirm('Do you realy want to delete '+this.row.id)){
+    		var id = this.row.id;
+    		//$location.path('/'+$routeParams.class+'/list');
+    		ClassItem.delete(
+    				{id: id, class: $scope.org_item.related_class},
+    				// On success
+    				function(){
+    					$('#row-'+id).fadeOut();
+    				}
+    		);
+    	}
+    };
+
+    
+    $scope.edit = function () {
+		var id = this.row.id;
+		$location.path('/'+$scope.org_item.related_class+'/edit/'+id);		
+    };
+    
     
     $scope.search = function() {    	
     	
@@ -182,15 +208,16 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, $rootScope, Cla
     
 	$scope.related = function(){
 		var related = this.link.foreign;
-		$location.path('/'+$routeParams.class+'/'+$routeParams.id+'/'+related+'/list');
+		var type = this.link.foreign_type;
+		$location.path('/'+$routeParams.class+'/'+$routeParams.id+'/'+related+'/'+type);
 	};
     
     $scope.reset_items();
 };
 
 
-var RelatedClassCtrl = function ($scope, $routeParams, $location, RelatedItem, RelatedClass, ClassItem, RelatedItems) {
-	$scope.actions = 'views/grid/actions/many_to_many_list.html';
+var RelatedClassCtrl = function ($scope, $routeParams, $location, RelatedItem, RelatedClass, ClassItem, RelatedItems, RelatedType) {
+	$scope.related_type = RelatedType;
 	$scope.sort_column = '';
 	$scope.item = {};
 	$scope.item.values = {};
@@ -317,6 +344,38 @@ var CreateCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
 	};
 };
 
+
+var CreateRelatedCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
+	$scope.item = {};
+	//related = $routeParams.class;
+	$scope.item.values = {};
+	$scope.item.values[$routeParams.field] = $routeParams.value;
+	
+	$scope.data = ClassItem.get(
+			{	class: $routeParams.related, },
+			// Success
+			function(data) {
+				//$scope.data
+			}
+	);
+	$scope.create = 1;
+	
+	$scope.save = function(){
+		
+		var item = this.item;
+		ClassItem.item;
+		ClassItem.save({
+			class: $routeParams.related,
+			item: item,
+		},
+		// Success
+		function(data) {
+			$location.path('/'+$routeParams.class+'/'+$routeParams.id+'/'+$routeParams.class+'/list');
+		}
+		);
+	};
+};
+
 var EditCtrl = function ($scope, $routeParams, $location, Item, ClassItem, $rootScope) {
 	$scope.item = Item.get({
 		class: $routeParams.class, 
@@ -348,7 +407,8 @@ var EditCtrl = function ($scope, $routeParams, $location, Item, ClassItem, $root
 	
 	$scope.related = function(){
 		var related = this.link.foreign;
-		$location.path('/'+$routeParams.class+'/'+$routeParams.id+'/'+related+'/list');
+		var type = this.link.foreign_type;
+		$location.path('/'+$routeParams.class+'/'+$routeParams.id+'/'+related+'/'+type);
 	};
 };
 
@@ -361,7 +421,7 @@ var ListCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
 	$scope.item.values = {};
 	$scope.sort_desc = false;
 	$scope.current_page = 1;
-	$scope.actions = 'views/grid/actions/class_list.html';
+	$scope.actions = 'class_list';
 	
 	$scope.sort = function (ord) {
         if ($scope.sort_column == ord) { $scope.sort_desc = !$scope.sort_desc; }

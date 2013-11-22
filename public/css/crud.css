@@ -22,6 +22,10 @@ header {
 	color: #CCC;
 }
 
+a[ng-click] {
+cursor: pointer;
+}
+
 .super-title {
 	font-size: 50%;
 	display: block;
@@ -30,6 +34,11 @@ header {
 
 .selected, .selected a, .active, .active a {
 	font-weight: bold;
+}
+
+
+.active.sort {
+	text-decoration: underline;
 }
 
 .pagination li.active a {
