@@ -42,3 +42,11 @@ lib/TableEdit/Schema
 config.yml
 /nbproject/private/
 nbproject/
+
+# Dancer stuff
+/run/
+/environments/
+
+# CPAN stuff
+Makefile
+MYMETA.*
