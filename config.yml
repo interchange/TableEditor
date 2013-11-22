@@ -8,13 +8,21 @@ charset: "UTF-8"
 session: YAML
 session_expires: 8 hours
 
-plugins: 
-   DBIC:
-    default:
-      dsn: dbi:Pg:dbname=__DATABASE_NAME__;host=localhost;port=__PORT__
-      schema_class: TableEdit::Schema
-      user: __USERNAME__
-      pass: __PASSWORD__
-      options:
-        RaiseError: 1
-        PrintError: 1
+plugins:
+
+# TableEdit will pick default databse
+ 
+#   DBIC:         
+#    default:
+#      dsn: dbi:mysql:dbname=bizi
+#      schema_class: TableEdit::Schema
+#      user: __USERNAME__
+#      pass: __PASSWORD__
+#      options:
+#        mysql_enable_utf8: 1
+#     default:
+#        dsn: dbi:Pg:dbname=__DATABASE_NAME__;host=localhost;port=__PORT__
+#        schema_class: TableEdit::Schema
+#        user: __USERNAME__
+#        pass: __PASSWORD__
+#        options:

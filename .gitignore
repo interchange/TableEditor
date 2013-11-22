@@ -39,10 +39,9 @@ Thumbs.db
 sessions
 nytprof
 lib/TableEdit/Schema
-config.yml
+environments/*.yml
 /nbproject/private/
 nbproject/
-
 # Dancer stuff
 /run/
 /environments/
