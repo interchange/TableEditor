@@ -42,7 +42,9 @@ You can use your existing DBIx schema or let schema loader make one for you.
 
 =head2 Database config
 
-You also have to set Dancers DBCI connection in config.yml
+You also have to set the DBIC connection details in the
+Dancer configuration (usually in the environments/*.yml
+files as this differs between systems).
 
 	plugins: 
 	   DBIC:
@@ -55,13 +57,13 @@ You also have to set Dancers DBCI connection in config.yml
 
 =head1 USE
 
-Whit basic configuration done you can start using Table Edit. You will probably want to fine tune it a bit though.
+With basic configuration done you can start using Table Edit. You will probably want to fine tune it a bit though.
 
 =head1 FINE TUNE
 
 Make sure you set all additional info below # DO NOT MODIFY THIS OR ANYTHING ABOVE! line in L<DBIx::Class> model.
 
-For this example we will use folowing model.
+For this example we will use following model.
 
 	use utf8;
 	package TableEdit::Schema::Result::User;
@@ -128,7 +130,7 @@ You can override column label by specifying it
 =head2 Object / Row string representation
 
 Row often has to be represented as string (titles, drop-down selectors, ...) so it is a good idea to 
-define a custum, human redable strigification method. For example users username, his id in parentheses 
+define a custom, human readable stringification method. For example users username, his id in parentheses 
 and company if he / she has one. It could be just username or something much complicated.
 
 	use overload fallback => 1, '""' => \&to_string; 
@@ -141,7 +143,7 @@ and company if he / she has one. It could be just username or something much com
 
 =head2 Hidden columns
 
-Some columns are used only internaly and you never want to see them in TableEdit. You can hide them.
+Some columns are used only internally and you never want to see them in TableEdit. You can hide them.
 
 	__PACKAGE__->columns_info->{internal_code}->{hidden} = 1;
 
@@ -153,8 +155,8 @@ You can set a column to be readonly
 
 =head2 Many to many
 
-"Has many" and "belongs_to" is automaticly detected. However, many to many DBIx::Class information 
-doesn't provide enough information, so you have to specify it manualy.
+"Has many" and "belongs_to" is automatically detected. However, many to many DBIx::Class information 
+doesn't provide enough information, so you have to specify it manually.
 Only set resultset_attributes once, or it will be overwritten! 
 
 	__PACKAGE__->resultset_attributes({ 
@@ -183,15 +185,16 @@ You can set user friendly name of the table.
 	
 =head2 Field data type
 
-Fileds have basic data types based on types in db. You can override them to use differen form element.
+Fields have basic data types based on types in db. You can override them to use different form element.
 
 	__PACKAGE__->columns_info->{email}->{data_type} = 'text';
 	
-You can also set them to use your custum widget. You create html file with the matching name in /public/views/field directory.
+You can also set them to use your custom widget. You create a HTML file with the matching name in /public/views/field directory.
+
 For example 	/public/views/field/email_widget.html
 	
 	__PACKAGE__->columns_info->{email}->{data_type} = 'email_widget';
 	
-These fied types are used on detail view and on list search. 	
+These field types are used on detail view and on list search. 	
 	
 =cut	
