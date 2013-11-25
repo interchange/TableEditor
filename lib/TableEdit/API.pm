@@ -345,6 +345,7 @@ sub grid_columns_info {
 	for my $col (@$defuault_columns){
 		$col->{required} = 0 ;
 		$col->{readonly} = 0 ;
+		$col->{primary_key} = 0 ;
 	}
 	
 	return $defuault_columns; 
@@ -518,7 +519,7 @@ sub column_add_info {
 	$column_info->{label} ||= $column_info->{foreign} ? label($column_info->{foreign}) : label($column_name); #Human label
 	$column_info->{required} ||= required_field($column_info);	
 	$column_info->{primary_key} ||= 1 if $column_name eq $schema->{$class}->{primary};	  
-	$column_info->{readonly} ||= 1 if $column_info->{primary_key};	  
+	#$column_info->{readonly} ||= 1 if $column_info->{primary_key};	  
 	
 	#debug to_dumper $column_info unless $column_info->{field_type};
 	#return undef if index($column_info->{field_type}, 'timestamp') != -1;

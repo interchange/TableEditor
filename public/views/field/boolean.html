@@ -4,7 +4,7 @@
 	id="media_format" 
 	ng-model="item.values[field.name]" 
 	ng-required="!field.is_nullable" 
-	ng-readonly="field.readonly" 
+	ng-readonly="field.readonly || (field.primary_key && !create)" 
 	>
 	<option></option>
 	<option value="0">No</option>

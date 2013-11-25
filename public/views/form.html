@@ -36,7 +36,7 @@
 
 						<!-- Text input-->
 						<div ng-repeat="field in data.fields">
-							<div ng-if="!(field.is_auto_increment || field.readonly && create)">
+							<div ng-if="!(field.is_auto_increment || (field.readonly && !field.primary_key) && create)">
 								<div class="control-group form-field">
 									<label class="control-label ">{{ field.label }}</label>
 									<ng-form name="validationScope">

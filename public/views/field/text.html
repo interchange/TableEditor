@@ -5,7 +5,7 @@
 	cols="30" 
 	ng-model="item.values[field.name]" 
 	ng-required="field.required"
-	ng-readonly="field.readonly" 
+	ng-readonly="field.readonly || (field.primary_key && !create)" 
 	>
 </textarea>
 <span ng-include="'views/field/partials/standard_validation.html'"></span>
