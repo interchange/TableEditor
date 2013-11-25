@@ -1,4 +1,5 @@
 <select 
+	name="field" 
 	class="form-control" 
 	id="media_format" 
 	ng-model="item.values[field.name]" 
@@ -7,3 +8,4 @@
 	ng-options="option.value as option.option_label for option in field.options">
 	<option></option>
 </select>
+<span ng-include="'views/field/partials/standard_validation.html'"></span>

@@ -520,7 +520,8 @@ sub column_add_info {
 	$column_info->{primary_key} ||= 1 if $column_name eq $schema->{$class}->{primary};	  
 	$column_info->{readonly} ||= 1 if $column_info->{primary_key};	  
 	
-	return undef if index($column_info->{field_type}, 'timestamp') != -1;
+	#debug to_dumper $column_info unless $column_info->{field_type};
+	#return undef if index($column_info->{field_type}, 'timestamp') != -1;
 	
 }
 
@@ -546,7 +547,7 @@ sub add_values {
 
 sub field_type {
 	my $field = shift;
-	my $data_type = $field->{data_type};
+	my $data_type = $field->{data_type} || 'varchar';
 	$data_type = 'varchar' unless grep( /^$data_type/, @$field_types );
 	return $data_type;
 }
