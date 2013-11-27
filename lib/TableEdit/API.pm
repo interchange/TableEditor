@@ -73,7 +73,6 @@ get '/:class/:id/:related/list' => sub {
 	$data->{'related_type'} = $relationship_info->{foreign_type};
 	$data->{'title'} = model_to_string($current_object);
 	
-	$data->{bread_crumbs} = [{label=> ucfirst($class), link => "../list"}, {label => $data->{title}}];
 	return to_json $data;
 };
 
@@ -155,7 +154,7 @@ get '/:class/:id/:related/items' => sub {
 	$current_object = schema->resultset($class)->find($id);
 	my $related_items = $current_object->$related;
 	
-	return '{}' unless ( defined $current_object );	
+	#return to_json '{}' unless ( defined $current_object );	
 	# Related bind
 	$data = grid_template_params($relationship_class, $get_params, $related_items);
 	
@@ -217,17 +216,15 @@ get '/:class/:id' => sub {
 	my $columns = columns_info($class); 
 	
 	$data->{fields} = $columns;
-	$data->{pk} = $id;
 
 	# Object lookup
 	my $object = schema->resultset(ucfirst($class))->find($id);
 	my $object_data = {$object->get_columns};
 	$data->{title} = model_to_string($object);
-	$data->{id} = $object_data->{id};
+	$data->{id} = $id;
+	$data->{class} = $class;
 	$data->{values} = $object_data;
 	add_values($columns, $object_data, $object);
-	
-	$data->{bread_crumbs} = [{label=> $schema->{$class}->{label}, link => "../list"}, {label => $data->{title}}];
 	
 	return to_json $data;
 };
@@ -245,7 +242,6 @@ get '/:class' => sub {
 		class => $class,
 		class_label => $schema->{$class}->{label},
 		relations => $relationships,
-		bread_crumbs => [{label=> $schema->{$class}->{label}, link => "list"}, {label=> 'Add'}], 
 	}; 
 };
 

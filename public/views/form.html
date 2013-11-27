@@ -32,8 +32,6 @@
 						<!-- Form Name -->
 						<div class="messages"></div>
 
-						<input name="pk" type="hidden" class="pk" />
-
 						<!-- Text input-->
 						<div ng-repeat="field in data.fields">
 							<div ng-if="!(field.is_auto_increment || (field.readonly && !field.primary_key) && create)">

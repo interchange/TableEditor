@@ -2,17 +2,17 @@
 
 /* App Module */
 
-var CrudApp = angular.module('CrudApp', ['ngResource', 'ngRoute']).
+var CrudApp = angular.module('CrudApp', ['CrudAppCustom', 'ngResource', 'ngRoute']).
 	config(function($routeProvider) {
 		$routeProvider.
-	     when('/', { templateUrl: 'views/home.html', controller: 'IndexCtrl' }).
-	     when('/:class/list', { templateUrl: 'views/list.html', controller: 'ListCtrl' }).
-	     when('/:class/new', { templateUrl: 'views/form.html', controller: 'CreateCtrl' }).
-	     when('/:class/edit/:id', { templateUrl: 'views/form.html', controller: 'EditCtrl' }).
-	     when('/:class/:id/new/:related/:field/:value/', { templateUrl: 'views/form.html', controller: 'CreateRelatedCtrl' }).
-	     when('/:class/:id/:related/has_many', { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' }).
-	     when('/:class/:id/:related/many_to_many', { templateUrl: 'views/many_to_many.html', controller: 'RelatedListCtrl' }).
-	     otherwise({redirectTo: '/'});
+		when('/', { templateUrl: 'views/home.html', controller: 'IndexCtrl' }).
+	    when('/:class/list', { templateUrl: 'views/list.html', controller: 'ListCtrl' }).
+	    when('/:class/new', { templateUrl: 'views/form.html', controller: 'CreateCtrl' }).
+	    when('/:class/edit/:id', { templateUrl: 'views/form.html', controller: 'EditCtrl' }).
+	    when('/:class/:id/new/:related/:field/:value/', { templateUrl: 'views/form.html', controller: 'CreateRelatedCtrl' }).
+	    when('/:class/:id/:related/has_many', { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' }).
+	    when('/:class/:id/:related/many_to_many', { templateUrl: 'views/many_to_many.html', controller: 'RelatedListCtrl' }).
+	    otherwise({redirectTo: '/'});
 });
 
 CrudApp.directive('activeLink', function($location) {
@@ -57,17 +57,50 @@ CrudApp.factory('ClassItem', function($resource) {
 	return $resource('/api/:class', { class: '@class' });
 });
 
-CrudApp.factory('Item', function($resource) {
-	return $resource('/api/:class/:id', { class: '@class', id: '@id' });
+CrudApp.factory('Item', function($resource, $location, ClassItem, $route) {
+	return {
+		read: $resource('/api/:class/:id', { class: '@class', id: '@id' }),
+		
+		update: function(){
+			var class_name = this.data.class;
+					// ClassItem.item
+					ClassItem.save({
+						class: class_name,
+						item: this.item,
+						},
+						// Success
+						function() {
+							$location.path('/'+class_name+'/list');
+						}
+					);
+		},
+		
+		delete: function () {
+	    	if (confirm('Do you realy want to delete '+this.row.id)){
+	    		var id = this.row.id;
+	    		$location.path('/'+this.data.class+'/list');
+	    		ClassItem.delete(
+	    				{id: id, class: this.data.class},
+	    				// On success
+	    				function(){
+	    					$('#row-'+id).fadeOut();
+	    				}
+	    		);
+	    	}
+	    },
+	    
+	    related_link: function(){
+			var related = this.link.foreign;
+			var type = this.link.foreign_type;
+			$location.path('/'+this.item.class+'/'+this.item.id+'/'+related+'/'+type);
+		},
+	} 
 });
 
 CrudApp.factory('Menu', function($resource) {
 	return $resource('/api/menu');
 });
 
-CrudApp.factory("Breadcrumbs", function(){
-	 return {};
-});
 
 CrudApp.factory("RelatedItems", function($resource){
 	return $resource('/api/:class/:id/:related/items', { class: '@class' });
@@ -86,6 +119,7 @@ CrudApp.factory("RelatedItem", function($resource){
 	  });
 
 });
+
 CrudApp.factory('RelatedType', function () {
 	  return { type: "" };
 	});
@@ -95,32 +129,36 @@ CrudApp.factory('RelatedType', function () {
 
 
 
-var RelatedListCtrl = function ($route, $scope, $routeParams, $location, $rootScope, Class, ClassItem, RelatedListCtrl,  RelatedItem, RelatedItems, RelatedType) {
-	$scope.org_item = RelatedListCtrl.get({
+var RelatedListCtrl = function ($route, $scope, $routeParams, $location, $rootScope, Class, ClassItem, RelatedListCtrl,  RelatedItem, RelatedItems, RelatedType, Item) {
+	$scope.relation = $routeParams.related;
+	
+	
+	$scope.item = RelatedListCtrl.get({
 		class: $routeParams.class,
 		id: $routeParams.id,
 		related: $routeParams.related},
 		// Success
 		function(data) {
-			$rootScope.breadcrumbs = data.bread_crumbs;
 		}
 	);
+	//$scope.item = {};
+	//$scope.item.values = {};
+	
 	$scope.class = ClassItem.get({
 		class: $routeParams.class,
 		},
 		// Success
 		function(data) {
-			$rootScope.breadcrumbs = data.bread_crumbs;
 		}
 	);
 	
-	$scope.item = {};
-	$scope.item.values = {};
+	$scope.related_item = {};
+	$scope.related_item.values = {};
 	$scope.sort_column = '';
 	$scope.data = {};
 	$scope.sort_desc = false;
 	$scope.current_page = 1;
-	$scope.relation = $routeParams.related;
+	
 
 	
 	$scope.sort = function (ord) {
@@ -157,34 +195,22 @@ var RelatedListCtrl = function ($route, $scope, $routeParams, $location, $rootSc
 		);
 	};
 	
-	$scope.del = function () {
-    	if (confirm('Do you realy want to delete '+this.row.id)){
-    		var id = this.row.id;
-    		//$location.path('/'+$routeParams.class+'/list');
-    		ClassItem.delete(
-    				{id: id, class: $scope.org_item.related_class},
-    				// On success
-    				function(){
-    					$('#row-'+id).fadeOut();
-    				}
-    		);
-    	}
-    };
+	$scope.del = Item.delete;
 
     
     $scope.edit = function () {
 		var id = this.row.id;
-		$location.path('/'+$scope.org_item.related_class+'/edit/'+id);		
+		$location.path('/'+$scope.item.related_class+'/edit/'+id);		
     };
     
     
     $scope.search = function() {    	
-    	
+    	var query = $scope.item.values ? JSON.stringify($scope.item.values) : '';
     	$scope.data = RelatedItems.get({
     		class: $routeParams.class,
     		id: $routeParams.id,
     		related: $routeParams.related,
-    		q: JSON.stringify($scope.item.values),
+    		q: query,
     		sort: $scope.sort_column, 
     		descending: $scope.sort_desc ? 1 : 0,
 			page: $scope.current_page,
@@ -206,11 +232,7 @@ var RelatedListCtrl = function ($route, $scope, $routeParams, $location, $rootSc
 		);
     };
     
-	$scope.related = function(){
-		var related = this.link.foreign;
-		var type = this.link.foreign_type;
-		$location.path('/'+$routeParams.class+'/'+$routeParams.id+'/'+related+'/'+type);
-	};
+	$scope.related = Item.related_link;
     
     $scope.reset_items();
 };
@@ -289,11 +311,11 @@ var RelatedClassCtrl = function ($scope, $routeParams, $location, RelatedItem, R
     
     $scope.reset();
 };
-var RelatedItemsCtrl = function ($scope, $routeParams, $location, $rootScope, RelatedItem, RelatedItems) {
+var RelatedItemsCtrl = function ($scope, $routeParams, $location, $rootScope, RelatedItem, RelatedItems, ClassItem, Item) {
+
+
 	
-};
-var BreadcrumbsCtrl = function ($scope, $routeParams, $location, $rootScope) {
-	$rootScope.breadcrumbs = [];
+	
 };
 
 
@@ -315,7 +337,7 @@ var IndexCtrl = function ($scope, Schema, SchemaCreate, Menu) {
 };
 
 
-var CreateCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
+var CreateCtrl = function ($scope, $routeParams, $location, Class, ClassItem, Item) {
 	$scope.item = {};
 	$scope.item.values = {};
 	$scope.data = ClassItem.get(
@@ -328,26 +350,13 @@ var CreateCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
 	);
 	$scope.create = 1;
 	
-	$scope.save = function(){
-	
-		var item = this.item;
-		ClassItem.item;
-		ClassItem.save({
-			class: $routeParams.class,
-			item: item,
-	    	},
-	    	// Success
-	    	function(data) {
-	    		$location.path('/'+$routeParams.class+'/list');
-	    	}
-		);
-	};
+	$scope.save = Item.update;
 };
 
 
-var CreateRelatedCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
+var CreateRelatedCtrl = function ($scope, $routeParams, $location, Class, ClassItem, Item) {
 	$scope.item = {};
-	//related = $routeParams.class;
+	// related = $routeParams.class;
 	$scope.item.values = {};
 	$scope.item.values[$routeParams.field] = $routeParams.value;
 	
@@ -355,29 +364,16 @@ var CreateRelatedCtrl = function ($scope, $routeParams, $location, Class, ClassI
 			{	class: $routeParams.related, },
 			// Success
 			function(data) {
-				//$scope.data
+				// $scope.data
 			}
 	);
 	$scope.create = 1;
 	
-	$scope.save = function(){
-		
-		var item = this.item;
-		ClassItem.item;
-		ClassItem.save({
-			class: $routeParams.related,
-			item: item,
-		},
-		// Success
-		function(data) {
-			$location.path('/'+$routeParams.class+'/'+$routeParams.id+'/'+$routeParams.class+'/list');
-		}
-		);
-	};
+	$scope.save = Item.update;
 };
 
 var EditCtrl = function ($scope, $routeParams, $location, Item, ClassItem, $rootScope) {
-	$scope.item = Item.get({
+	$scope.item = Item.read.get({
 		class: $routeParams.class, 
 		id: $routeParams.id}
 	);
@@ -386,34 +382,17 @@ var EditCtrl = function ($scope, $routeParams, $location, Item, ClassItem, $root
 		},
 		// Success
 		function(data) {
-			$rootScope.breadcrumbs = data.bread_crumbs;
 		}
 	);
 	
-	$scope.save = function(){
-		
-		// ClassItem.item
-		ClassItem.save({
-			class: $routeParams.class,
-			item: this.item,
-		},
-		// Success
-		function(data) {
-			$location.path('/'+$routeParams.class+'/list');
-		}
-		);
-	};
+	$scope.save = Item.update;
 
 	
-	$scope.related = function(){
-		var related = this.link.foreign;
-		var type = this.link.foreign_type;
-		$location.path('/'+$routeParams.class+'/'+$routeParams.id+'/'+related+'/'+type);
-	};
+	$scope.related = Item.related_link;
 };
 
 
-var ListCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
+var ListCtrl = function ($scope, $routeParams, $location, Class, ClassItem, Item) {
 	// $scope.data = Class.get({class: $routeParams.class});
 	$scope.sort_column = '';
 	$scope.data = {};
@@ -442,19 +421,7 @@ var ListCtrl = function ($scope, $routeParams, $location, Class, ClassItem) {
     };
     
     
-    $scope.del = function () {
-    	if (confirm('Do you realy want to delete '+this.row.id)){
-    		var id = this.row.id;
-    		$location.path('/'+$routeParams.class+'/list');
-    		ClassItem.delete(
-    				{id: id, class: $routeParams.class},
-    				// On success
-    				function(){
-    					$('#row-'+id).fadeOut();
-    				}
-    		);
-    	}
-    };
+    $scope.del = Item.delete;
 
     
     $scope.edit = function () {

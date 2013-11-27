@@ -2,7 +2,7 @@
 <!-- Page heading -->
 <div class="page-head">
 	<!-- Page heading -->
-	<h1 ng-if="org_item.title" class="title"><span class="grey super-title">{{ org_item.class }}</span> {{ org_item.title }}</h1>
+	<h1 ng-if="item.title" class="title"><span class="grey super-title">{{ item.class }}</span> {{ item.title }}</h1>
 	<div class="clearfix"></div>
 
 </div>
@@ -13,16 +13,16 @@
 <div class="matter bundle-page">
 
 	<ul ng-show="class.relations" class="nav nav-tabs" ng-if="!create">
-			<li ><a href="/#/{{org_item.class}}/edit/{{org_item.id}}/">General</a></li>
+			<li ><a href="/#/{{item.class}}/edit/{{item.id}}/">General</a></li>
 			
 			<li ng-class="{active: link.foreign == relation}" class="sub-menu-item" ng-repeat="link in class.relations">
 				<a class="sub-menu-link" ng-click="related()">{{link.label}}</a>
 			</li>
 		</ul>
-	<a href="/#/{{org_item.class}}/{{org_item.id}}/new/{{org_item.related_class}}/{{org_item.related.name}}/{{org_item.id}}" class="pull-right"><i class="icon-plus"></i> New {{org_item.related_class_label}}</a>
+	<a href="/#/{{item.class}}/{{item.id}}/new/{{item.related_class}}/{{item.related.name}}/{{item.id}}" class="pull-right"><i class="icon-plus"></i> New {{item.related_class_label}}</a>
 	<div class="row-fluid">
 
-		<h2>Related {{org_item.related_class_label}}</h2>
+		<h2>Related {{item.related_class_label}}</h2>
 		<div id="list-grid" ng-include='"views/list_grid.html"' ng-controller='RelatedItemsCtrl' ng-init="actions='has_many_items_list';"></div>
 
 	</div>	

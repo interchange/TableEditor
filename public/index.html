@@ -14,6 +14,7 @@
 <script src="/javascripts/angular.js"></script>
 <script src="/javascripts/angular-resource.js"></script>
 <script src="/javascripts/angular-route.js"></script>
+<script src="/customization.js"></script>
 <script src="/app.js"></script>
 </head>
 
@@ -32,13 +33,6 @@
 			</form>
 			<span id="site-title">Table Editor</span>
 
-			<!-- Breadcrumb -->
-			<div style="display:none" ng-controller="BreadcrumbsCtrl">
-				<a href="/"><i class="icon-home"></i> Home</a>
-				<!-- Divider -->
-				<span ng-repeat="crumb in breadcrumbs" class="crumb"> / <a ng-if="crumb.link" href="{{crumb.link}}">{{crumb.label}}</a> <span ng-if="!crumb.link" class="bread-current class link">{{crumb.label}}</span>
-				</span>
-			</div>
 		</div>
 	</header>
 	<div class="container">
