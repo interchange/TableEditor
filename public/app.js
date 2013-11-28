@@ -11,6 +11,7 @@ var CrudApp = angular.module('CrudApp', ['CrudAppCustom', 'ngResource', 'ngRoute
 	    when('/:class/edit/:id', { templateUrl: 'views/form.html', controller: 'EditCtrl' }).
 	    when('/:class/:id/new/:related/:field/:value/', { templateUrl: 'views/form.html', controller: 'CreateRelatedCtrl' }).
 	    when('/:class/:id/:related/has_many', { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' }).
+	    when('/:class/:id/:related/might_have', { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' }).
 	    when('/:class/:id/:related/many_to_many', { templateUrl: 'views/many_to_many.html', controller: 'RelatedListCtrl' }).
 	    otherwise({redirectTo: '/'});
 });
@@ -57,34 +58,45 @@ CrudApp.factory('ClassItem', function($resource) {
 	return $resource('/api/:class', { class: '@class' });
 });
 
-CrudApp.factory('Item', function($resource, $location, ClassItem, $route) {
+CrudApp.factory('Item', function($resource, $location, LastUrl, ClassItem, $route) {
 	return {
 		read: $resource('/api/:class/:id', { class: '@class', id: '@id' }),
 		
 		update: function(){
 			var class_name = this.data.class;
+			var class_label = this.data.class_label;
+			var item = this.item;
 					// ClassItem.item
 					ClassItem.save({
 						class: class_name,
-						item: this.item,
+						item: item,
 						},
 						// Success
 						function() {
 							$location.path('/'+class_name+'/list');
+						},
+						// Error
+						function() {
+							alert('There has been an error saving '+class_label+'!');
 						}
 					);
 		},
 		
 		delete: function () {
-	    	if (confirm('Do you realy want to delete '+this.row.id)){
+	    	if (confirm('Do you realy want to delete '+this.row.name)){
 	    		var id = this.row.id;
+	    		var class_label = this.data.class_label;
 	    		$location.path('/'+this.data.class+'/list');
 	    		ClassItem.delete(
 	    				{id: id, class: this.data.class},
 	    				// On success
 	    				function(){
 	    					$('#row-'+id).fadeOut();
-	    				}
+	    				},
+	    				// Error
+						function() {
+							alert('There has been an error deleting '+class_label+'!');
+						}
 	    		);
 	    	}
 	    },
@@ -124,12 +136,16 @@ CrudApp.factory('RelatedType', function () {
 	  return { type: "" };
 	});
 
+CrudApp.factory('LastUrl', function () {
+	return { url: "" };
+});
+
 
 // Controllers
 
 
 
-var RelatedListCtrl = function ($route, $scope, $routeParams, $location, $rootScope, Class, ClassItem, RelatedListCtrl,  RelatedItem, RelatedItems, RelatedType, Item) {
+var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, RelatedListCtrl,  RelatedItem, RelatedItems, Item) {
 	$scope.relation = $routeParams.related;
 	
 	
@@ -139,16 +155,22 @@ var RelatedListCtrl = function ($route, $scope, $routeParams, $location, $rootSc
 		related: $routeParams.related},
 		// Success
 		function(data) {
+		},
+		// Error
+		function() {
+			alert('Could not retrieve data!');
 		}
 	);
-	//$scope.item = {};
-	//$scope.item.values = {};
 	
 	$scope.class = ClassItem.get({
 		class: $routeParams.class,
 		},
 		// Success
 		function(data) {
+		},
+		// Error
+		function() {
+			alert('Could not retrieve data!');
 		}
 	);
 	
@@ -191,7 +213,11 @@ var RelatedListCtrl = function ($route, $scope, $routeParams, $location, $rootSc
 	    	// Success
 	    	function(data) {
 	    		$('#row-'+row_id).fadeOut();
-	    	}
+	    	},
+	    	// Error
+			function() {
+				alert('Could not remove item!');
+			}
 		);
 	};
 	
@@ -228,7 +254,11 @@ var RelatedListCtrl = function ($route, $scope, $routeParams, $location, $rootSc
 	    		for (var i = from_page; i <= to_page; i++) {
 	    			$scope.page_list.push(i);
 	    		}
-	    	}
+	    	},
+	    	// Error
+			function() {
+				alert('Could not retrieve data!');
+			}
 		);
     };
     
@@ -238,7 +268,7 @@ var RelatedListCtrl = function ($route, $scope, $routeParams, $location, $rootSc
 };
 
 
-var RelatedClassCtrl = function ($scope, $routeParams, $location, RelatedItem, RelatedClass, ClassItem, RelatedItems, RelatedType) {
+var RelatedClassCtrl = function ($scope, $routeParams, RelatedItem, RelatedClass, RelatedType) {
 	$scope.related_type = RelatedType;
 	$scope.sort_column = '';
 	$scope.item = {};
@@ -277,7 +307,11 @@ var RelatedClassCtrl = function ($scope, $routeParams, $location, RelatedItem, R
 	    	// Success
 	    	function(data) {
 	    		$scope.reset_items();
-	    	}
+	    	},
+	    	// Error
+			function() {
+				alert('Could not add item!');
+			}
 		);
 	};
     
@@ -305,21 +339,22 @@ var RelatedClassCtrl = function ($scope, $routeParams, $location, RelatedItem, R
 	    		for (var i = from_page; i <= to_page; i++) {
 	    			$scope.page_list.push(i);
 	    		}
-	    	}
+	    	},
+	    	// Error
+			function() {
+				alert('Could not retrieve data!');
+			}
 		);
     };
     
     $scope.reset();
 };
 var RelatedItemsCtrl = function ($scope, $routeParams, $location, $rootScope, RelatedItem, RelatedItems, ClassItem, Item) {
-
-
-	
 	
 };
 
 
-var IndexCtrl = function ($scope, Schema, SchemaCreate, Menu) {
+var IndexCtrl = function ($scope, Schema, SchemaCreate) {
 	$scope.schema = Schema.get({},
 			function(data) {
 		if(data.make_schema == '1'){
@@ -337,7 +372,7 @@ var IndexCtrl = function ($scope, Schema, SchemaCreate, Menu) {
 };
 
 
-var CreateCtrl = function ($scope, $routeParams, $location, Class, ClassItem, Item) {
+var CreateCtrl = function ($scope, $routeParams, ClassItem, Item) {
 	$scope.item = {};
 	$scope.item.values = {};
 	$scope.data = ClassItem.get(
@@ -346,7 +381,11 @@ var CreateCtrl = function ($scope, $routeParams, $location, Class, ClassItem, It
     	function(data) {
     		// Pagination
     		;
-    	}
+    	},
+    	// Error
+		function() {
+			alert('Could not retrieve data!');
+		}
 	);
 	$scope.create = 1;
 	
@@ -354,48 +393,36 @@ var CreateCtrl = function ($scope, $routeParams, $location, Class, ClassItem, It
 };
 
 
-var CreateRelatedCtrl = function ($scope, $routeParams, $location, Class, ClassItem, Item) {
+var CreateRelatedCtrl = function ($scope, $routeParams, ClassItem, Item) {
 	$scope.item = {};
 	// related = $routeParams.class;
 	$scope.item.values = {};
 	$scope.item.values[$routeParams.field] = $routeParams.value;
 	
-	$scope.data = ClassItem.get(
-			{	class: $routeParams.related, },
-			// Success
-			function(data) {
-				// $scope.data
-			}
-	);
+	$scope.data = ClassItem.get({class: $routeParams.related,});
 	$scope.create = 1;
 	
 	$scope.save = Item.update;
 };
 
-var EditCtrl = function ($scope, $routeParams, $location, Item, ClassItem, $rootScope) {
+var EditCtrl = function ($scope, $rootScope, $routeParams, Item, ClassItem, LastUrl) {
 	$scope.item = Item.read.get({
 		class: $routeParams.class, 
 		id: $routeParams.id}
 	);
-	$scope.data = ClassItem.get({
-		class: $routeParams.class,
-		},
-		// Success
-		function(data) {
-		}
-	);
+	$scope.data = ClassItem.get({class: $routeParams.class});
 	
 	$scope.save = Item.update;
-
 	
 	$scope.related = Item.related_link;
 };
 
 
-var ListCtrl = function ($scope, $routeParams, $location, Class, ClassItem, Item) {
+var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, ClassItem, Item, LastUrl) {
 	// $scope.data = Class.get({class: $routeParams.class});
 	$scope.sort_column = '';
 	$scope.data = {};
+	$scope.data.page_size = 10;
 	$scope.item = {};
 	$scope.item.values = {};
 	$scope.sort_desc = false;
@@ -426,6 +453,8 @@ var ListCtrl = function ($scope, $routeParams, $location, Class, ClassItem, Item
     
     $scope.edit = function () {
 		var id = this.row.id;
+		$scope.last_url = LastUrl.url;
+		$scope.last_url = 'test';
 		$location.path('/'+$routeParams.class+'/edit/'+id);		
     };
     
@@ -437,13 +466,14 @@ var ListCtrl = function ($scope, $routeParams, $location, Class, ClassItem, Item
     		sort: $scope.sort_column, 
     		descending: $scope.sort_desc ? 1 : 0,
 			page: $scope.current_page,
+			page_size: $scope.data.page_size,
 	    	},
 	    	// Success
 	    	function(data) {
 	    		// Pagination
 	    		var page_scope = 5;
 	    		var current_page = $scope.data.page = parseInt($scope.data.page);
-	    		var pages = $scope.data.pages = parseInt($scope.data.pages);
+	    		var pages = $scope.data.pages = parseInt($scope.data.pages) ? parseInt($scope.data.pages) : 1;
 	    		var from_page = (current_page - page_scope > 0) ? (current_page - page_scope) : 1;
 	    		var to_page = (current_page + page_scope < pages) ? (current_page + page_scope) : pages;
 
@@ -458,7 +488,7 @@ var ListCtrl = function ($scope, $routeParams, $location, Class, ClassItem, Item
     $scope.reset();
 };
 
-var SidebarCtrl = function ($scope, $location, Menu) {
+var SidebarCtrl = function ($scope, Menu) {
 	$scope.menu = Menu.query();
 };
 

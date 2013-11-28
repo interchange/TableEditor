@@ -361,34 +361,38 @@ sub columns_static_info {
 	my $columns_info = [];
 	
 	for my $relationship($result_source->relationships){
-		my $column_name;
 		my $relationship_info = $result_source->relationship_info($relationship);
 		my $relationship_class_package = $relationship_info->{class};
 		next if $relationship_info->{hidden};
 		my $relationship_class = schema->class_mappings->{$relationship_class_package};
 		my $count = schema->resultset($relationship_class)->count;
 		
-		for (values $relationship_info->{cond}){
-			$column_name ||= [split('\.', "$_")]->[-1];
-			last;
-		}
+		my ($foreign_column, $column_name) = %{$relationship_info->{cond}};
+		$foreign_column =~ s/foreign\.//g;
+		$column_name =~ s/self\.//g;
+		
 		my $column_info = $columns->{$column_name};
 		$relationship_info->{foreign} = $relationship;
+		$relationship_info->{foreign_column} = $foreign_column;
 
 		my $rel_type = $relationship_info->{attrs}->{accessor};
 		# Belongs to or Has one
 		if( $rel_type eq 'single' or $rel_type eq 'filter' ){
 			$relationship_info->{foreign_type} = 'belongs_to' if $rel_type eq 'filter';
 			$relationship_info->{foreign_type} = 'might_have' if $rel_type eq 'single';
+			
+			# Add fk column attributes
+			my ($fk_column) = keys %{$relationship_info->{attrs}->{fk_columns}};
+			$relationship_info = {%$relationship_info, %{$columns->{$fk_column}}} if $fk_column;
+			
+			# If there aren't too many related items, make a dropdown
 			if ($count <= $dropdown_treshold){
 				$relationship_info->{field_type} = 'dropdown';
 				
 				my @foreign_objects = schema->resultset($relationship_class)->all;
-				$relationship_info->{options} = dropdown(\@foreign_objects);
+				$relationship_info->{options} = dropdown(\@foreign_objects, $foreign_column );
 			}
-			else {
-				$relationship_info->{field_type} = 'varchar';
-			} 
+			 
 			column_add_info($column_name, $relationship_info, $class );
 			push $columns_info, $relationship_info;
 		}
@@ -421,7 +425,7 @@ sub columns_info {
 			if ($count <= $dropdown_treshold){
 				$column_info->{field_type} = 'dropdown';
 				my @foreign_objects = schema->resultset($column_info->{source})->all;
-				$column_info->{options} = dropdown(\@foreign_objects);
+				$column_info->{options} = dropdown(\@foreign_objects, $column_info->{foreign_column});
 			}
 			else {
 				$column_info->{field_type} = 'varchar';
@@ -515,10 +519,6 @@ sub column_add_info {
 	$column_info->{label} ||= $column_info->{foreign} ? label($column_info->{foreign}) : label($column_name); #Human label
 	$column_info->{required} ||= required_field($column_info);	
 	$column_info->{primary_key} ||= 1 if $column_name eq $schema->{$class}->{primary};	  
-	#$column_info->{readonly} ||= 1 if $column_info->{primary_key};	  
-	
-	#debug to_dumper $column_info unless $column_info->{field_type};
-	#return undef if index($column_info->{field_type}, 'timestamp') != -1;
 	
 }
 
@@ -578,11 +578,10 @@ sub label {
 
 
 sub dropdown {
-	my ($result_set, $selected) = @_;
+	my ($result_set, $column) = @_;
 	my $items = [];
 	for my $object (@$result_set){
-		my $id_column = $object->result_source->_primaries->[0];
-		my $id = $object->$id_column;
+		my $id = $object->$column;
 		my $name = model_to_string($object);
 		push $items, {option_label=>$name, value=>$id};
 	}
@@ -603,6 +602,7 @@ sub grid_template_params {
 	my $rs = $related_items || schema->resultset(ucfirst($class));
 	my $primary_column = $schema->{$class}->{primary};
 	my $page = $get_params->{page} || 1;
+	$page_size = $get_params->{page_size} if $get_params->{page_size};
 	
 	my $objects = $rs->search(
 	$where,
@@ -670,7 +670,7 @@ sub grid_rows {
 			$value = model_to_string($value) if blessed($value);
 			push $row_data, {value => $value};
 		}
-		push @table_rows, {row => $row_data, id => $id };
+		push @table_rows, {row => $row_data, id => $id, name => model_to_string($row) };
 	}
 	return \@table_rows;
 }

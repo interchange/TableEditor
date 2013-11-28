@@ -5,6 +5,7 @@
 	ng-model="item.values[field.name]" 
 	ng-required="field.required" 
 	ng-readonly="field.readonly || (field.primary_key && !create)" 
+	ng-disabled="field.readonly || (field.primary_key && !create)" 
 	ng-options="option.value as option.option_label for option in field.options">
 	<option></option>
 </select>

@@ -8,7 +8,16 @@
 						<a ng-class="{active: field.name==sort_column}" ng-click="sort('{{field.name}}')" class="field-label sort">{{field.label}}</a>
 						<i ng-class="{'icon-chevron-down': field.name==sort_column && sort_desc, 'icon-chevron-up': field.name==sort_column && !sort_desc}" ></i>
 					</th>
-					<th></th>
+					<th>
+						<select ng-change="reset()" ng-model="data.page_size" style="width: auto;">
+							<option>10</option>
+							<option>20</option>
+							<option>50</option>
+							<option>100</option>
+							<option>200</option>
+							<option>500</option>
+						</select>
+					</th>
 				</tr>
 				<tr>
 					<th class="column-search" ng-repeat="field in data.field_list">
@@ -29,7 +38,7 @@
 		<div ng-if="data.count == 0">No results</div>
 	</form>
 
-<div style="text-align: center;"> Page {{ data.page }} / {{ data.pages }} </div>
+<div style="text-align: center;">{{data.count}} items found. Page {{ data.page }} / {{ data.pages }}.</div>
 </div>
 
 <ul ng-if="data.pages > 1" class="pagination">

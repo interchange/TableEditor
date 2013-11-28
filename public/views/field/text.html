@@ -6,6 +6,7 @@
 	ng-model="item.values[field.name]" 
 	ng-required="field.required"
 	ng-readonly="field.readonly || (field.primary_key && !create)" 
+	maxlength="{{field.size}}"
 	>
 </textarea>
 <span ng-include="'views/field/partials/standard_validation.html'"></span>
