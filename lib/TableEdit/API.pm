@@ -29,7 +29,7 @@ if (eval {schema}){
 		($schema->{$class}->{primary}) = schema->source($class)->primary_columns;
 		$schema->{$class}->{label} = class_label($class);
 		$schema->{$class}->{columns} = class_columns($class);
-		$schema->{$class}->{columns_info} = columns_static_info($class);
+		$schema->{$class}->{column_info} = columns_static_info($class);
 		$schema->{$class}->{relationships} = relationships_info($class);	
 		$schema->{$class}->{attributes} = class_source($class)->resultset_attributes;	
 	
@@ -233,7 +233,7 @@ get '/:class/:id' => sub {
 get '/:class' => sub {
 	my (@languages, $errorMessage);
 	my $class = params->{class};
-	my $columns = columns_info($class); 
+	my $columns = columns_info($class, class_form_columns($class)); 
 	my $relationships = $schema->{$class}->{relationships};	
 	relationships_info($class);
 
@@ -313,6 +313,38 @@ sub class_columns {
 	return [class_source($class)->columns]; 
 }
 
+sub class_grid_columns {
+	my $class = shift;	
+	return class_source($class)->resultset_attributes->{grid_columns} if class_source($class)->resultset_attributes->{grid_columns};	
+	my $columns = [];
+	for my $column (@{class_columns($class)}){
+		my $column_info = column_info($class, $column);
+		
+		# Leave out inappropriate columns
+		next if $column_info->{data_type} and $column_info->{data_type} eq 'text';
+		next if $column_info->{size} and $column_info->{size} > 255;
+		
+		push $columns, $column;
+	}
+	return $columns; 
+}
+
+sub class_form_columns {
+	my $class = shift;	
+	return class_source($class)->resultset_attributes->{form_columns} if class_source($class)->resultset_attributes->{form_columns};	
+	my $columns = [];
+	for my $column (@{class_columns($class)}){
+		#my $column_info = column_info($class, $column);
+		
+		# Leave out inappropriate columns
+		#next if $column_info->{hidden};
+		#next if $column_info->{size} and $column_info->{size} > 255;
+		
+		push $columns, $column;
+	}
+	return $columns; 
+}
+
 
 =head2 class_columns
 
@@ -322,29 +354,22 @@ Returns array of hashes with metadata for grid of all table columns
 
 sub grid_columns_info {
 	my ($class) = @_;
-	my $defuault_columns = [];
-	my $columns = columns_info(
-		$class, 
-		class_source($class)->resultset_attributes->{grid_columns}
-	);
+	my $default_columns = [];
+	my $columns = class_grid_columns($class);
 	for my $col (@$columns){
-		my %col_copy = %{$col};
-		unless (
-			($col_copy{data_type} and $col_copy{data_type} eq 'text') or
-			($col_copy{size} and $col_copy{size} > 255)
-		){
-			push $defuault_columns, \%col_copy; 
-		};
+		my $col_info = column_info($class, $col);
+		my $col_copy = \%{$col_info};
+
+	# Cleanup for grid
+		$col_copy->{required} = 0 ;
+		$col_copy->{readonly} = 0 ;
+		$col_copy->{primary_key} = 0 ;
+
+		push $default_columns, $col_copy; 		
 	}
+
 	
-	# Remove required and readonly field properties
-	for my $col (@$defuault_columns){
-		$col->{required} = 0 ;
-		$col->{readonly} = 0 ;
-		$col->{primary_key} = 0 ;
-	}
-	
-	return $defuault_columns; 
+	return $default_columns; 
 }
 
 
@@ -355,10 +380,10 @@ Returns array of hashes with metadata for form of all table columns
 =cut
 
 sub columns_static_info {
-	my ($class, $selected_columns) = @_;
+	my ($class) = @_;
 	my $result_source = class_source($class);
 	my $columns = $result_source->columns_info; 
-	my $columns_info = [];
+	my $columns_info = {};
 	
 	for my $relationship($result_source->relationships){
 		my $relationship_info = $result_source->relationship_info($relationship);
@@ -394,33 +419,37 @@ sub columns_static_info {
 			}
 			 
 			column_add_info($column_name, $relationship_info, $class );
-			push $columns_info, $relationship_info;
+			$columns_info->{$column_name} = $relationship_info;
 		}
 	}
 	
-	$selected_columns ||= class_columns($class);
+	my $selected_columns = class_columns($class);
 	for (@$selected_columns){
 		my $column_info = $columns->{$_};
 		next if $column_info->{is_foreign_key} or $column_info->{hidden};
 		column_add_info($_, $column_info, $class);
 		
-		push $columns_info, $column_info;
+		$columns_info->{$_} = $column_info;
 	} 
 	
 	return $columns_info;
 }
 
+sub column_info {
+	my ($class, $column) = @_;
+	return $schema->{$class}->{column_info}->{$column};
+}
+
 
 sub columns_info {
-	my ($class) = @_;
-	my $result_source = class_source($class);
-	my $columns = $result_source->columns_info; 
-	my $columns_info = $schema->{$class}->{columns_info};
-	
-	for my $column_info(@$columns_info){
-		next unless defined $column_info->{foreign_type};
+	my ($class, $selected_columns) = @_;
+	$selected_columns ||= class_columns($class); 
+	my $column_info = $schema->{$class}->{column_info};
+	my $columns_info = [];
+	for my $column(@$selected_columns){
+		my $column_info = column_info($class, $column);
 		# Belongs to or Has one
-		if( $column_info->{foreign_type} eq 'belongs_to' or $column_info->{foreign_type} eq 'might_have' ){
+		if( defined $column_info->{foreign_type} and ($column_info->{foreign_type} eq 'belongs_to' or $column_info->{foreign_type} eq 'might_have') ){
 			my $count = schema->resultset($column_info->{source})->count;
 			if ($count <= $dropdown_treshold){
 				$column_info->{field_type} = 'dropdown';
@@ -431,8 +460,9 @@ sub columns_info {
 				$column_info->{field_type} = 'varchar';
 			} 
 		}
+		push @$columns_info, $column_info;
 	}
-	return $schema->{$class}->{columns_info};
+	return $columns_info;
 }
 
 

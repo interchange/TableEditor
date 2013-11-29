@@ -1,4 +1,4 @@
-<div class="well well-small">
+<div class="well well-small" ng-init="view='grid'">
 
 	<form class="form-search grid" style="margin: 0px">
 		<table class="table table-striped table-responsive" ng-model="data.query">
@@ -21,7 +21,7 @@
 				</tr>
 				<tr>
 					<th class="column-search" ng-repeat="field in data.field_list">
-						<div class="nullable" ng-include="'views/field/'+field.field_type+'.html'" ></div>
+						<div class="nullable" ng-include="'views/field/'+field.field_type+'.html'"></div>
 					</th>
 					<th><button class="btn btn-default" ng-click="reset()">Filter</button></th>
 				</tr>
@@ -41,9 +41,10 @@
 <div style="text-align: center;">{{data.count}} items found. Page {{ data.page }} / {{ data.pages }}.</div>
 </div>
 
-<ul ng-if="data.pages > 1" class="pagination">
-	<li ng-if="data.page > 1"><a ng-click="go_to_page('{{ data.page - 1 }}')">«</a></li>
-	<li ng-class="{active: page==data.page}" ng-repeat="page in page_list"><a ng-click="go_to_page( page )">{{ page }}</a></li>
-	<li ng-if="data.page < data.pages"><a ng-click="go_to_page('{{ data.page + 1 }}')">»</a></li>
-</ul>
-
+<div ng-if="data.pages > 1" class="pagination">
+	<ul>
+		<li ng-if="data.page > 1"><a ng-click="go_to_page('{{ data.page - 1 }}')">«</a></li>
+		<li ng-class="{active: page==data.page}" ng-repeat="page in page_list"><a ng-click="go_to_page( page )">{{ page }}</a></li>
+		<li ng-if="data.page < data.pages"><a ng-click="go_to_page('{{ data.page + 1 }}')">»</a></li>
+	</ul>
+</div>

@@ -50,7 +50,7 @@ CrudApp.factory('Schema', function($resource) {
 CrudApp.factory('SchemaCreate', function($resource) { 
 	return $resource('/api/create_schema',{},{query: {isArray: false}});
 });
-CrudApp.factory('RelatedListCtrl', function($resource) { 
+CrudApp.factory('RelatedList', function($resource) { 
 	return $resource('/api/:class/:id/:related/list', { class: '@class' });
 });
 
@@ -58,13 +58,15 @@ CrudApp.factory('ClassItem', function($resource) {
 	return $resource('/api/:class', { class: '@class' });
 });
 
-CrudApp.factory('Item', function($resource, $location, LastUrl, ClassItem, $route) {
+CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route) {
+	//var root = $scope;
 	return {
 		read: $resource('/api/:class/:id', { class: '@class', id: '@id' }),
 		
 		update: function(){
 			var class_name = this.data.class;
 			var class_label = this.data.class_label;
+			var url = Url.edit;
 			var item = this.item;
 					// ClassItem.item
 					ClassItem.save({
@@ -73,7 +75,7 @@ CrudApp.factory('Item', function($resource, $location, LastUrl, ClassItem, $rout
 						},
 						// Success
 						function() {
-							$location.path('/'+class_name+'/list');
+							$location.path(url);							
 						},
 						// Error
 						function() {
@@ -136,8 +138,8 @@ CrudApp.factory('RelatedType', function () {
 	  return { type: "" };
 	});
 
-CrudApp.factory('LastUrl', function () {
-	return { url: "" };
+CrudApp.factory('Url', function () {
+	return { edit: "" };
 });
 
 
@@ -145,11 +147,11 @@ CrudApp.factory('LastUrl', function () {
 
 
 
-var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, RelatedListCtrl,  RelatedItem, RelatedItems, Item) {
+var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, RelatedList,  RelatedItem, RelatedItems, Item, Url) {
 	$scope.relation = $routeParams.related;
 	
 	
-	$scope.item = RelatedListCtrl.get({
+	$scope.item_info = RelatedList.get({
 		class: $routeParams.class,
 		id: $routeParams.id,
 		related: $routeParams.related},
@@ -161,6 +163,9 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 			alert('Could not retrieve data!');
 		}
 	);
+	$scope.item = {};
+	$scope.item.values = {};
+	
 	
 	$scope.class = ClassItem.get({
 		class: $routeParams.class,
@@ -195,7 +200,7 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
     	$scope.reset_items();
     };
     
-    $scope.reset_items = function () {
+    $scope.reset = function () {
         $scope.page = 1;
         $scope.items = [];
         $scope.search();
@@ -223,10 +228,16 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 	
 	$scope.del = Item.delete;
 
+	$scope.create = function () {
+    	Url.edit = $location.path();
+		$location.path('/'+$scope.item_info.class+'/'+$scope.item_info.id+'/new/'+$scope.item_info.related_class+'/'+$scope.item_info.related.name+'/'+$scope.item_info.id);		
+    };
+
     
     $scope.edit = function () {
+    	Url.edit = $location.path();
 		var id = this.row.id;
-		$location.path('/'+$scope.item.related_class+'/edit/'+id);		
+		$location.path('/'+$scope.item_info.related_class+'/edit/'+id);		
     };
     
     
@@ -264,7 +275,7 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
     
 	$scope.related = Item.related_link;
     
-    $scope.reset_items();
+    $scope.reset();
 };
 
 
@@ -358,15 +369,22 @@ var IndexCtrl = function ($scope, Schema, SchemaCreate) {
 	$scope.schema = Schema.get({},
 			function(data) {
 		if(data.make_schema == '1'){
-			SchemaCreate.get({}, function(data){
-				$scope.schema.make_schema = null;
-				if(data.make_schema_error){
-					$scope.schema.schema_error = data.make_schema_error;
+			SchemaCreate.get({}, 
+				// Success	
+				function(data){
+					$scope.schema.make_schema = null;
+					if(data.make_schema_error){
+						$scope.schema.schema_error = data.make_schema_error;
+					}
+					else {
+						$scope.schema.schema_created = 1;
+					}
+				},
+				// Error
+				function() {
+					alert('Could not retrieve data!');
 				}
-				else {
-					$scope.schema.schema_created = 1;
-				}
-			});
+			);
 		} 
 	});
 };
@@ -405,7 +423,7 @@ var CreateRelatedCtrl = function ($scope, $routeParams, ClassItem, Item) {
 	$scope.save = Item.update;
 };
 
-var EditCtrl = function ($scope, $rootScope, $routeParams, Item, ClassItem, LastUrl) {
+var EditCtrl = function ($scope, $rootScope, $routeParams, Item, ClassItem, Url) {
 	$scope.item = Item.read.get({
 		class: $routeParams.class, 
 		id: $routeParams.id}
@@ -418,7 +436,7 @@ var EditCtrl = function ($scope, $rootScope, $routeParams, Item, ClassItem, Last
 };
 
 
-var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, ClassItem, Item, LastUrl) {
+var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, ClassItem, Item, Url) {
 	// $scope.data = Class.get({class: $routeParams.class});
 	$scope.sort_column = '';
 	$scope.data = {};
@@ -453,9 +471,12 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
     
     $scope.edit = function () {
 		var id = this.row.id;
-		$scope.last_url = LastUrl.url;
-		$scope.last_url = 'test';
+		Url.edit = $location.path();
 		$location.path('/'+$routeParams.class+'/edit/'+id);		
+    };
+
+    $scope.create = function () {
+    	Url.edit = $location.path();
     };
     
     $scope.search = function() {    	
