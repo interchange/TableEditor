@@ -116,6 +116,18 @@ For this example we will use following model.
 	# Created by DBIx::Class::Schema::Loader v0.07033
 	# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:g5NE5itWUoKXqfEKXj/8Rg
 	
+	__PACKAGE__->resultset_attributes({ 	
+		label => 'Employees',
+		grid_columns => ['id', 'username', 'email'],
+		form_columns => ['id', 'username', 'email', 'birthday', 'internal_code'],
+		many_to_many => {
+			items => {class => 'TableEdit::Schema::Result::Item', where => {inactive => 'false'}},  
+		},	
+	});
+	
+	__PACKAGE__->columns_info->{created_date}->{readonly} = 1;
+	__PACKAGE__->columns_info->{internal_code}->{hidden} = 1;
+	__PACKAGE__->columns_info->{email}->{data_type} = 'text';
 	
 	# You can replace this text with custom code or comments, and it will be preserved on regeneration
 	1;
@@ -165,14 +177,15 @@ Only set resultset_attributes once, or it will be overwritten!
 		},		
 	});
 	
-=head2 Grid visible columns
+=head2 Grid / form visible columns
 
 Often you don't care about all columns when you browse though rows or there are simply to many. 
-You can specify a list of columns that will appear on grid. 
-Only set resultset_attributes once, or it will be overwritten! 
+You can specify a list of columns that will appear on grid or form. 
+You have to be careful not to omit required columns and similar on form view.
 
 	__PACKAGE__->resultset_attributes({ 	
-		grid_columns => ['approval_id', 'item_id', 'notify', 'is_approved'],
+		grid_columns => ['id', 'username', 'email'],
+		form_columns => ['id', 'username', 'email', 'birthday', 'internal_code'],
 	});
 	
 =head2 Model name / label
