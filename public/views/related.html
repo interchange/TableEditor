@@ -2,7 +2,7 @@
 <!-- Page heading -->
 <div class="page-head">
 	<!-- Page heading -->
-	<h1 ng-if="item.title" class="title"><span class="grey super-title">{{ item.class }}</span> {{ item.title }}</h1>
+	<h1 ng-if="item_info.title" class="title"><span class="grey super-title">{{ item_info.class }}</span> {{ item_info.title }}</h1>
 	<div class="clearfix"></div>
 
 </div>
@@ -13,7 +13,7 @@
 			<li ><a href="/#/{{item_info.class}}/edit/{{item_info.id}}/">General</a></li>
 			
 			<li ng-class="{active: link.foreign == relation}" class="sub-menu-item" ng-repeat="link in class.relations">
-				<a class="sub-menu-link" ng-click="related()">{{link.label}}</a>
+				<a class="sub-menu-link" href="/#/{{item_info.class}}/{{item_info.id}}/{{link.foreign}}/{{link.foreign_type}}">{{link.label}}</a>
 			</li>
 		</ul>
 	<a ng-click="create()" class="pull-right"><i class="icon-plus"></i> New {{item_info.related_class_label}}</a>

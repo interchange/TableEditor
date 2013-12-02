@@ -5,7 +5,7 @@
 var CrudApp = angular.module('CrudApp', ['CrudAppCustom', 'ngResource', 'ngRoute']).
 	config(function($routeProvider) {
 		$routeProvider.
-		when('/', { templateUrl: 'views/home.html', controller: 'IndexCtrl' }).
+		when('/status', { templateUrl: 'views/status.html', controller: 'StatusCtrl' }).
 	    when('/:class/list', { templateUrl: 'views/list.html', controller: 'ListCtrl' }).
 	    when('/:class/new', { templateUrl: 'views/form.html', controller: 'CreateCtrl' }).
 	    when('/:class/edit/:id', { templateUrl: 'views/form.html', controller: 'EditCtrl' }).
@@ -13,7 +13,7 @@ var CrudApp = angular.module('CrudApp', ['CrudAppCustom', 'ngResource', 'ngRoute
 	    when('/:class/:id/:related/has_many', { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' }).
 	    when('/:class/:id/:related/might_have', { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' }).
 	    when('/:class/:id/:related/many_to_many', { templateUrl: 'views/many_to_many.html', controller: 'RelatedListCtrl' }).
-	    otherwise({redirectTo: '/'});
+	    otherwise({redirectTo: '/status'});
 });
 
 CrudApp.directive('activeLink', function($location) {
@@ -200,7 +200,7 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
     	$scope.reset_items();
     };
     
-    $scope.reset = function () {
+    $scope.reset_items = function () {
         $scope.page = 1;
         $scope.items = [];
         $scope.search();
@@ -275,7 +275,7 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
     
 	$scope.related = Item.related_link;
     
-    $scope.reset();
+    $scope.reset_items();
 };
 
 
@@ -365,7 +365,7 @@ var RelatedItemsCtrl = function ($scope, $routeParams, $location, $rootScope, Re
 };
 
 
-var IndexCtrl = function ($scope, Schema, SchemaCreate) {
+var StatusCtrl = function ($scope, Schema, SchemaCreate) {
 	$scope.schema = Schema.get({},
 			function(data) {
 		if(data.make_schema == '1'){

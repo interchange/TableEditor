@@ -1,8 +1,8 @@
 <input
 	name="field" 
-	class="form-control"
+	class="form-control date"
 	ng-required="field.required" 
 	ng-readonly="field.readonly || (field.primary_key && !create)" 
 	ng-model="item.values[field.name]" 
-	type="datetime-local" >
+	type="text" >
 <span ng-include="'views/field/partials/standard_validation.html'"></span>

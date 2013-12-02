@@ -358,14 +358,14 @@ sub grid_columns_info {
 	my $columns = class_grid_columns($class);
 	for my $col (@$columns){
 		my $col_info = column_info($class, $col);
-		my $col_copy = \%{$col_info};
+		my %col_copy = %{$col_info};
 
 	# Cleanup for grid
-		$col_copy->{required} = 0 ;
-		$col_copy->{readonly} = 0 ;
-		$col_copy->{primary_key} = 0 ;
+		$col_copy{required} = 0 ;
+		$col_copy{readonly} = 0 ;
+		$col_copy{primary_key} = 0 ;
 
-		push $default_columns, $col_copy; 		
+		push $default_columns, \%col_copy; 		
 	}
 
 	
