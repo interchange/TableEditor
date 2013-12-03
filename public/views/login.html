@@ -1,0 +1,19 @@
+
+<h1>Login</h1>
+<div>
+	<form>
+		<fieldset>
+			<div class="controls control-group">
+				<label class="control-label"> Username </label> <input type="text" ng-model="user.username" />
+			</div>
+			<div class="controls control-group">
+				<label class="control-label"> Password </label> <input type="text" ng-model="user.password" />
+			</div>
+			<div class="alert alert-danger" ng-show="error">{{error}}</div>
+			<div class="alert alert-success" ng-show="success">{{success}}</div>
+			<div class="controls control-group">
+				<button class="btn btn-primary" ng-click="login()">Login</button>
+			</div>
+		</fieldset>
+	</form>
+</div>

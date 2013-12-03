@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="CrudApp">
+<html lang="en" ng-app="CrudApp" check-user ng-controller="RootCtrl">
 <head>
 
 <!-- Title and other stuffs -->
@@ -25,13 +25,21 @@
 	<!-- Main content starts -->
 	<header class="jumbotron">
 		<div class="container">
-			<form class="form-search pull-right">
+		<div class="pull-right">
+			<form class="form-search">
 				<div class="input-append">
 					<input type="text" class="span2 search-query">
 					<button type="submit" class="btn btn-primary">Search</button>
 				</div>
 			</form>
-			<span id="site-title">Table Editor</span>
+			<span ng-show="!user.username">
+				<a href="/#/login">Log in</a>
+			</span>
+			<span ng-show="user.username">
+				Logged in as {{user.username}}. <a ng-click="logout()">Logout</a>
+			</span>
+		</div>
+			<a href="/#/"><span id="site-title">Table Editor</span></a>
 
 		</div>
 	</header>
@@ -50,7 +58,7 @@
 						<ul class="nav nav-list bs-docs-sidenav">
 							<!-- Use the class nred, ngreen, nblue, nlightblue, nviolet or norange to add background color. You need to use this in <li> tag. -->
 							<li class="nav-header">Configuration</li>
-							<a href="#/">Status</a>
+							<a href="/#/status">Status</a>
 							<li class="nav-header">Tables</li>
 							<li ng-repeat="link in menu" data-active-link=""><a  href="{{link.url}}" class="list-group-item">{{link.name}}</a></li>
 						</ul>
