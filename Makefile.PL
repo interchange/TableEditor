@@ -19,6 +19,7 @@ WriteMakefile(
     PREREQ_PM => {
         'Test::More' => 0,
         'YAML'       => 0,
+        'Array::Utils' => 0,
         'Dancer'     => 1.3118,
         'Dancer::Plugin::DBIC', => 0,
         'Template::Flute' => 0.0080,
