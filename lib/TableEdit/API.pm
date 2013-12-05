@@ -179,7 +179,7 @@ get '/:class/list' => sub {
 	$grid_params = grid_template_params($class, $get_params);
 	$grid_params->{'class_label'} = $schema->{$class}->{label};
 	
-	return to_json $grid_params;
+	return to_json($grid_params, {allow_unknown => 1});
 };
 
 
@@ -226,7 +226,7 @@ get '/:class/:id' => sub {
 	$data->{values} = $object_data;
 	add_values($columns, $object_data, $object);
 	
-	return to_json $data;
+	return to_json($data, {allow_unknown => 1});
 };
 
 
@@ -237,12 +237,12 @@ get '/:class' => sub {
 	my $relationships = $schema->{$class}->{relationships};	
 	relationships_info($class);
 
-	return to_json { 
+	return to_json({ 
 		fields => $columns,
 		class => $class,
 		class_label => $schema->{$class}->{label},
 		relations => $relationships,
-	}; 
+	}, {allow_unknown => 1}); 
 };
 
 =head1 Fuctions
@@ -255,10 +255,12 @@ Returns string representation of model object
 
 sub model_to_string {
 	my $object = shift;
+	return $object->to_string if eval{$object->to_string};
+	return "$object" unless eval{$object->result_source};
 	my $class = $object->result_source->{source_name};
 	my ($pk) = $object->result_source->primary_columns;
 	my $id = $object->$pk;
-	return eval{$object->to_string} ? $object->to_string : "$id - ".class_label($class);
+	return "$id - ".class_label($class);
 }
 
 

@@ -231,27 +231,12 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 	$scope.data = {};
 	$scope.sort_desc = false;
 	$scope.current_page = 1;
+	$scope.data.page_size = 10;
 
 
 
-	$scope.sort = function (ord) {
-		if ($scope.sort_column == ord) { $scope.sort_desc = !$scope.sort_desc; }
-		else { $scope.sort_desc = false; }
-		$scope.sort_column = ord;
-		$scope.reset_items();
-	};
 
-	$scope.go_to_page = function (set_page) {
-		$scope.current_page = parseInt(set_page);
-		$scope.reset_items();
-	};
-
-	$scope.reset_items = function () {
-		$scope.page = 1;
-		$scope.items = [];
-		$scope.search();
-
-	};
+	
 
 	$scope.remove = function(){
 		var row_id = this.row.id
@@ -297,6 +282,7 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 			sort: $scope.sort_column, 
 			descending: $scope.sort_desc ? 1 : 0,
 					page: $scope.current_page,
+					page_size: $scope.data.page_size,
 		},
 		// Success
 		function(data) {
@@ -321,7 +307,27 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 
 	$scope.related = Item.related_link;
 
-	$scope.reset_items();
+	$scope.sort = function (ord) {
+		if ($scope.sort_column == ord) { $scope.sort_desc = !$scope.sort_desc; }
+		else { $scope.sort_desc = false; }
+		$scope.sort_column = ord;
+		$scope.reset();
+	};
+
+	$scope.go_to_page = function (set_page) {
+		$scope.current_page = parseInt(set_page);
+		$scope.search();
+	};
+	
+	$scope.reset = function () {
+		$scope.current_page = 1;
+		$scope.items = [];
+		$scope.search();
+
+	};
+	
+	$scope.reset();
+	
 };
 
 
@@ -343,11 +349,11 @@ var RelatedClassCtrl = function ($scope, $routeParams, RelatedItem, RelatedClass
 
 	$scope.go_to_page = function (set_page) {
 		$scope.current_page = parseInt(set_page);
-		$scope.reset();
+		$scope.search();
 	};
 
 	$scope.reset = function () {
-		$scope.page = 1;
+		$scope.current_page = 1;
 		$scope.items = [];
 		$scope.search();
 
@@ -382,6 +388,7 @@ var RelatedClassCtrl = function ($scope, $routeParams, RelatedItem, RelatedClass
 			sort: $scope.sort_column, 
 			descending: $scope.sort_desc ? 1 : 0,
 					page: $scope.current_page,
+					page_size: $scope.data.page_size,
 		},
 		// Success
 		function(data) {
@@ -407,7 +414,8 @@ var RelatedClassCtrl = function ($scope, $routeParams, RelatedItem, RelatedClass
 	$scope.reset();
 };
 var RelatedItemsCtrl = function ($scope, $routeParams, $location, $rootScope, RelatedItem, RelatedItems, ClassItem, Item) {
-
+	
+	
 };
 
 
@@ -502,11 +510,11 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 
 	$scope.go_to_page = function (set_page) {
 		$scope.current_page = parseInt(set_page);
-		$scope.reset();
+		$scope.search();
 	};
 
 	$scope.reset = function () {
-		$scope.page = 1;
+		$scope.current_page = 1;
 		$scope.items = [];
 		$scope.search();
 	};
@@ -548,6 +556,10 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 			for (var i = from_page; i <= to_page; i++) {
 				$scope.page_list.push(i);
 			}
+		},
+		// Error
+		function(data) {
+			alert('Error retrieving '+$routeParams.class);
 		}
 		);
 	};
@@ -605,5 +617,5 @@ var LoginCtrl = function ($scope, $rootScope, Auth, Url, $location) {
 		);
 	};
 
-	
+
 };
