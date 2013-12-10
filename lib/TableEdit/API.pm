@@ -7,6 +7,7 @@ use Array::Utils qw(:all);
 use Digest::SHA qw(sha256_hex);
 use Dancer::Plugin::Ajax;
 use Dancer::Plugin::DBIC qw(schema resultset rset);
+use Dancer::Plugin::Auth::Extensible;
 use FindBin;
 use Cwd qw/realpath/;
 use YAML::Tiny;
@@ -52,7 +53,7 @@ any '**' => sub {
 };
 
 
-get '/:class/:id/:related/list' => sub {
+get '/:class/:id/:related/list' => require_login sub {
 	my $id = params->{id};
 	my $class = params->{class};
 	my $related = params->{related};
@@ -77,7 +78,7 @@ get '/:class/:id/:related/list' => sub {
 };
 
 
-post '/:class/:id/:related/:related_id' => sub {
+post '/:class/:id/:related/:related_id' => require_login sub {
 	my $id = params->{id};
 	my $class = params->{class};
 	my $related = params->{related};
@@ -110,7 +111,7 @@ post '/:class/:id/:related/:related_id' => sub {
 
 
 
-del '/:class/:id/:related/:related_id' => sub {
+del '/:class/:id/:related/:related_id' => require_login sub {
 	my $id = params->{id};
 	my $class = params->{class};
 	my $related = params->{related};
@@ -141,7 +142,7 @@ del '/:class/:id/:related/:related_id' => sub {
 };
 
 
-get '/:class/:id/:related/items' => sub {
+get '/:class/:id/:related/items' => require_login sub {
 	my $id = params->{id};
 	my $class = params->{class};
 	my $related = params->{related};
@@ -162,7 +163,7 @@ get '/:class/:id/:related/items' => sub {
 };
 
 
-get '/:class/:related/list' => sub {
+get '/:class/:related/list' => require_login sub {
 	my $class = params->{class};
 	my $related = params->{related};
 	my $relationship_info = $schema->{$class}->{relation}->{$related};
@@ -171,7 +172,7 @@ get '/:class/:related/list' => sub {
 };
 
 
-get '/:class/list' => sub {
+get '/:class/list' => require_login sub {
 	my $class = params->{class};
 	my $get_params = params('query');
 	my $grid_params;		
@@ -183,7 +184,7 @@ get '/:class/list' => sub {
 };
 
 
-del '/:class' => sub {
+del '/:class' => require_login sub {
 	my $id = params->{id};
 	my $class = params->{class};
 	my $object = schema->resultset(ucfirst($class))->find($id);
@@ -197,7 +198,7 @@ get '/menu' => sub {
 };
 
 
-post '/:class' => sub {
+post '/:class' => require_login sub {
 	my $class = params->{class};
 	my $body = from_json request->body;
 	my $item = $body->{item};
@@ -209,7 +210,7 @@ post '/:class' => sub {
 };
 
 
-get '/:class/:id' => sub {
+get '/:class/:id' => require_login sub {
 	my ($data);
 	my $id = params->{id};
 	my $class = params->{class};
@@ -230,7 +231,7 @@ get '/:class/:id' => sub {
 };
 
 
-get '/:class' => sub {
+get '/:class' => require_login sub {
 	my (@languages, $errorMessage);
 	my $class = params->{class};
 	my $columns = columns_info($class, class_form_columns($class)); 
