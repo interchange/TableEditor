@@ -26,3 +26,24 @@ plugins:
 #        user: __USERNAME__
 #        pass: __PASSWORD__
 #        options:
+
+# Sample configuration for authentication with Dancer::Plugin::Auth::Extensible
+
+  Auth::Extensible:
+    disable_roles: 0
+    no_login_handler: 1
+    login_page: /login
+    logout_page: /logout
+    denied_page: /login/denied
+    no_default_pages: 1
+    no_api_change_warning: 1
+    realms:
+      users:
+        provider: 'DBIC'
+        db_connection_name: 'default'
+        users_resultset: User
+        roles_relationship: roles
+        role_column: name
+        username_column: username
+        password_column: password
+        password_check: check_password
