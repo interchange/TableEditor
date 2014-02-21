@@ -42,6 +42,10 @@ lib/TableEdit/Schema
 environments/*.yml
 /nbproject/private/
 nbproject/
+
+# backup files
+*.old
+
 # Dancer stuff
 /run/
 /environments/
@@ -49,3 +53,5 @@ nbproject/
 # CPAN stuff
 Makefile
 MYMETA.*
+blib
+pm_to_blib
