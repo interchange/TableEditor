@@ -13,10 +13,14 @@ use Cwd qw/realpath/;
 use YAML::Tiny;
 use Scalar::Util 'blessed';
 
+use TableEdit::SchemaInfo;
+
 my $layout = {};
 my $dropdown_treshold = 100;
 my $page_size = 10;
 my $appdir = realpath( "$FindBin::Bin/..");
+
+my $schema_info = TableEdit::SchemaInfo->new(schema => schema);
 
 # Compile schema metadata
 my $schema = {};
@@ -272,13 +276,7 @@ Returns all usable classes (tables that have primary one column key, CRUD requir
 =cut
 
 sub classes {
-	my $classes = [sort values schema->{class_mappings}];
-	my $classes_with_pk = [];
-	for my $class (@$classes){
-		my @pk = schema->source($class)->primary_columns;
-		push $classes_with_pk, $class if (@pk == 1);
-	}
-	return $classes_with_pk;
+    return $schema_info->classes_with_single_primary_key;
 }
 
 

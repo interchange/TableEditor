@@ -25,6 +25,8 @@ WriteMakefile(
         'Dancer::Plugin::Auth::Extensible' => 0,
         'Template::Flute' => 0.0080,
         'DBIx::Class::Schema::Loader' => 0,
+        'Moo' => 0,
+        'MooX::Types::MooseLike' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'TableEdit-*' },
