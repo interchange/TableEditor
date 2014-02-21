@@ -5,7 +5,8 @@ use Dancer::Plugin::Auth::Extensible;
 prefix '/';
 
 get '/login' => sub {
-	return to_json session('username') ? {username => session('username')} : {};
+	return to_json session('logged_in_user')
+        ? {username => session('logged_in_user')} : {};
 };
 
 post '/login' => sub {
