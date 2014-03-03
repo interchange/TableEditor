@@ -6,7 +6,7 @@ var CrudApp = angular.module('CrudApp', ['CrudAppCustom', 'ngResource', 'ngRoute
 config(function($routeProvider) {
 	$routeProvider.
 	when('/login', { templateUrl: 'views/login.html', controller: 'LoginCtrl', public: true }).
-	when('/status', { templateUrl: 'views/status.html', controller: 'StatusCtrl' }).
+	when('/status', { templateUrl: 'views/status.html', controller: 'StatusCtrl', public: true }).
 	when('/:class/list', { templateUrl: 'views/list.html', controller: 'ListCtrl' }).
 	when('/:class/new', { templateUrl: 'views/form.html', controller: 'CreateCtrl' }).
 	when('/:class/edit/:id', { templateUrl: 'views/form.html', controller: 'EditCtrl' }).
@@ -95,6 +95,9 @@ CrudApp.factory('Schema', function($resource) {
 });
 CrudApp.factory('SchemaCreate', function($resource) { 
 	return $resource('/api/create_schema',{},{query: {isArray: false}});
+});
+CrudApp.factory('DBConfig', function($resource) { 
+	return $resource('/api/db-config', {}, {query: {isArray: false}});
 });
 CrudApp.factory('RelatedList', function($resource) { 
 	return $resource('/api/:class/:id/:related/list', { class: '@class' });
@@ -419,28 +422,47 @@ var RelatedItemsCtrl = function ($scope, $routeParams, $location, $rootScope, Re
 };
 
 
-var StatusCtrl = function ($scope, Schema, SchemaCreate) {
-	$scope.schema = Schema.get({},
-			function(data) {
-		if(data.make_schema == '1'){
-			SchemaCreate.get({}, 
-					// Success
-					function(data){
-				$scope.schema.make_schema = null;
-				if(data.make_schema_error){
-					$scope.schema.schema_error = data.make_schema_error;
+var StatusCtrl = function ($scope, Schema, SchemaCreate, DBConfig) {
+	check_status();
+	function check_status() {
+		$scope.schema = Schema.get({},
+				function(data) {
+			if(data.make_schema == '1'){
+				SchemaCreate.get({}, 
+						// Success
+						function(data){
+					$scope.schema.make_schema = null;
+					if(data.make_schema_error){
+						$scope.schema.schema_error = data.make_schema_error;
+					}
+					else {
+						$scope.schema.schema_created = 1;
+					}
+				},
+				// Error
+				function() {
+					alert('Could not retrieve data!');
 				}
-				else {
-					$scope.schema.schema_created = 1;
-				}
-			},
-			// Error
-			function() {
-				alert('Could not retrieve data!');
-			}
-			);
-		} 
-	});
+				);
+			} 
+		});
+	}
+	
+	$scope.submit_config = function(){
+		var db = $scope.db;
+		DBConfig.save({		
+			config: db,
+		},
+		// Success
+		function(data) {
+			check_status()
+		},
+		// Error
+		function() {
+			alert('Could not add item!');
+		}
+		);
+	};
 };
 
 

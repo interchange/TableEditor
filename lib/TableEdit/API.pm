@@ -20,29 +20,14 @@ my $dropdown_treshold = 100;
 my $page_size = 10;
 my $appdir = realpath( "$FindBin::Bin/..");
 
-my $schema_info = TableEdit::SchemaInfo->new(schema => schema);
+my $schema_info;
 
 # Compile schema metadata
 my $schema = {};
 
 my $field_types;
 my $menu;
-if (eval {schema}){
-	$menu = to_json [map {name=> class_label($_), url=>"#/$_/list"}, @{classes()}];
-	$field_types = field_types();
-	for my $class (@{classes()}){
-		($schema->{$class}->{primary}) = schema->source($class)->primary_columns;
-		$schema->{$class}->{label} = class_label($class);
-		$schema->{$class}->{columns} = class_columns($class);
-		$schema->{$class}->{column_info} = columns_static_info($class);
-		$schema->{$class}->{relationships} = relationships_info($class);	
-		$schema->{$class}->{attributes} = class_source($class)->resultset_attributes;	
-	
-		for my $related (@{$schema->{$class}->{relationships}}){
-			$schema->{$class}->{relation}->{$related->{foreign}} = relationship_info($class, $related->{foreign});	
-		}
-	}
-}
+
 
 hook 'before' => sub {
 	 my $route_handler = shift;
@@ -198,6 +183,23 @@ del '/:class' => require_login sub {
 
 
 get '/menu' => sub {
+	if (!$menu and eval {schema}){
+		$menu = to_json [map {name=> class_label($_), url=>"#/$_/list"}, @{classes()}];
+		$field_types = field_types();
+		for my $class (@{classes()}){
+			($schema->{$class}->{primary}) = schema->source($class)->primary_columns;
+			$schema->{$class}->{label} = class_label($class);
+			$schema->{$class}->{columns} = class_columns($class);
+			$schema->{$class}->{column_info} = columns_static_info($class);
+			$schema->{$class}->{relationships} = relationships_info($class);	
+			$schema->{$class}->{attributes} = class_source($class)->resultset_attributes;	
+		
+			for my $related (@{$schema->{$class}->{relationships}}){
+				$schema->{$class}->{relation}->{$related->{foreign}} = relationship_info($class, $related->{foreign});	
+			}
+		}
+	}
+	
 	return $menu;
 };
 
@@ -276,6 +278,7 @@ Returns all usable classes (tables that have primary one column key, CRUD requir
 =cut
 
 sub classes {
+	$schema_info = TableEdit::SchemaInfo->new(schema => schema);
     return $schema_info->classes_with_single_primary_key;
 }
 
