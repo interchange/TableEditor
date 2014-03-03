@@ -13,25 +13,7 @@ logger_format: "%t [%P] %L @%D> %m in %f l. %l"
 
 plugins:
 
-# TableEdit will pick default databse
- 
-#   DBIC:         
-#    default:
-#      dsn: dbi:mysql:dbname=bizi
-#      schema_class: TableEdit::Schema
-#      user: __USERNAME__
-#      pass: __PASSWORD__
-#      options:
-#        mysql_enable_utf8: 1
-#     default:
-#        dsn: dbi:Pg:dbname=__DATABASE_NAME__;host=localhost;port=__PORT__
-#        schema_class: TableEdit::Schema
-#        user: __USERNAME__
-#        pass: __PASSWORD__
-#        options:
-
 # Sample configuration for authentication with Dancer::Plugin::Auth::Extensible
-
   Auth::Extensible:
     disable_roles: 0
     no_login_handler: 1

@@ -13,6 +13,38 @@
 	<div ng-class="{'alert-success': schema.db_info, 'alert-danger': schema.return && !schema.db_info}" class="alert">
 		<h2>Database configuration</h2>
 		<p ng-show="schema.db_info">Configuration exists.</p>
+		<div ng-show="!schema.db_info">
+			<form>
+				<fieldset>
+			   
+			   <label>DB Driver</label>
+ 				<select name="driver" ng-model="db.driver">
+ 					<option ng-repeat="driver in schema.db_drivers" value="{{ driver }}">{{ driver }}</option>
+ 				</select>
+
+			   <label>DB Name</label>
+ 				<input type="text" name="dbname" ng-model="db.dbname"/>
+
+				<label>Username</label>
+				<input type="text" name="user" ng-model="db.user"/>
+
+				<label>Password</label>
+				<input name="password" type="password" ng-model="db.pass"/>
+
+				<label>Schema class</label>
+				<input type="text" name="schema_class" ng-model="db.schema_class"/>
+				<span class="help-block">Optional. If you don't specify existing DBIx schema class one will be generated for you.</span>
+
+				<label>DSN suffix</label>
+				<input type="text" name="dsn_suffix" ng-model="db.dsn_suffix"/>
+				<span class="help-block">Optional. Extra options for DB connection.</span>
+
+			   <button type="submit" class="btn" ng-click="submit_config()">Submit</button>
+			  </fieldset>
+				
+				
+			</form>
+		</div>
 	</div>
 	<div ng-class="{'alert-success': schema.return && !schema.db_connection_error, 'alert-danger': schema.db_connection_error}" class="alert">
 		<h2>Connection to DB</h2>

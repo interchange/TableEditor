@@ -3,11 +3,30 @@ package TableEdit::Config;
 use Dancer ':syntax';
 
 use Dancer::Plugin::DBIC qw(schema resultset rset);
+use DBI;
 use DBIx::Class::Schema::Loader qw/ make_schema_at /;
 use FindBin;
 use Cwd qw/realpath/;
+use TableEdit::ConfigSchema;
+
 
 my $appdir = realpath( "$FindBin::Bin/..");
+my $SQLite = TableEdit::ConfigSchema->connect("dbi:SQLite:$appdir/db/config.db");
+
+hook 'before' => sub {
+	# Set schema settings
+	unless (config->{plugins}->{DBIC}->{default}){
+		my $db_settings = $SQLite->resultset('Db')->find('default');
+		set_db({
+			dbname => $db_settings->dbname,
+			driver => $db_settings->driver,
+			dsn_suffix => $db_settings->dsn_suffix,
+			user => $db_settings->user,
+			pass => $db_settings->pass,
+			schema_class => $db_settings->schema_class,
+		}) if $db_settings;
+	}
+};
 
 prefix '/api';
 any '**' => sub {
@@ -35,49 +54,53 @@ get '/schema' => sub {
 	$schema_info->{db_connection_error} = "$@";
 	
 	# Check if DBIx class schema exists
-	if (eval{schema}){
-		if(%{schema->{class_mappings}}){
-			$schema_info->{schema} = scalar keys %{schema->{class_mappings}};		
+	unless($schema_info->{db_connection_error}){
+		if (eval{schema}){
+			if(%{schema->{class_mappings}}){
+				$schema_info->{schema} = scalar keys %{schema->{class_mappings}};		
+			}
+			# Schema doesn't exits. Try to generate it
+			else {
+				$schema_info->{make_schema} = 1;
+				return to_json $schema_info;
+				$schema_info->{schema_error} = make_schema($db);
+				$schema_info->{schema_created} = $schema_info->{schema_error} ? 1 : 0;
+			}
 		}
-		# Schema doesn't exits. Try to generate it
-		else {
+		else{
 			$schema_info->{make_schema} = 1;
 			return to_json $schema_info;
-			$schema_info->{schema_error} = make_schema($db);
-			$schema_info->{schema_created} = $schema_info->{schema_error} ? 1 : 0;
+			$schema_info->{schema_error} = make_schema($db);	
 		}
 	}
-	else{
-		$schema_info->{make_schema} = 1;
-		return to_json $schema_info;
-		$schema_info->{schema_error} = make_schema($db);	
+	else {
+		$schema_info->{db_drivers} = [DBI->available_drivers(1)];
 	}
-	
-
-	# TODO: Input db data through form 	
-	if(0){
-	    # Create a YAML file
-	    my $yaml = YAML::Tiny->new;
-	
-	    # Open the config
-	    my $config_path = '../config.yml';
-	    $yaml = YAML::Tiny->read( $config_path );
-	
-	    # Reading properties
-	    my $db = $yaml->[0]->{plugins}->{DBIC}->{default};
-	    $db->{dsn} = 'dbi:Pg:dbname=iro;host=localhost;port=8948';
-	    $db->{options} = {};
-	    $db->{user} = 'interch';
-	    $db->{pass} = '94daq2rix';
-	    $db->{schema_class} = 'TableEdit::Schema';
-	
-	    # Save the file
-	    #$yaml->write( $config_path );
-	}
-	
-	$schema_info->{db_info}->{pass} = '******';
+		
+	$schema_info->{db_info}->{pass} = '******' if $schema_info->{db_info} and $schema_info->{db_info}->{pass};
 	
 	return to_json $schema_info;
+};
+
+post '/db-config' => sub {
+	my $post = from_json request->body;
+	set_db( $post->{config} );
+	
+	my $db_test = eval{schema->storage->dbh};
+	my $error = $@;
+	
+	if ( $error ) {
+		set plugins => {DBIC => {'default' => undef }};
+		return undef if $error;
+	}
+	
+	# Success
+	
+	# Save to db
+	my $db = $SQLite->resultset('Db')->create({name => 'default', %{$post->{config}} });
+	
+	
+	return to_json {db => 'configured'};
 };
 
 sub make_schema {
@@ -98,8 +121,24 @@ sub make_schema {
 		    [ $db->{dsn}, $db->{user}, $db->{pass} ],
 		);
 	};
-	# Return error or enpty string if successfull
+	# Return error or empty string if successfull
 	return "$@";
+}
+
+
+sub set_db {
+	my $db_settings = shift;
+	
+	# Set schema settings
+	if( $db_settings ){
+		set plugins => {DBIC => {'default' => {
+			dsn => "dbi:$db_settings->{driver}:dbname=$db_settings->{dbname};$db_settings->{dsn_suffix}",
+            user => $db_settings->{user},
+            pass => $db_settings->{pass},
+            schema_class => $db_settings->{schema_class} ? $db_settings->{schema_class} : 'TableEdit::Schema'}
+	    	}
+	    };
+	}
 }
 
 1;
