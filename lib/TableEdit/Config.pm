@@ -131,9 +131,15 @@ sub set_db {
 	
 	# Set schema settings
 	if( $db_settings ){
+        my $dbname = $db_settings->{dbname} || '';
+
+        if ($db_settings->{driver} eq 'Pg') {
+            $dbname = "database=$dbname";
+        }
+
         my $dsn = join (':', ('dbi',
                               $db_settings->{driver} || '',
-                              $db_settings->{dbname} || ''));
+                              $dbname));
 
         if ($db_settings->{dsn_suffix}) {
             $dsn .= ";$db_settings->{dsn_suffix}";
