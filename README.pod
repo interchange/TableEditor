@@ -59,6 +59,11 @@ files as this differs between systems).
 Make sure that you are using the appropriate UTF-8 flag for L<Dancer::Plugin::DBIC>, as
 this plugin doesn't set it automatically.
 
+=head1 FRONTEND
+
+Table Edit uses L<Angular|http://angularjs.org/Angular> and L<Bootstrap|http://getbootstrap.com/> for the frontend.
+It is easy to change the Bootstrap theme to get a different look for Table Edit.
+
 =head1 USE
 
 With basic configuration done you can start using Table Edit. You will probably want to fine tune it a bit though.
