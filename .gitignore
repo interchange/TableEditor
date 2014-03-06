@@ -55,3 +55,7 @@ Makefile
 MYMETA.*
 blib
 pm_to_blib
+
+# Patch stuff
+*.orig
+*.rej
