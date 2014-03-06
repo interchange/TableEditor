@@ -54,6 +54,10 @@ files as this differs between systems).
 	        user: __USERNAME__
 	        pass: __PASSWORD__
 	        options:
+               pg_enable_utf8: 1
+
+Make sure that you are using the appropriate UTF-8 flag for L<Dancer::Plugin::DBIC>, as
+this plugin doesn't set it automatically.
 
 =head1 USE
 
