@@ -114,8 +114,12 @@ list-style: none;
 	background: white;
 }
 
-.grid table .object-table-value, .grid table .field{
-	word-break: break-word;
+.grid table .object-table-value {
+	word-break: break-all;
+}
+
+.grid table .field {
+	word-wrap: break-word;
 }
 
 .actions {
