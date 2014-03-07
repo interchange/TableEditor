@@ -221,7 +221,9 @@ get '/:class/:id' => require_login sub {
 	my $id = params->{id};
 	my $class = params->{class};
 	my $columns = columns_info($class); 
-	
+    my $relationships = $schema->{$class}->{relationships};
+	relationships_info($class);
+
 	$data->{fields} = $columns;
 
 	# Object lookup
