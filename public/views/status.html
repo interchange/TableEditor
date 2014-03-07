@@ -17,29 +17,43 @@
 			<form>
 				<fieldset>
 			   
-			   <label>DB Driver</label>
- 				<select name="driver" ng-model="db.driver">
- 					<option ng-repeat="driver in schema.db_drivers" value="{{ driver }}">{{ driver }}</option>
- 				</select>
+			   <div class="form-group">
+				   <label>DB Driver</label>
+	 				<select class="form-control" name="driver" ng-model="db.driver">
+	 					<option ng-repeat="driver in schema.db_drivers" value="{{ driver }}">{{ driver }}</option>
+	 				</select>
+			   </div>
 
+			   <div class="form-group">
 			   <label>DB Name</label>
- 				<input type="text" name="dbname" ng-model="db.dbname"/>
+ 				<input class="form-control" type="text" name="dbname" ng-model="db.dbname"/>
+ 				</div>
 
+			   <div class="form-group">
 				<label>Username</label>
-				<input type="text" name="user" ng-model="db.user"/>
+				<input class="form-control" type="text" name="user" ng-model="db.user"/>
+				</div>
 
+			   <div class="form-group">
 				<label>Password</label>
-				<input name="password" type="password" ng-model="db.pass"/>
+				<input class="form-control" name="password" type="password" ng-model="db.pass"/>
+				</div>
 
+			   <div class="form-group">
 				<label>Schema class</label>
-				<input type="text" name="schema_class" ng-model="db.schema_class"/>
+				<input class="form-control" type="text" name="schema_class" ng-model="db.schema_class"/>
 				<span class="help-block">Optional. If you don't specify existing DBIx schema class one will be generated for you.</span>
+				</div>
 
+			   <div class="form-group">
 				<label>DSN suffix</label>
-				<input type="text" name="dsn_suffix" ng-model="db.dsn_suffix"/>
+				<input class="form-control" type="text" name="dsn_suffix" ng-model="db.dsn_suffix"/>
 				<span class="help-block">Optional. Extra options for DB connection.</span>
+				</div>
 
-			   <button type="submit" class="btn" ng-click="submit_config()">Submit</button>
+			   <div class="form-group">
+			   <button class="btn btn-default" type="submit" ng-click="submit_config()">Submit</button>
+			   </div>
 			  </fieldset>
 				
 				

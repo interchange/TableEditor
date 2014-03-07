@@ -9,7 +9,7 @@
 						<i ng-class="{'icon-chevron-down': field.name==sort_column && sort_desc, 'icon-chevron-up': field.name==sort_column && !sort_desc}" ></i>
 					</th>
 					<th>
-						<select ng-change="reset()" ng-model="data.page_size" style="width: auto;">
+						<select class="form-control" ng-change="reset()" ng-model="data.page_size" style="width: auto;">
 							<option>2</option>
 							<option>10</option>
 							<option>20</option>
@@ -30,7 +30,7 @@
 			<tbody>
 
 				<tr class="object-table-row" ng-repeat="row in data.rows" id="row-{{row.id}}">
-					<td class="object-table-value" ng-repeat="field in row.row">{{ field.value }}</td>
+					<td ng-repeat="field in row.row"><p class="object-table-value">{{ field.value }}<p></td>
 					<td class="actions" ng-include="'views/grid/actions/' + actions + '.html';"></td>
 				</tr>
 			</tbody>
@@ -42,8 +42,8 @@
 <div style="text-align: center;">{{data.count}} items found. Page {{ data.page }} / {{ data.pages }}</div>
 </div>
 
-<div ng-if="data.pages > 1" class="pagination">
-	<ul>
+<div ng-if="data.pages > 1" >
+	<ul class="pagination">
 		<li ng-if="data.page > 1"><a ng-click="go_to_page('{{ data.page - 1 }}')">«</a></li>
 		<li ng-class="{active: page==data.page}" ng-repeat="page in page_list"><a ng-click="go_to_page( page )">{{ page }}</a></li>
 		<li ng-if="data.page < data.pages"><a ng-click="go_to_page('{{ data.page + 1 }}')">»</a></li>

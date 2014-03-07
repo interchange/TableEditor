@@ -3,15 +3,15 @@
 <div>
 	<form>
 		<fieldset>
-			<div class="controls control-group">
-				<label class="control-label"> Username </label> <input type="text" name="username" ng-model="user.username" />
+			<div class="controls form-group">
+				<label class="control-label"> Username </label> <input class="form-control" type="text" name="username" ng-model="user.username" />
 			</div>
-			<div class="controls control-group">
-				<label class="control-label"> Password </label> <input type="password" name="password" ng-model="user.password" />
+			<div class="controls form-group">
+				<label class="control-label"> Password </label> <input class="form-control" type="password" name="password" ng-model="user.password" />
 			</div>
 			<div class="alert alert-danger" ng-show="error">{{error}}</div>
 			<div class="alert alert-success" ng-show="success">{{success}}</div>
-			<div class="controls control-group">
+			<div class="controls form-group">
 				<button class="btn btn-primary" ng-click="login()">Login</button>
 			</div>
 		</fieldset>
