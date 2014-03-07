@@ -148,7 +148,7 @@ get '/:class/:id/:related/items' => require_login sub {
 	# Related bind
 	$data = grid_template_params($relationship_class, $get_params, $related_items);
 	
-	return to_json $data;
+	return to_json( $data, {allow_unknown => 1} );
 };
 
 
@@ -718,5 +718,6 @@ sub grid_rows {
 	}
 	return \@table_rows;
 }
+
 
 true;
