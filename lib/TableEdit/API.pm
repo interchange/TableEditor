@@ -278,7 +278,7 @@ Returns all usable classes (tables that have primary one column key, CRUD requir
 =cut
 
 sub classes {
-	$schema_info = TableEdit::SchemaInfo->new(schema => schema);
+	$schema_info ||= TableEdit::SchemaInfo->new(schema => schema);
     return $schema_info->classes_with_single_primary_key;
 }
 
@@ -313,8 +313,9 @@ Returns plain array of all table columns
 =cut
 
 sub class_columns {
-	my $class = shift;		
-	return [class_source($class)->columns]; 
+	my $class = shift;
+    $schema_info ||= TableEdit::SchemaInfo->new(schema => schema);
+    return $schema_info->resultset($class)->columns;
 }
 
 sub class_grid_columns {
@@ -441,9 +442,16 @@ sub columns_static_info {
 
 sub column_info {
 	my ($class, $column) = @_;
-	return $schema->{$class}->{column_info}->{$column};
-}
 
+    if (exists $schema->{$class}->{column_info}->{$column}) {
+        return $schema->{$class}->{column_info}->{$column};
+    }
+    else {
+        my $column_info = columns_static_info($class);
+        $schema->{$class}->{column_info}->{$column} = $column_info->{$column};
+        return $column_info->{$column};
+    }
+}
 
 sub columns_info {
 	my ($class, $selected_columns) = @_;
@@ -634,7 +642,9 @@ sub grid_template_params {
 	add_values($grid_params->{field_list}, $where_params);
 	
 	my $rs = $related_items || schema->resultset(ucfirst($class));
-	my $primary_column = $schema->{$class}->{primary};
+
+	my $primary_column = $schema_info->resultset($class)->primary_key;
+    
 	my $page = $get_params->{page} || 1;
 	$page_size = $get_params->{page_size} if $get_params->{page_size};
 	
