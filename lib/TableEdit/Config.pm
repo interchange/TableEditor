@@ -8,7 +8,7 @@ use DBIx::Class::Schema::Loader qw/ make_schema_at /;
 use FindBin;
 use Cwd qw/realpath/;
 use TableEdit::ConfigSchema;
-
+use TableEdit::DriverInfo;
 
 my $appdir = realpath( "$FindBin::Bin/..");
 my $SQLite = TableEdit::ConfigSchema->connect("dbi:SQLite:$appdir/db/config.db");
@@ -74,7 +74,7 @@ get '/schema' => sub {
 		}
 	}
 	else {
-		$schema_info->{db_drivers} = [DBI->available_drivers(1)];
+		$schema_info->{db_drivers} = TableEdit::DriverInfo->new->available;
 	}
 		
 	$schema_info->{db_info}->{pass} = '******' if $schema_info->{db_info} and $schema_info->{db_info}->{pass};
@@ -131,10 +131,24 @@ sub set_db {
 	
 	# Set schema settings
 	if( $db_settings ){
+        my $dbname = $db_settings->{dbname} || '';
+
+        if ($db_settings->{driver} eq 'Pg') {
+            $dbname = "database=$dbname";
+        }
+
+        my $dsn = join (':', ('dbi',
+                              $db_settings->{driver} || '',
+                              $dbname));
+
+        if ($db_settings->{dsn_suffix}) {
+            $dsn .= ";$db_settings->{dsn_suffix}";
+        }
+
 		set plugins => {DBIC => {'default' => {
-			dsn => "dbi:$db_settings->{driver}:dbname=$db_settings->{dbname};$db_settings->{dsn_suffix}",
-            user => $db_settings->{user},
-            pass => $db_settings->{pass},
+			dsn => $dsn,
+            user => $db_settings->{user} || '',
+            pass => $db_settings->{pass} || '',
             schema_class => $db_settings->{schema_class} ? $db_settings->{schema_class} : 'TableEdit::Schema'}
 	    	}
 	    };

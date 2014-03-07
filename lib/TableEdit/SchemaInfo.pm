@@ -3,12 +3,28 @@ package TableEdit::SchemaInfo;
 use Moo;
 use MooX::Types::MooseLike::Base qw/InstanceOf/;
 
+use TableEdit::ResultInfo;
+
 # DBIx::Class schema
 has schema => (
     is => 'ro',
     required => 1,
     isa => InstanceOf ['DBIx::Class::Schema'],
 );
+
+=head2 resultset
+
+Returns L<TableEdit::ResultsetInfo> object for given name.
+
+=cut
+
+sub resultset {
+    my ($self, $name) = @_;
+
+    my $rs = $self->schema->resultset($name);
+
+    return TableEdit::ResultInfo->new(resultset => $rs);
+};
 
 =head2 classes_with_single_primary_key {
 

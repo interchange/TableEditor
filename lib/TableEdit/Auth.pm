@@ -11,8 +11,8 @@ get '/login' => sub {
 
 post '/login' => sub {
 	my $post = from_json request->body;
-    my $username = $post->{user}->{username};
-	my $password = $post->{user}->{password};
+    my $username = $post->{user}->{username} || '';
+	my $password = $post->{user}->{password} || '';
 
 	my $user = {role => 'guest'};
 

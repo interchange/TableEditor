@@ -1,24 +1,5 @@
-package TableEdit;
-use Dancer ':syntax';
+=encoding utf8
 
-our $VERSION = '0.1';
-
-use Dancer::Plugin::DBIC qw(schema resultset rset);
-use TableEdit::Config;
-use TableEdit::API;
-
-hook 'before_template_render' => sub {
-	my $tokens = shift;
-	$tokens->{'site-title'} = 'Table Edit';
-};
-
-prefix '/';
-get '/' => sub { return forward '/index.html'};
-
-true;
-
-__END__
- 
 =pod
  
 =head1 NAME
@@ -54,6 +35,15 @@ files as this differs between systems).
 	        user: __USERNAME__
 	        pass: __PASSWORD__
 	        options:
+               pg_enable_utf8: 1
+
+Make sure that you are using the appropriate UTF-8 flag for L<Dancer::Plugin::DBIC>, as
+this plugin doesn't set it automatically.
+
+=head1 FRONTEND
+
+Table Edit uses L<Angular|http://angularjs.org/Angular> and L<Bootstrap|http://getbootstrap.com/> for the frontend.
+It is easy to change the Bootstrap theme to get a different look for Table Edit.
 
 =head1 USE
 
