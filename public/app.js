@@ -134,7 +134,7 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route) {
 		},
 
 		delete: function () {
-			if (confirm('Do you realy want to delete '+this.row.name)){
+			if (confirm('Do you really want to delete '+this.row.name)){
 				var id = this.row.id;
 				var class_label = this.data.class_label;
 				$location.path('/'+this.data.class+'/list');
