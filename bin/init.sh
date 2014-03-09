@@ -71,6 +71,11 @@ if [ -z "$DANCER_PORT" ]; then
     fi
 fi
 
+# path
+if [ -f "$DANCER_RUNDIR/$DANCER_APP.path" ]; then
+    DANCER_PATH="--path="$(cat "$DANCER_RUNDIR/$DANCER_APP.path")
+fi
+
 # workers
 if [ -z "$DANCER_WORKERS" ]; then
     if [ "$DANCER_ENVIRONMENT" != "production" ]; then
@@ -82,7 +87,7 @@ fi
 
 DANCER_CMD=$(which plackup)
 
-DANCER_CMDOPTS="-E $DANCER_ENVIRONMENT -s Starman --workers=$DANCER_WORKERS --pid $DANCER_PIDFILE -p $DANCER_PORT -a bin/app.pl -D"
+DANCER_CMDOPTS="-E $DANCER_ENVIRONMENT $DANCER_PATH -s Starman --workers=$DANCER_WORKERS --pid $DANCER_PIDFILE -p $DANCER_PORT -a bin/app.pl -D"
 
 check_running() {
     [ -s $DANCER_PIDFILE ] && kill -0 $(cat $DANCER_PIDFILE) >/dev/null 2>&1
