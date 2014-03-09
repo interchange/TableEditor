@@ -163,6 +163,32 @@ get '/:class/:related/list' => require_login sub {
 	return forward "/api/$relationship_class/list"; 	
 };
 
+# Retrieve item for might_have relationship
+get '/:class/:id/:related/might_have' => require_login sub {
+    my $id = params->{id};
+	my $class = params->{class};
+	my $related = params->{related};
+
+    # find source for relationship
+    my $object = resultset($class)->find($id);
+
+	my $relationship_info = $schema->{$class}->{relation}->{$related};
+	my $relationship_class = $relationship_info->{class_name};
+	my $objects = $object->search_related($relationship_class);
+    my $related_object = $objects->next;
+
+	my $object_data = {$related_object->get_columns};
+    my $data;
+	my $columns = columns_info($relationship_class);
+
+	$data->{title} = model_to_string($related_object);
+	$data->{id} = $id;
+	$data->{class} = $relationship_class;
+	$data->{values} = $object_data;
+	add_values($columns, $object_data, $related_object);
+
+    return to_json($data, {allow_unknown => 1});
+};
 
 get '/:class/list' => require_login sub {
 	my $class = params->{class};
@@ -533,7 +559,14 @@ sub relationships_info {
 			column_add_info($column_name, $relationship_info, $class );
 			push $relationships_info, $relationship_info;
 		}
-		
+		elsif ( $rel_type eq 'single' ) {
+            # Only tables with one PK
+			my @pk = schema->source($relationship_class)->primary_columns;
+			next unless scalar @pk == 1;
+
+            column_add_info($column_name, $relationship_info, $class );
+			push $relationships_info, $relationship_info;
+        }
 	}
 	
 	return $relationships_info;

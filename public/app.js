@@ -12,7 +12,7 @@ config(function($routeProvider) {
 	when('/:class/edit/:id', { templateUrl: 'views/form.html', controller: 'EditCtrl' }).
 	when('/:class/:id/new/:related/:field/:value/', { templateUrl: 'views/form.html', controller: 'CreateRelatedCtrl' }).
 	when('/:class/:id/:related/has_many', { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' }).
-	when('/:class/:id/:related/might_have', { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' }).
+	when('/:class/:id/:related/might_have', { templateUrl: 'views/form.html', controller: 'EditRelatedCtrl' }).
 	when('/:class/:id/:related/many_to_many', { templateUrl: 'views/many_to_many.html', controller: 'RelatedListCtrl' }).
 	otherwise({redirectTo: '/status'});
 });
@@ -105,6 +105,9 @@ CrudApp.factory('RelatedList', function($resource) {
 
 CrudApp.factory('ClassItem', function($resource) {
 	return $resource('api/:class', { class: '@class' });
+});
+CrudApp.factory('Related', function($resource) {
+	return $resource('api/:class/:id/:related/:relationship', { class: '@class', id: '@id', related: '@related', relationship: 'might_have'});
 });
 
 CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route) {
@@ -495,6 +498,29 @@ var CreateRelatedCtrl = function ($scope, $routeParams, ClassItem, Item) {
 
 	$scope.data = ClassItem.get({class: $routeParams.related,});
 	$scope.create = 1;
+
+	$scope.save = Item.update;
+};
+
+var EditRelatedCtrl = function ($scope, $routeParams, ClassItem, Item, Related) {
+	$scope.item = {};
+
+	$scope.data = ClassItem.get({class: $routeParams.related});
+
+    $scope.item = Related.get({
+		class: $routeParams.class,
+		id: $routeParams.id,
+		related: $routeParams.related,
+        relationship: 'might_have',
+    },
+		// Success
+		function(data) {
+		},
+		// Error
+		function() {
+			alert('Could not retrieve data!');
+		}
+	);
 
 	$scope.save = Item.update;
 };
