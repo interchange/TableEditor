@@ -15,5 +15,11 @@ hook 'before_template_render' => sub {
 
 prefix '/';
 get '/' => sub { return forward '/index.html'};
+get '/index.html' => sub { template 'index';};
+get '/views/*.html' => sub {
+    my ($view) = splat;
+
+    template $view;
+};
 
 true;

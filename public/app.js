@@ -32,12 +32,12 @@ CrudApp.directive('checkUser', function ($rootScope, $location, $route, Url, Aut
 						}
 						else {
 							Url.login = $location.path();
-							$location.path('/login');
+							$location.path('login');
 						}
 					},
 					// Error
 					function(data) {
-						$location.path('/login');
+						$location.path('login');
 					}
 					);
 				}
@@ -46,7 +46,7 @@ CrudApp.directive('checkUser', function ($rootScope, $location, $route, Url, Aut
 					}
 					else {
 						Url.login = $location.path();
-						$location.path('/login');
+						$location.path('login');
 					}
 				}
 			});
@@ -79,38 +79,38 @@ CrudApp.directive('activeLink', function($location) {
 
 CrudApp.factory('Auth', function($resource){
 	return {
-		login: $resource('/login', {}, {method:'POST'}),
-		logout: $resource('/logout', {}, {method:'POST'}),
+		login: $resource('login', {}, {method:'POST'}),
+		logout: $resource('logout', {}, {method:'POST'}),
 	};
 });
 
 CrudApp.factory('Class', function($resource) { 
-	return $resource('/api/:class/list', { class: '@class' });
+	return $resource('api/:class/list', { class: '@class' });
 });
 CrudApp.factory('RelatedClass', function($resource) { 
-	return $resource('/api/:class/:related/list', { class: '@class', related: '@related' });
+	return $resource('api/:class/:related/list', { class: '@class', related: '@related' });
 });
 CrudApp.factory('Schema', function($resource) { 
-	return $resource('/api/schema',{},{query: {isArray: false}});
+	return $resource('api/schema',{},{query: {isArray: false}});
 });
 CrudApp.factory('SchemaCreate', function($resource) { 
-	return $resource('/api/create_schema',{},{query: {isArray: false}});
+	return $resource('api/create_schema',{},{query: {isArray: false}});
 });
 CrudApp.factory('DBConfig', function($resource) { 
-	return $resource('/api/db-config', {}, {query: {isArray: false}});
+	return $resource('api/db-config', {}, {query: {isArray: false}});
 });
 CrudApp.factory('RelatedList', function($resource) { 
-	return $resource('/api/:class/:id/:related/list', { class: '@class' });
+	return $resource('api/:class/:id/:related/list', { class: '@class' });
 });
 
 CrudApp.factory('ClassItem', function($resource) {
-	return $resource('/api/:class', { class: '@class' });
+	return $resource('api/:class', { class: '@class' });
 });
 
 CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route) {
 	// var root = $scope;
 	return {
-		read: $resource('/api/:class/:id', { class: '@class', id: '@id' }),
+		read: $resource('api/:class/:id', { class: '@class', id: '@id' }),
 
 		update: function(){
 			var class_name = this.data.class;
@@ -161,16 +161,16 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route) {
 });
 
 CrudApp.factory('Menu', function($resource) {
-	return $resource('/api/menu');
+    return $resource('api/menu');
 });
 
 
 CrudApp.factory("RelatedItems", function($resource){
-	return $resource('/api/:class/:id/:related/items', { class: '@class' });
+	return $resource('api/:class/:id/:related/items', { class: '@class' });
 });
 
 CrudApp.factory("RelatedItem", function($resource){
-	return $resource('/api/:class/:id/:related/:related_id', 
+	return $resource('api/:class/:id/:related/:related_id', 
 			{ class: '@class', id: '@id', related: '@related', related_id: '@related_id' },
 			{
 				add: {

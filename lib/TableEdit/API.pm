@@ -595,7 +595,7 @@ sub field_type {
 
 
 sub field_types {
-	my $dir = $appdir.'/public/views/field';
+	my $dir = $appdir.'/views/field';
 	my @types;
     opendir(DIR, $dir) or die $!;
 
