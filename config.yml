@@ -8,6 +8,9 @@ charset: "UTF-8"
 session: YAML
 session_expires: 8 hours
 
+# Template engine for front page
+template: "template_flute"
+
 # include timestamp in log format
 logger_format: "%t [%P] %L @%D> %m in %f l. %l"
 

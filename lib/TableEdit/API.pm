@@ -37,6 +37,9 @@ hook 'before' => sub {
 
 prefix '/api';
 any '**' => sub {
+    # load schema if necessary
+    _setup_schema();
+
 	content_type 'application/json';
 	pass;
 };
@@ -160,6 +163,32 @@ get '/:class/:related/list' => require_login sub {
 	return forward "/api/$relationship_class/list"; 	
 };
 
+# Retrieve item for might_have relationship
+get '/:class/:id/:related/might_have' => require_login sub {
+    my $id = params->{id};
+	my $class = params->{class};
+	my $related = params->{related};
+
+    # find source for relationship
+    my $object = resultset($class)->find($id);
+
+	my $relationship_info = $schema->{$class}->{relation}->{$related};
+	my $relationship_class = $relationship_info->{class_name};
+	my $objects = $object->search_related($relationship_class);
+    my $related_object = $objects->next;
+
+	my $object_data = {$related_object->get_columns};
+    my $data;
+	my $columns = columns_info($relationship_class);
+
+	$data->{title} = model_to_string($related_object);
+	$data->{id} = $id;
+	$data->{class} = $relationship_class;
+	$data->{values} = $object_data;
+	add_values($columns, $object_data, $related_object);
+
+    return to_json($data, {allow_unknown => 1});
+};
 
 get '/:class/list' => require_login sub {
 	my $class = params->{class};
@@ -183,23 +212,10 @@ del '/:class' => require_login sub {
 
 
 get '/menu' => sub {
-	if (!$menu and eval {schema}){
-		$menu = to_json [map {name=> class_label($_), url=>"#/$_/list"}, @{classes()}];
-		$field_types = field_types();
-		for my $class (@{classes()}){
-			($schema->{$class}->{primary}) = schema->source($class)->primary_columns;
-			$schema->{$class}->{label} = class_label($class);
-			$schema->{$class}->{columns} = class_columns($class);
-			$schema->{$class}->{column_info} = columns_static_info($class);
-			$schema->{$class}->{relationships} = relationships_info($class);	
-			$schema->{$class}->{attributes} = class_source($class)->resultset_attributes;	
-		
-			for my $related (@{$schema->{$class}->{relationships}}){
-				$schema->{$class}->{relation}->{$related->{foreign}} = relationship_info($class, $related->{foreign});	
-			}
-		}
-	}
-	
+    if (! $menu) {
+        $menu = to_json [map {name=> class_label($_), url=>"#/$_/list"}, @{classes()}];
+    }
+
 	return $menu;
 };
 
@@ -221,7 +237,9 @@ get '/:class/:id' => require_login sub {
 	my $id = params->{id};
 	my $class = params->{class};
 	my $columns = columns_info($class); 
-	
+    my $relationships = $schema->{$class}->{relationships};
+	relationships_info($class);
+
 	$data->{fields} = $columns;
 
 	# Object lookup
@@ -541,7 +559,14 @@ sub relationships_info {
 			column_add_info($column_name, $relationship_info, $class );
 			push $relationships_info, $relationship_info;
 		}
-		
+		elsif ( $rel_type eq 'single' ) {
+            # Only tables with one PK
+			my @pk = schema->source($relationship_class)->primary_columns;
+			next unless scalar @pk == 1;
+
+            column_add_info($column_name, $relationship_info, $class );
+			push $relationships_info, $relationship_info;
+        }
 	}
 	
 	return $relationships_info;
@@ -593,7 +618,7 @@ sub field_type {
 
 
 sub field_types {
-	my $dir = $appdir.'/public/views/field';
+	my $dir = $appdir.'/views/field';
 	my @types;
     opendir(DIR, $dir) or die $!;
 
@@ -723,5 +748,24 @@ sub grid_rows {
 	return \@table_rows;
 }
 
+sub _setup_schema {
+    return $schema if $schema->{active};
 
+    my $classes = classes;
+
+    for my $class (@$classes) {
+        ($schema->{$class}->{primary}) = schema->source($class)->primary_columns;
+        $schema->{$class}->{label} = class_label($class);
+        $schema->{$class}->{columns} = class_columns($class);
+        $schema->{$class}->{column_info} = columns_static_info($class);
+        $schema->{$class}->{relationships} = relationships_info($class);	
+        $schema->{$class}->{attributes} = class_source($class)->resultset_attributes;	
+		
+        for my $related (@{$schema->{$class}->{relationships}}){
+            $schema->{$class}->{relation}->{$related->{foreign}} = relationship_info($class, $related->{foreign});	
+        }
+    }
+
+    $schema->{active} = 1;
+}
 true;

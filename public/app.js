@@ -12,7 +12,7 @@ config(function($routeProvider) {
 	when('/:class/edit/:id', { templateUrl: 'views/form.html', controller: 'EditCtrl' }).
 	when('/:class/:id/new/:related/:field/:value/', { templateUrl: 'views/form.html', controller: 'CreateRelatedCtrl' }).
 	when('/:class/:id/:related/has_many', { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' }).
-	when('/:class/:id/:related/might_have', { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' }).
+	when('/:class/:id/:related/might_have', { templateUrl: 'views/form.html', controller: 'EditRelatedCtrl' }).
 	when('/:class/:id/:related/many_to_many', { templateUrl: 'views/many_to_many.html', controller: 'RelatedListCtrl' }).
 	otherwise({redirectTo: '/status'});
 });
@@ -32,12 +32,12 @@ CrudApp.directive('checkUser', function ($rootScope, $location, $route, Url, Aut
 						}
 						else {
 							Url.login = $location.path();
-							$location.path('/login');
+							$location.path('login');
 						}
 					},
 					// Error
 					function(data) {
-						$location.path('/login');
+						$location.path('login');
 					}
 					);
 				}
@@ -46,7 +46,7 @@ CrudApp.directive('checkUser', function ($rootScope, $location, $route, Url, Aut
 					}
 					else {
 						Url.login = $location.path();
-						$location.path('/login');
+						$location.path('login');
 					}
 				}
 			});
@@ -79,38 +79,41 @@ CrudApp.directive('activeLink', function($location) {
 
 CrudApp.factory('Auth', function($resource){
 	return {
-		login: $resource('/login', {}, {method:'POST'}),
-		logout: $resource('/logout', {}, {method:'POST'}),
+		login: $resource('login', {}, {method:'POST'}),
+		logout: $resource('logout', {}, {method:'POST'}),
 	};
 });
 
 CrudApp.factory('Class', function($resource) { 
-	return $resource('/api/:class/list', { class: '@class' });
+	return $resource('api/:class/list', { class: '@class' });
 });
 CrudApp.factory('RelatedClass', function($resource) { 
-	return $resource('/api/:class/:related/list', { class: '@class', related: '@related' });
+	return $resource('api/:class/:related/list', { class: '@class', related: '@related' });
 });
 CrudApp.factory('Schema', function($resource) { 
-	return $resource('/api/schema',{},{query: {isArray: false}});
+	return $resource('api/schema',{},{query: {isArray: false}});
 });
 CrudApp.factory('SchemaCreate', function($resource) { 
-	return $resource('/api/create_schema',{},{query: {isArray: false}});
+	return $resource('api/create_schema',{},{query: {isArray: false}});
 });
 CrudApp.factory('DBConfig', function($resource) { 
-	return $resource('/api/db-config', {}, {query: {isArray: false}});
+	return $resource('api/db-config', {}, {query: {isArray: false}});
 });
 CrudApp.factory('RelatedList', function($resource) { 
-	return $resource('/api/:class/:id/:related/list', { class: '@class' });
+	return $resource('api/:class/:id/:related/list', { class: '@class' });
 });
 
 CrudApp.factory('ClassItem', function($resource) {
-	return $resource('/api/:class', { class: '@class' });
+	return $resource('api/:class', { class: '@class' });
+});
+CrudApp.factory('Related', function($resource) {
+	return $resource('api/:class/:id/:related/:relationship', { class: '@class', id: '@id', related: '@related', relationship: 'might_have'});
 });
 
 CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route) {
 	// var root = $scope;
 	return {
-		read: $resource('/api/:class/:id', { class: '@class', id: '@id' }),
+		read: $resource('api/:class/:id', { class: '@class', id: '@id' }),
 
 		update: function(){
 			var class_name = this.data.class;
@@ -134,7 +137,7 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route) {
 		},
 
 		delete: function () {
-			if (confirm('Do you realy want to delete '+this.row.name)){
+			if (confirm('Do you really want to delete '+this.row.name)){
 				var id = this.row.id;
 				var class_label = this.data.class_label;
 				$location.path('/'+this.data.class+'/list');
@@ -161,16 +164,16 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route) {
 });
 
 CrudApp.factory('Menu', function($resource) {
-	return $resource('/api/menu');
+    return $resource('api/menu');
 });
 
 
 CrudApp.factory("RelatedItems", function($resource){
-	return $resource('/api/:class/:id/:related/items', { class: '@class' });
+	return $resource('api/:class/:id/:related/items', { class: '@class' });
 });
 
 CrudApp.factory("RelatedItem", function($resource){
-	return $resource('/api/:class/:id/:related/:related_id', 
+	return $resource('api/:class/:id/:related/:related_id', 
 			{ class: '@class', id: '@id', related: '@related', related_id: '@related_id' },
 			{
 				add: {
@@ -495,6 +498,29 @@ var CreateRelatedCtrl = function ($scope, $routeParams, ClassItem, Item) {
 
 	$scope.data = ClassItem.get({class: $routeParams.related,});
 	$scope.create = 1;
+
+	$scope.save = Item.update;
+};
+
+var EditRelatedCtrl = function ($scope, $routeParams, ClassItem, Item, Related) {
+	$scope.item = {};
+
+	$scope.data = ClassItem.get({class: $routeParams.related});
+
+    $scope.item = Related.get({
+		class: $routeParams.class,
+		id: $routeParams.id,
+		related: $routeParams.related,
+        relationship: 'might_have',
+    },
+		// Success
+		function(data) {
+		},
+		// Error
+		function() {
+			alert('Could not retrieve data!');
+		}
+	);
 
 	$scope.save = Item.update;
 };
