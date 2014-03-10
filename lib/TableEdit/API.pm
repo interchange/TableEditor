@@ -653,7 +653,7 @@ sub grid_template_params {
 	  {
 	    page => $page,  # page to return (defaults to 1)
 	    rows => $page_size, # number of results per page
-	    order_by => grid_sort($get_params),	
+	    order_by => grid_sort($class, $get_params),	
 	  },);
 	my $count = $rs->search($where)->count;
 
@@ -674,8 +674,12 @@ sub grid_template_params {
 
 
 sub grid_sort {
-	my $get_params = shift;
+	my ($class, $get_params) = @_;
+	# Selected sort
 	my $sort = $get_params->{sort};
+	# Predefined sort
+	$sort ||= class_source($class)->resultset_attributes->{grid_sort};
+	
 	$sort .= $get_params->{descending} ? ' DESC' : '' if $sort;
 	return $sort;
 }
