@@ -16,6 +16,17 @@ hook 'before_template_render' => sub {
 prefix '/';
 get '/' => sub { return forward '/index.html'};
 get '/index.html' => sub { template 'index';};
+
+=head2 get '/views/**.html'
+
+Route which returns the views used by Angular as
+templates.
+
+We use this instead of HTML files to adjust the
+URIs when the application is mounted at /myurl/.
+
+=cut
+
 get '/views/**.html' => sub {
     my ($view) = splat;
     my $template = join('/', @$view);
