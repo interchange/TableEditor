@@ -145,13 +145,20 @@ sub set_db {
             $dsn .= ";$db_settings->{dsn_suffix}";
         }
 
-		set plugins => {DBIC => {'default' => {
+        # Our settings
+        my $our_settings = {
 			dsn => $dsn,
             user => $db_settings->{user} || '',
             pass => $db_settings->{pass} || '',
-            schema_class => $db_settings->{schema_class} ? $db_settings->{schema_class} : 'TableEdit::Schema'}
-	    	}
-	    };
+            schema_class => $db_settings->{schema_class} ? $db_settings->{schema_class} : 'TableEdit::Schema'};
+
+        # Retrieve current settings
+        my $dbic_settings = config->{plugins}->{DBIC};
+
+        # Merge settings
+        $dbic_settings->{default} = $our_settings;
+
+        set plugins => {DBIC => $dbic_settings};
 	}
 }
 
