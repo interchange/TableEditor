@@ -23,7 +23,7 @@ WriteMakefile(
         'Dancer'     => 1.3118,
         'Dancer::Plugin::DBIC' => 0,
         'Dancer::Plugin::Auth::Extensible' => 0,
-        'Dancer::Template::Flute' => 0.0106,
+        'Dancer::Template::TemplateFlute' => 0.0106,
         'DBIx::Class::Schema::Loader' => 0,
         'Moo' => 0,
         'MooX::Types::MooseLike' => 0,
