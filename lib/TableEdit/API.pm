@@ -177,15 +177,19 @@ get '/:class/:id/:related/might_have' => require_login sub {
 	my $objects = $object->search_related($relationship_class);
     my $related_object = $objects->next;
 
-	my $object_data = {$related_object->get_columns};
-    my $data;
-	my $columns = columns_info($relationship_class);
+    my $data = {};
 
-	$data->{title} = model_to_string($related_object);
-	$data->{id} = $id;
-	$data->{class} = $relationship_class;
-	$data->{values} = $object_data;
-	add_values($columns, $object_data, $related_object);
+    if ($related_object) {
+        my $object_data = {$related_object->get_columns};
+        my $columns = columns_info($relationship_class);
+
+        $data->{title} = model_to_string($related_object);
+        $data->{id} = $id;
+        $data->{class} = $relationship_class;
+        $data->{values} = $object_data;
+
+        add_values($columns, $object_data, $related_object);
+    }
 
     return to_json($data, {allow_unknown => 1});
 };
