@@ -205,16 +205,6 @@ get '/:class/list' => require_login sub {
 	return to_json($grid_params, {allow_unknown => 1});
 };
 
-
-del '/:class' => require_login sub {
-	my $id = params->{id};
-	my $class = params->{class};
-	my $object = schema->resultset(ucfirst($class))->find($id);
-	$object->delete;
-	return 1;
-};
-
-
 get '/menu' => sub {
     if (! $menu) {
         $menu = to_json [map {name=> class_label($_), url=>"#/$_/list"}, @{classes()}];
@@ -222,19 +212,6 @@ get '/menu' => sub {
 
 	return $menu;
 };
-
-
-post '/:class' => require_login sub {
-	my $class = params->{class};
-	my $body = from_json request->body;
-	my $item = $body->{item};
-
-	my $rs = schema->resultset(ucfirst($class));
-	#$rs->update_or_create( $item->{values} ); 
-
-	return $rs->update_or_create( $item->{values} ); ;
-};
-
 
 get '/:class/:id' => require_login sub {
 	my ($data);
@@ -272,6 +249,25 @@ get '/:class' => require_login sub {
 		class_label => $schema->{$class}->{label},
 		relations => $relationships,
 	}, {allow_unknown => 1}); 
+};
+
+post '/:class' => require_login sub {
+	my $class = params->{class};
+	my $body = from_json request->body;
+	my $item = $body->{item};
+
+	my $rs = schema->resultset(ucfirst($class));
+	#$rs->update_or_create( $item->{values} );
+
+	return $rs->update_or_create( $item->{values} ); ;
+};
+
+del '/:class' => require_login sub {
+	my $id = params->{id};
+	my $class = params->{class};
+	my $object = schema->resultset(ucfirst($class))->find($id);
+	$object->delete;
+	return 1;
 };
 
 =head1 Fuctions
