@@ -140,3 +140,33 @@ list-style: none;
 .left-menu li > a {
 	padding: 2px 10px;
 }
+
+.glyphicon-refresh-animate {
+	animation-name: rotateThis;
+	animation-duration: .5s;
+	animation-iteration-count: infinite;
+	animation-timing-function: linear;
+	-webkit-animation-name: rotateThisC;
+	-webkit-animation-duration: .5s;
+	-webkit-animation-iteration-count: infinite;
+	-webkit-animation-timing-function: linear;
+}
+
+@keyframes rotateThis {
+	from { transform: scale( 1 ) rotate( 0deg );   }
+	to   { transform: scale( 1 ) rotate( 360deg ); }
+}
+@-webkit-keyframes rotateThisC {
+	from { -webkit-transform: scale( 1 ) rotate( 0deg );   }
+	to   { -webkit-transform: scale( 1 ) rotate( 360deg ); }
+}
+
+.loading {
+	text-align: center;
+	vertical-align: middle;
+	padding: 50%;
+}
+
+.loading > div {
+	width: 100px;
+}

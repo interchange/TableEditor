@@ -16,11 +16,20 @@
 				<a class="sub-menu-link" href="/#/{{item_info.class}}/{{item_info.id}}/{{link.foreign}}/{{link.foreign_type}}">{{link.label}}</a>
 			</li>
 		</ul>
-	<a ng-click="create()" class="pull-right"><i class="icon-plus"></i> New {{item_info.related_class_label}}</a>
-	<div class="row-fluid">
 
-		<h2>Related {{item_info.related_class_label}}</h2>
-		<div id="list-grid" ng-include='"views/list_grid.html"' ng-controller='RelatedItemsCtrl' ng-init="actions='has_many_items_list';"></div>
+	<div ng-if="!item_info.class" class="loading">
+		<div>
+			<span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Loading...
+		</div>
+	</div>
 
-	</div>	
+	<div ng-show="item_info.class">
+		<a ng-click="create()" class="pull-right"><i class="icon-plus"></i> New {{item_info.related_class_label}}</a>
+		<div class="row-fluid">
+	
+			<h2>Related {{item_info.related_class_label}}</h2>
+			<div id="list-grid" ng-include='"views/list_grid.html"' ng-controller='RelatedItemsCtrl' ng-init="actions='has_many_items_list';"></div>
+	
+		</div>	
+	</div>
 </div>

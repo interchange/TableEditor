@@ -1,62 +1,70 @@
-<!-- Page heading -->
-<div class="page-head" ng-init="view='form'" checkUser>
-	<!-- Page heading -->
-	<h1 ng-if="!item.title" class="title">New {{ data.class_label }}</h1>
-	<h1 ng-if="item.title" class="title">
-		<span class="grey super-title">{{ data.class_label }}</span> {{ item.title }}
-	</h1>
-	<!-- Breadcrumb -->
-
-	<div class="clearfix"></div>
-
+<div ng-if="!data.fields" class="loading">
+	<div>
+		<span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Loading...
+	</div>
 </div>
-<!-- Page heading ends -->
 
-<!-- Matter -->
-<div class="matter" id="details">
-	<div class="container-fluid">
-		<div class="row-fluid">
-			<div class="alert-box span12"></div>
-		</div>
-		<ul ng-show="data.relations" class="nav nav-tabs" ng-if="!create">
-			<li class="active"><a href="#">General</a></li>
-			<li class="sub-menu-item" ng-repeat="link in data.relations">
-				<a class="sub-menu-link" href="/#/{{item.class}}/{{item.id}}/{{link.foreign}}/{{link.foreign_type}}">{{link.label}}</a>
-			</li>
-		</ul>
-
-		<div class="row-fluid">
-			<div class="span12">
-				<form name="form" method="post" enctype="multipart/form-data" class="form-horizontal form" novalidate>
-					<fieldset>
-
-
-						<!-- Form Name -->
-						<div class="messages"></div>
-
-						<!-- Text input-->
-						<div ng-repeat="field in data.fields">
-							<div ng-if="!(field.is_auto_increment || (field.readonly && !field.primary_key) && create)">
-								<div class="form-group form-field">
-									<label class="control-label ">{{ field.label }}</label>
-									<ng-form name="validationScope">
-									<div class="controls control-group" ng-class="{'error': validationScope.field.$invalid}">
-										<div ng-include="'views/field/'+field.field_type+'.html'"></div>
+<div ng-if="data.fields">
+	<!-- Page heading -->
+	<div class="page-head" ng-init="view='form'" checkUser>
+		<!-- Page heading -->
+		<h1 ng-if="create" class="title">New {{ data.class_label }}</h1>
+		<h1 ng-if="!create" class="title">
+			<span class="grey super-title">{{ data.class_label }}</span> {{ item.title }}
+		</h1>
+		<!-- Breadcrumb -->
+	
+		<div class="clearfix"></div>
+	
+	</div>
+	<!-- Page heading ends -->
+	
+	<!-- Matter -->
+	<div class="matter" id="details">
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="alert-box span12"></div>
+			</div>
+			<ul ng-show="data.relations" class="nav nav-tabs" ng-if="!create">
+				<li class="active"><a href="#">General</a></li>
+				<li class="sub-menu-item" ng-repeat="link in data.relations">
+					<a class="sub-menu-link" href="/#/{{item.class}}/{{item.id}}/{{link.foreign}}/{{link.foreign_type}}">{{link.label}}</a>
+				</li>
+			</ul>
+	
+			<div class="row-fluid">
+				<div class="span12">
+					<form name="form" method="post" enctype="multipart/form-data" class="form-horizontal form" novalidate>
+						<fieldset>
+	
+	
+							<!-- Form Name -->
+							<div class="messages"></div>
+	
+							<!-- Text input-->
+							<div ng-repeat="field in data.fields">
+								<div ng-if="!(field.is_auto_increment || (field.readonly && !field.primary_key) && create)">
+									<div class="form-group form-field">
+										<label class="control-label ">{{ field.label }}</label>
+										<ng-form name="validationScope">
+										<div class="controls control-group" ng-class="{'error': validationScope.field.$invalid}">
+											<div ng-include="'views/field/'+field.field_type+'.html'"></div>
+										</div>
+										</ng-form>
 									</div>
-									</ng-form>
 								</div>
 							</div>
-						</div>
-
-
-						<div class="form-group">
-							<button ng-disabled="form.$invalid || isUnchanged(item)" ng-click="save()" class="btn btn-success pull-right">Save</button>
+	
+	
+							<div class="form-group">
+								<button ng-disabled="form.$invalid || isUnchanged(item)" ng-click="save()" class="btn btn-success pull-right">Save</button>
+								</div>
 							</div>
-						</div>
-					</fieldset>
-				</form>
+						</fieldset>
+					</form>
+				</div>
 			</div>
+	
 		</div>
-
 	</div>
 </div>
