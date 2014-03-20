@@ -2,7 +2,7 @@
 #
 # Dancer application startup script.
 #
-# Copyright (C) 2011-2012 Stefan Hornburg (Racke) <racke@linuxia.de>
+# Copyright (C) 2011-2014 Stefan Hornburg (Racke) <racke@linuxia.de>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -78,16 +78,25 @@ fi
 
 # workers
 if [ -z "$DANCER_WORKERS" ]; then
-    if [ "$DANCER_ENVIRONMENT" != "production" ]; then
+    if [ -f "$DANCER_RUNDIR/$DANCER_APP.workers" ]; then
+	    DANCER_WORKERS=$(cat "$DANCER_RUNDIR/$DANCER_APP.workers")
+    elif [ "$DANCER_ENVIRONMENT" != "production" ]; then
         DANCER_WORKERS="2"
     else 
         DANCER_WORKERS="5"
     fi
 fi
 
+
+if [ -f "$DANCER_RUNDIR/$DANCER_APP.maxrequests" ]; then
+    DANCER_MAX_REQUEST_PER_CHILD=$(cat "$DANCER_RUNDIR/$DANCER_APP.maxrequests")
+else
+    DANCER_MAX_REQUEST_PER_CHILD=1000
+fi
+
 DANCER_CMD=$(which plackup)
 
-DANCER_CMDOPTS="-E $DANCER_ENVIRONMENT $DANCER_PATH -s Starman --workers=$DANCER_WORKERS --pid $DANCER_PIDFILE -p $DANCER_PORT -a bin/app.pl -D"
+DANCER_CMDOPTS="-E $DANCER_ENVIRONMENT $DANCER_PATH -s Starman --workers=$DANCER_WORKERS --max-requests $DANCER_MAX_REQUEST_PER_CHILD --pid $DANCER_PIDFILE -p $DANCER_PORT -a bin/app.pl -D"
 
 check_running() {
     [ -s $DANCER_PIDFILE ] && kill -0 $(cat $DANCER_PIDFILE) >/dev/null 2>&1
@@ -123,7 +132,7 @@ _start() {
 }
 
 start() {
-    log_daemon_msg "Joining dancefloor" "$DANCER_APP"
+    log_daemon_msg "Joining dancefloor $DANCER_PORT with $DANCER_WORKERS dancers" "$DANCER_APP"
 
     if check_plack_handler; then
 	log_failure_msg "Plack handler for Starman not available."
@@ -152,7 +161,7 @@ stop() {
 }
 
 restart() {
-    log_daemon_msg "Spin on the dancefloor" "$DANCER_APP"
+    log_daemon_msg "Spin on the dancefloor $DANCER_PORT with $DANCER_WORKERS dancers" "$DANCER_APP"
 
     if check_compile; then
         log_action_msg "$APP_ERROR"
