@@ -1,10 +1,6 @@
 MANIFEST
 bin/app.pl
 config.yml
-environments/development.yml
-environments/production.yml
-views/index.tt
-views/layouts/main.tt
 MANIFEST.SKIP
 lib/TableEdit.pm
 public/css/style.css
@@ -17,6 +13,4 @@ public/dispatch.fcgi
 public/favicon.ico
 public/dispatch.cgi
 public/javascripts/jquery.js
-t/002_index_route.t
-t/001_base.t
 Makefile.PL
