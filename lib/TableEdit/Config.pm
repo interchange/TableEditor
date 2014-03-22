@@ -172,7 +172,12 @@ sub _bootstrap_config_schema {
     }
     else {
         # create database
-        DBI->connect("dbi:SQLite:dbname=$dbfile","","");
+        my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile", '', '',
+                           {PrintError => 0});
+
+        if (! $dbh) {
+            die "Failed to create ConfigSchema database $dbfile: $DBI::errstr";
+        }
 
         $schema = TableEdit::ConfigSchema->connect("dbi:SQLite:$dbfile");
 
