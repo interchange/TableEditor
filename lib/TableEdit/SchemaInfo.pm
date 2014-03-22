@@ -38,7 +38,7 @@ sub classes_with_single_primary_key {
     my (@pk_classes);
     my $schema = $self->schema;
 
-    my $candidates = [sort values $schema->{class_mappings}];
+    my $candidates = [sort values %{$schema->{class_mappings}}];
 
     for my $class (@$candidates) {
         push @pk_classes, $class if $schema->source($class)->primary_columns == 1;
