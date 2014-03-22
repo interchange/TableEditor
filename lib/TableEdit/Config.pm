@@ -11,7 +11,7 @@ use TableEdit::ConfigSchema;
 use TableEdit::DriverInfo;
 
 my $appdir = realpath( "$FindBin::Bin/..");
-my $SQLite = TableEdit::ConfigSchema->connect("dbi:SQLite:$appdir/db/config.db");
+my $SQLite = _bootstrap_config_schema();
 
 hook 'before' => sub {
 	# Set schema settings
@@ -160,6 +160,26 @@ sub set_db {
 
         set plugins => {DBIC => $dbic_settings};
 	}
+}
+
+# bootstrap config schema object
+sub _bootstrap_config_schema {
+    my $dbfile = "$appdir/db/config.db";
+    my $schema;
+
+    if (-f $dbfile) {
+        $schema = TableEdit::ConfigSchema->connect("dbi:SQLite:$dbfile");
+    }
+    else {
+        # create database
+        DBI->connect("dbi:SQLite:dbname=$dbfile","","");
+
+        $schema = TableEdit::ConfigSchema->connect("dbi:SQLite:$dbfile");
+
+        $schema->deploy;
+    }
+
+    return $schema;
 }
 
 1;
