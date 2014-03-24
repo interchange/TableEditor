@@ -16,7 +16,7 @@ TableEdit::DriverInfo - DBI driver information for Table Editor
 Standard list of drivers to be excluded from available drivers as array
 reference.
 
-Defaults to C<DBM>, C<ExampleP>, C<File>, C<Gofer>, C<Proxy> and C<Sponge>.
+Defaults to C<CSV>, C<DBM>, C<ExampleP>, C<File>, C<Gofer>, C<Proxy> and C<Sponge>.
 
 =cut
 
@@ -24,7 +24,7 @@ has skip => (
     is => 'ro',
     isa => ArrayRef,
     lazy => 1,
-    default => sub {[qw/DBM ExampleP File Gofer Proxy Sponge/]},
+    default => sub {[qw/CSV DBM ExampleP File Gofer Proxy Sponge/]},
 );
 
 =head2 skip_extra
