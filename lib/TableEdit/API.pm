@@ -347,7 +347,7 @@ sub class_grid_columns {
 		next if $column_info->{data_type} and $column_info->{data_type} eq 'text';
 		next if $column_info->{size} and $column_info->{size} > 255;
 		
-		push $columns, $column;
+		push @$columns, $column;
 	}
 	return $columns; 
 }
@@ -363,7 +363,7 @@ sub class_form_columns {
 		#next if $column_info->{hidden};
 		#next if $column_info->{size} and $column_info->{size} > 255;
 		
-		push $columns, $column;
+		push @$columns, $column;
 	}
 	return $columns; 
 }
@@ -388,7 +388,7 @@ sub grid_columns_info {
 		$col_copy{readonly} = 0 ;
 		$col_copy{primary_key} = 0 ;
 
-		push $default_columns, \%col_copy; 		
+		push @$default_columns, \%col_copy; 		
 	}
 
 	
@@ -527,7 +527,7 @@ sub relationships_info {
 		$relationship_info->{foreign} = $many_to_many;
 		$relationship_info->{foreign_type} = 'many_to_many';
 		column_add_info($many_to_many, $relationship_info, $class );
-		push $relationships_info, $relationship_info;
+		push @$relationships_info, $relationship_info;
 	}
 	
 	for my $relationship(@$relationships){
@@ -539,7 +539,7 @@ sub relationships_info {
 		my $relationship_class = schema->class_mappings->{$relationship_class_package};
 		my $count = schema->resultset($relationship_class)->count;
 		
-		for (values $relationship_info->{cond}){
+		for (values %{$relationship_info->{cond}}){
 			$column_name ||= [split('\.', "$_")]->[-1];
 			last;
 		}
@@ -557,7 +557,7 @@ sub relationships_info {
 			$relationship_info->{foreign_type} = 'has_many';
 			
 			column_add_info($column_name, $relationship_info, $class );
-			push $relationships_info, $relationship_info;
+			push @$relationships_info, $relationship_info;
 		}
 		elsif ( $rel_type eq 'single' ) {
             # Only tables with one PK
@@ -565,7 +565,7 @@ sub relationships_info {
 			next unless scalar @pk == 1;
 
             column_add_info($column_name, $relationship_info, $class );
-			push $relationships_info, $relationship_info;
+			push @$relationships_info, $relationship_info;
         }
 	}
 	
@@ -650,7 +650,7 @@ sub dropdown {
 	for my $object (@$result_set){
 		my $id = $object->$column;
 		my $name = model_to_string($object);
-		push $items, {option_label=>$name, value=>$id};
+		push @$items, {option_label=>$name, value=>$id};
 	}
 	return $items;
 }
@@ -741,7 +741,7 @@ sub grid_rows {
 			my $column_name = $column->{foreign} ? "$column->{foreign}" : "$column->{name}";
 			my $value = $row->$column_name;
 			$value = model_to_string($value) if blessed($value);
-			push $row_data, {value => $value};
+			push @$row_data, {value => $value};
 		}
 		push @table_rows, {row => $row_data, id => $id, name => model_to_string($row) };
 	}
