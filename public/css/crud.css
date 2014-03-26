@@ -126,11 +126,6 @@ list-style: none;
 	word-break: normal;
 }
 
-.actions [class*=" icon-"] {
-	padding: 5px;
-	margin: 1px;
-}
-
 .mainbar{
 	padding: 20px;
 }
