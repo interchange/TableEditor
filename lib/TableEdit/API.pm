@@ -28,13 +28,6 @@ my $schema = {};
 my $field_types;
 my $menu;
 
-
-hook 'before' => sub {
-	 my $route_handler = shift;
-        var note => 'Hi there';
-        
-    };
-
 prefix '/api';
 any '**' => sub {
     # load schema if necessary
