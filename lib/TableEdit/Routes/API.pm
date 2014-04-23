@@ -1,4 +1,4 @@
-package TableEdit::API;
+package TableEdit::Routes::API;
 
 use Dancer ':syntax';
 use POSIX;
