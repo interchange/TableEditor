@@ -162,6 +162,16 @@ for my $testdb (@handles) {
                        $classes->{Product}->relationships->{Inventory},
                        \%expected);
 
+    %expected = (
+        type => 'belongs_to',
+        self_column => 'roles_id',
+        foreign_column => 'roles_id',
+    );
+
+    test_relationship($classes->{Permission},
+                      $classes->{Permission}->relationships->{Role},
+                       \%expected);
+
     # test hashref
     my $col_info = $schema_info->column('UserRole', 'users_id');
     my $col_label = $col_info->hashref->{label};
@@ -241,27 +251,29 @@ sub test_relationships {
 
 sub test_relationship {
     my ($class, $relationship, $expected) = @_;
-    my $name = $relationship->name;
+    my $class_name = $class->name;
+    my $rel_name = $relationship->name;
     my $expected_value;
 
     # type
     my $type = $relationship->type;
     $expected_value = $expected->{type};
-    ok($type eq $expected_value, "Test type for relationship $name.")
+    ok($type eq $expected_value,
+       "Test type for class $class_name and relationship $rel_name and $expected_value.")
         || diag "$type instead of $expected_value";
 
     # self column
     my $self_column = $relationship->self_column;
     $expected_value = $expected->{self_column};
     ok($self_column eq $expected_value,
-       "Test self column for relationship $name.")
+       "Test self column for class $class_name and relationship $rel_name.")
         || diag "$self_column instead of $expected_value";
 
     # foreign column
     my $foreign_column = $relationship->foreign_column;
     $expected_value = $expected->{foreign_column};
     ok($foreign_column eq $expected_value,
-       "Test foreign column for relationship $name.")
+       "Test foreign column for class $class_name and relationship $rel_name.")
         || diag "$foreign_column instead of $expected_value";
 }
 

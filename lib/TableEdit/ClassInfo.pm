@@ -157,9 +157,6 @@ sub _build__relationships {
     for my $rel_name ($source->relationships){
         my $rel_info = $source->relationship_info($rel_name);
         my $relationship_class_package = $rel_info->{class};
-        use Data::Dumper;
-        warn "Class: ", $self->name, "\n";
-warn "Rel info for $rel_name: ", Dumper($rel_info);
 
         next if $rel_info->{hidden};
 
@@ -183,10 +180,13 @@ warn "Rel info for $rel_name: ", Dumper($rel_info);
 
         # Type of relationship
         if ($rel_type eq 'single') {
-            $foreign_type = 'might_have';
-        }
-        elsif ($rel_type eq 'filter') {
-            $foreign_type = 'belongs_to';
+            # try fk_columns
+            if (exists $rel_info->{attrs}->{fk_columns}) {
+                $foreign_type = 'belongs_to';
+            }
+            else {
+                $foreign_type = 'might_have';
+            }
         }
         elsif ($rel_type eq 'multi') {
             $foreign_type = 'has_many';
