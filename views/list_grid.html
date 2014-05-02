@@ -22,7 +22,7 @@
 				</tr>
 				<tr>
 					<th class="column-search" ng-repeat="field in data.field_list">
-						<div class="nullable" ng-include="'views/field/'+field.field_type+'.html'"></div>
+						<div class="nullable" ng-include="'views/field/'+field.display_type+'.html'"></div>
 					</th>
 					<th><button class="btn btn-default" ng-click="reset()">Filter</button></th>
 				</tr>

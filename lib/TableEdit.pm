@@ -30,7 +30,9 @@ URIs when the application is mounted at /myurl/.
 get '/views/**.html' => sub {
     my ($view) = splat;
     my $template = join('/', @$view);
-    
+
+    debug "Template: $template.";
+
     template $template;
 };
 

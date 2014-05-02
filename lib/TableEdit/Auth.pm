@@ -13,7 +13,7 @@ post '/login' => sub {
 	my $post = from_json request->body;
     my $username = $post->{user}->{username} || '';
 	my $password = $post->{user}->{password} || '';
-
+	debug "Login post: ", $post;
 	my $user = {role => 'guest'};
 
     # removing surrounding whitespaces

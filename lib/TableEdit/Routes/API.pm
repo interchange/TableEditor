@@ -13,6 +13,7 @@ use Cwd qw/realpath/;
 use YAML::Tiny;
 use Scalar::Util 'blessed';
 
+use TableEdit::API;
 use TableEdit::SchemaInfo;
 
 my $layout = {};
@@ -29,9 +30,12 @@ my $field_types;
 my $menu;
 
 prefix '/api';
+
 any '**' => sub {
     # load schema if necessary
     _setup_schema();
+
+    debug "Route: ", request->uri;
 
 	content_type 'application/json';
 	pass;
@@ -187,6 +191,7 @@ get '/:class/:id/:related/might_have' => require_login sub {
     return to_json($data, {allow_unknown => 1});
 };
 
+# Class listing
 get '/:class/list' => require_login sub {
 	my $class = params->{class};
 	my $get_params = params('query');
@@ -195,15 +200,22 @@ get '/:class/list' => require_login sub {
 	$grid_params = grid_template_params($class, $get_params);
 	$grid_params->{'class_label'} = $schema->{$class}->{label};
 	
+	debug "Grid params for $class: ", $grid_params;
+
 	return to_json($grid_params, {allow_unknown => 1});
 };
 
 get '/menu' => sub {
     if (! $menu) {
-        $menu = to_json [map {name=> class_label($_), url=>"#/$_/list"}, @{classes()}];
+        $menu = to_json [map { 
+	    {name => $_->label, 
+	     url=> join('/', '#' . $_->name, 'list'),
+	    }}
+	    $schema->{info}->classes,
+	    ]
     }
 
-	return $menu;
+    return $menu;
 };
 
 get '/:class/:id' => require_login sub {
@@ -214,8 +226,9 @@ get '/:class/:id' => require_login sub {
     my $relationships = $schema->{$class}->{relationships};
 	relationships_info($class);
 
-	$data->{fields} = $columns;
-
+	debug "Columns: ", $columns;
+	$data->{fields} = [map {$_->hashref} @$columns];
+	debug "Fields: ", $data->{fields};
 	# Object lookup
 	my $object = schema->resultset(ucfirst($class))->find($id);
 	my $object_data = {$object->get_columns};
@@ -224,7 +237,7 @@ get '/:class/:id' => require_login sub {
 	$data->{class} = $class;
 	$data->{values} = $object_data;
 	add_values($columns, $object_data, $object);
-	
+debug "Displaying class $class and id $id: ", $data;	
 	return to_json($data, {allow_unknown => 1});
 };
 
@@ -232,9 +245,9 @@ get '/:class/:id' => require_login sub {
 get '/:class' => require_login sub {
 	my (@languages, $errorMessage);
 	my $class = params->{class};
-	my $columns = columns_info($class, class_form_columns($class)); 
-	my $relationships = $schema->{$class}->{relationships};	
-	relationships_info($class);
+	my $columns = [map {$_->hashref} @{columns_info($class, class_form_columns($class))}];
+	my $relationships = [map {$_->hashref} $schema->{info}->relationships($class)];
+	#relationships_info($class);
 
 	return to_json({ 
 		fields => $columns,
@@ -249,6 +262,8 @@ post '/:class' => require_login sub {
 	my $body = from_json request->body;
 	my $item = $body->{item};
 
+	debug "Updating item for $class: ", $item;
+
 	my $rs = schema->resultset(ucfirst($class));
 	#$rs->update_or_create( $item->{values} );
 
@@ -259,6 +274,11 @@ del '/:class' => require_login sub {
 	my $id = params->{id};
 	my $class = params->{class};
 	my $object = schema->resultset(ucfirst($class))->find($id);
+
+	if (! $object) {
+	    return status '404';
+	}
+
 	$object->delete;
 	return 1;
 };
@@ -324,23 +344,21 @@ Returns plain array of all table columns
 =cut
 
 sub class_columns {
-	my $class = shift;
-    $schema_info ||= TableEdit::SchemaInfo->new(schema => schema);
-    return $schema_info->resultset($class)->columns;
+    my $class = shift;
+    my @columns = $schema->{info}->columns($class);
+    return \@columns;
 }
 
 sub class_grid_columns {
 	my $class = shift;	
 	return class_source($class)->resultset_attributes->{grid_columns} if class_source($class)->resultset_attributes->{grid_columns};	
 	my $columns = [];
-	for my $column (@{class_columns($class)}){
-		my $column_info = column_info($class, $column);
-		
+	for my $column_info (@{class_columns($class)}){
 		# Leave out inappropriate columns
-		next if $column_info->{data_type} and $column_info->{data_type} eq 'text';
-		next if $column_info->{size} and $column_info->{size} > 255;
-		
-		push @$columns, $column;
+		next if $column_info->data_type eq 'text';
+		next if $column_info->size > 255;
+
+		push @$columns, $column_info;
 	}
 	return $columns; 
 }
@@ -373,7 +391,8 @@ sub grid_columns_info {
 	my $default_columns = [];
 	my $columns = class_grid_columns($class);
 	for my $col (@$columns){
-		my $col_info = column_info($class, $col);
+	    my $col_info = $col->hashref;
+	    debug "Get grid column info for $class and $col: ", $col_info;
 		my %col_copy = %{$col_info};
 
 	# Cleanup for grid
@@ -401,8 +420,12 @@ sub columns_static_info {
 	my $columns = $result_source->columns_info; 
 	my $columns_info = {};
 	
+	my $schema_info = $schema->{info};
+
 	for my $relationship($result_source->relationships){
+	    next;
 		my $relationship_info = $result_source->relationship_info($relationship);
+		debug "RI for $relationship: ", $relationship_info;
 		my $relationship_class_package = $relationship_info->{class};
 		next if $relationship_info->{hidden};
 		my $relationship_class = schema->class_mappings->{$relationship_class_package};
@@ -428,7 +451,7 @@ sub columns_static_info {
 			
 			# If there aren't too many related items, make a dropdown
 			if ($count <= $dropdown_treshold){
-				$relationship_info->{field_type} = 'dropdown';
+				$relationship_info->{display_type} = 'dropdown';
 				
 				my @foreign_objects = schema->resultset($relationship_class)->all;
 				$relationship_info->{options} = dropdown(\@foreign_objects, $foreign_column );
@@ -439,55 +462,61 @@ sub columns_static_info {
 		}
 	}
 	
-	my $selected_columns = class_columns($class);
-	for (@$selected_columns){
-		my $column_info = $columns->{$_};
-		next if $column_info->{is_foreign_key} or $column_info->{hidden};
-		column_add_info($_, $column_info, $class);
+	my @selected_columns = $schema_info->columns($class);
+
+debug "SC: ", keys %{$schema_info->columns($class)};
+
+	for my $ci (@selected_columns){
+	    next if $ci->is_foreign_key or $ci->hidden;
+	    column_add_info($ci->name, $ci, $class);
 		
-		$columns_info->{$_} = $column_info;
+	    $columns_info->{$ci->name} = $ci;
 	} 
-	
+	debug "CI: ", $columns_info;
 	return $columns_info;
 }
 
 sub column_info {
 	my ($class, $column) = @_;
 
-    if (exists $schema->{$class}->{column_info}->{$column}) {
-        return $schema->{$class}->{column_info}->{$column};
-    }
-    else {
+ #   if (exists $schema->{$class}->{column_info}->{$column}) {
+ #       return $schema->{$class}->{column_info}->{$column};
+ #   }
+ #   else {
         my $column_info = columns_static_info($class);
         $schema->{$class}->{column_info}->{$column} = $column_info->{$column};
         return $column_info->{$column};
-    }
+ #   }
 }
 
 sub columns_info {
-	my ($class, $selected_columns) = @_;
-	$selected_columns ||= class_columns($class); 
-	my $column_info = $schema->{$class}->{column_info};
-	my $columns_info = [];
-	for my $column(@$selected_columns){
-		my $column_info = column_info($class, $column);
-		# Belongs to or Has one
-		if( defined $column_info->{foreign_type} and ($column_info->{foreign_type} eq 'belongs_to' or $column_info->{foreign_type} eq 'might_have') ){
-			my $count = schema->resultset($column_info->{source})->count;
-			if ($count <= $dropdown_treshold){
-				$column_info->{field_type} = 'dropdown';
-				my @foreign_objects = schema->resultset($column_info->{source})->all;
-				$column_info->{options} = dropdown(\@foreign_objects, $column_info->{foreign_column});
-			}
-			else {
-				$column_info->{field_type} = 'varchar';
-			} 
-		}
-		push @$columns_info, $column_info;
-	}
-	return $columns_info;
-}
+    my ($class, $selected_columns) = @_;
+    my $columns_info = [];
 
+    if (! $selected_columns) {
+	$selected_columns = [$schema->{info}->columns($class)];
+    }
+
+    for my $column_info (@$selected_columns) {
+	debug "CI for ", $column_info->name, ": ", $column_info;
+	
+# Belongs to or Has one
+	my $foreign_type = $column_info->foreign_type;
+
+	if ($foreign_type eq 'belongs_to' or $foreign_type eq 'might_have') {
+	    my $count = schema->resultset($column_info->{source})->count;
+	    if ($count <= $dropdown_treshold){
+		$column_info->display_type ('dropdown');
+		my @foreign_objects = schema->resultset($column_info->{source})->all;
+		$column_info->{options} = dropdown(\@foreign_objects, $column_info->{foreign_column});
+	    }
+	}
+	push @$columns_info, $column_info;
+    }
+    
+    debug "CI for $class: ", $columns_info;
+    return $columns_info;
+}
 
 sub relationship_info {
 	my ($class, $related) = @_;
@@ -562,6 +591,8 @@ sub relationships_info {
         }
 	}
 	
+#	debug "RI for $class: ", $relationships_info;
+
 	return $relationships_info;
 }
 
@@ -571,8 +602,10 @@ sub column_add_info {
 	
 	return undef if $column_info->{hidden};
 	
+	debug "CAI for $column_name: ", $column_info;
+    debug "Field type For $column_name, ", field_type($column_info);
 	# Coulumn calculated properties - can be overwritten in model
-	$column_info->{field_type} ||= field_type($column_info);
+	$column_info->{display_type} ||= field_type($column_info);
 	$column_info->{default_value} = ${$column_info->{default_value}} if ref($column_info->{default_value}) eq 'SCALAR' ;
 	$column_info->{original} = undef;
 	$column_info->{name} ||= $column_name; # Column database name
@@ -661,7 +694,7 @@ sub grid_template_params {
 	
 	my $rs = $related_items || schema->resultset(ucfirst($class));
 
-	my $primary_column = $schema_info->resultset($class)->primary_key;
+	my $primary_column = $schema->{info}->resultset($class)->primary_key;
     
 	my $page = $get_params->{page} || 1;
 	$page_size = $get_params->{page_size} if $get_params->{page_size};
@@ -721,6 +754,10 @@ sub grid_where {
 	
 }
 
+=head2 grid_rows
+
+
+=cut
 
 sub grid_rows {
 	my ($rows, $columns_info, $primary_column, $args) = @_;
@@ -728,11 +765,14 @@ sub grid_rows {
 	my @table_rows; 
 	for my $row (@$rows){
 		die 'No primary column' unless $primary_column;
+		# unravel object
+		my $row_inflated = {$row->get_inflated_columns};
 		my $id = $row->$primary_column;
 		my $row_data = [];
 		for my $column (@$columns_info){
 			my $column_name = $column->{foreign} ? "$column->{foreign}" : "$column->{name}";
-			my $value = $row->$column_name;
+			my $value = $row_inflated->{$column_name};
+			debug "ID $id, column $column_name, value: ", $value;
 			$value = model_to_string($value) if blessed($value);
 			push @$row_data, {value => $value};
 		}
@@ -744,11 +784,20 @@ sub grid_rows {
 sub _setup_schema {
     return $schema if $schema->{active};
 
-    my $classes = classes;
+    # create SchemaInfo object
+    my $schema_info = TableEdit::SchemaInfo->new(
+        schema => schema,
+        sort => 1,
+	);
 
-    for my $class (@$classes) {
+    $schema->{info} = $schema_info;
+
+    my @classes = $schema_info->classes;
+
+    for my $class_object (@classes) {
+	my $class = $class_object->name;
         ($schema->{$class}->{primary}) = schema->source($class)->primary_columns;
-        $schema->{$class}->{label} = class_label($class);
+        $schema->{$class}->{label} = $class_object->label;
         $schema->{$class}->{columns} = class_columns($class);
         $schema->{$class}->{column_info} = columns_static_info($class);
         $schema->{$class}->{relationships} = relationships_info($class);	
