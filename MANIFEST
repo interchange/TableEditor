@@ -9,7 +9,6 @@ DANCER2
 db/config.db
 db/README
 lib/TableEdit.pm
-lib/TableEdit/API.pm
 lib/TableEdit/Auth.pm
 lib/TableEdit/ClassInfo.pm
 lib/TableEdit/ColumnInfo.pm

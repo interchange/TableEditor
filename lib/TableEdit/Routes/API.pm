@@ -13,7 +13,6 @@ use Cwd qw/realpath/;
 use YAML::Tiny;
 use Scalar::Util 'blessed';
 
-use TableEdit::API;
 use TableEdit::SchemaInfo;
 
 my $layout = {};
