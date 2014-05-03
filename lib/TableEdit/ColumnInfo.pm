@@ -39,7 +39,14 @@ has display_type => (
     lazy => 1,
     default => sub {
         return $_[0]->data_type;
-    }
+    },
+    trigger => sub {
+	my ($self, $value) = @_;
+
+	if (ref($self->{hashref}) eq 'HASH') {
+	    $self->{hashref}->{display_type} = $value;
+	}
+    },
 );
 
 =head2 is_foreign_key
@@ -121,20 +128,27 @@ has hashref => (
     is => 'lazy',
     default => sub {
         my $self = shift;
-        my %hash = (
-            data_type => $self->data_type,
-            display_type => $self->display_type,
-            foreign_column => $self->foreign_column,
-            hidden => $self->hidden,
-            is_foreign_key => $self->is_foreign_key,
-            is_nullable => $self->is_nullable,
-            label => $self->label,
-            name => $self->name,
-            size => $self->size,
-        );
 
-        return \%hash;
+	return $self->_as_hashref;
     },
 );
+
+sub _as_hashref {
+    my $self = shift;
+
+    my %hash = (
+	data_type => $self->data_type,
+	display_type => $self->display_type,
+	foreign_column => $self->foreign_column,
+	hidden => $self->hidden,
+	is_foreign_key => $self->is_foreign_key,
+	is_nullable => $self->is_nullable,
+	label => $self->label,
+	name => $self->name,
+	size => $self->size,
+    );
+
+    return \%hash;
+}
 
 1;
