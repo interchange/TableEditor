@@ -237,6 +237,11 @@ sub test_columns {
             ok($fk_type eq $expected_value,
                "Test foreign_type name for type $col_name")
                 || diag "$fk_type instead of $expected_value.";
+
+            # test relationship object
+            my $rel = $col_obj->relationship;
+
+            isa_ok($rel, 'TableEdit::RelationshipInfo');
         }
     }
 }
