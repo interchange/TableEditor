@@ -109,20 +109,20 @@ has hidden => (
 has hashref => (
     is => 'lazy',
     default => sub {
-	my $self = shift;
-	my %hash = (
-	    data_type => $self->data_type,
-	    display_type => $self->display_type,
-	    foreign_column => $self->foreign_column,
-	    hidden => $self->hidden,
-	    is_foreign_key => $self->is_foreign_key,
-	    is_nullable => $self->is_nullable,
-	    label => $self->label,
-	    name => $self->name,
-	    size => $self->size,
-	);
+        my $self = shift;
+        my %hash = (
+            data_type => $self->data_type,
+            display_type => $self->display_type,
+            foreign_column => $self->foreign_column,
+            hidden => $self->hidden,
+            is_foreign_key => $self->is_foreign_key,
+            is_nullable => $self->is_nullable,
+            label => $self->label,
+            name => $self->name,
+            size => $self->size,
+        );
 
-	return \%hash;
+        return \%hash;
     },
 );
 

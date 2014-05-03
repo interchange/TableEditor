@@ -63,17 +63,17 @@ sub columns {
     my $classes = $self->_classes;
 
     if (! exists $classes->{$class}) {
-	die "No such class $class.";
+        die "No such class $class.";
     }
 
     my $columns = $classes->{$class}->columns;
 
     if (wantarray) {
-	if ($self->sort) {
-	    return sort values %$columns;
-	}
+        if ($self->sort) {
+            return sort values %$columns;
+        }
 
-	return values %$columns;
+        return values %$columns;
     }
 
     return {%$columns};
@@ -90,7 +90,7 @@ sub column {
     my $classes = $self->_classes;
 
     if (! exists $classes->{$class}) {
-	die "No such class $class.";
+        die "No such class $class.";
     }
 
     return $classes->{$class}->column($name);
@@ -134,12 +134,12 @@ sub classes {
     my $self = shift;
 
     if (wantarray) {
-	if ($self->sort) {
-	    return sort {$a->name cmp $b->name} values %{$self->_classes};
-	}
-	else {
-	    return values %{$self->_classes};
-	}
+        if ($self->sort) {
+            return sort {$a->name cmp $b->name} values %{$self->_classes};
+        }
+        else {
+            return values %{$self->_classes};
+        }
     }
 
     return $self->_classes;
@@ -173,8 +173,8 @@ sub _build__classes {
     my $candidates = [sort values %{$schema->{class_mappings}}];
 
     for my $class (@$candidates) {
-	my $rs = $self->schema->resultset($class);
-	$class_hash{$class} = TableEdit::ClassInfo->new(name => $class, resultset => $rs);
+        my $rs = $self->schema->resultset($class);
+        $class_hash{$class} = TableEdit::ClassInfo->new(name => $class, resultset => $rs);
     }
 
     return \%class_hash;

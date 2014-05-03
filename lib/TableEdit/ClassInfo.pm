@@ -94,7 +94,7 @@ sub column {
     my $columns = $self->_columns;
 
     if (! exists $columns->{$name}) {
-	die "No such column $name.";
+        die "No such column $name.";
     }
 
     return $columns->{$name};
@@ -115,18 +115,16 @@ sub _build__columns {
     }
 
     while (my ($name, $info) = each %$candidates) {
-	# Dancer::Logger::debug ("Candidate $name.");
+        # check if there is a relationship for this column
+        if (exists $rel_hash{$name}) {
+            my $rel_obj = $rel_hash{$name};
 
-	# check if there is a relationship for this column
-	if (exists $rel_hash{$name}) {
-	    my $rel_obj = $rel_hash{$name};
+            $info->{foreign_column} = $rel_obj->{foreign_column};
+        }
 
-	    $info->{foreign_column} = $rel_obj->{foreign_column};
-	}
-
-	$column_hash{$name} = TableEdit::ColumnInfo->new(
-	    name => $name,
-	    %$info);
+        $column_hash{$name} = TableEdit::ColumnInfo->new(
+            name => $name,
+            %$info);
     }
 
     return \%column_hash;

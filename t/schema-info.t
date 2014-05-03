@@ -51,7 +51,7 @@ for my $testdb (@handles) {
     my $expected_value = 44;
 
     ok ($count == $expected_value, "Test number of classes")
-	|| diag "Number of classes: $count instead of $expected_value.";
+        || diag "Number of classes: $count instead of $expected_value.";
 
     ok (exists $classes->{Role}, "Test for Role class.");
 
@@ -59,12 +59,12 @@ for my $testdb (@handles) {
     my $name = $classes->{Role}->name;
     $expected_value = 'Role';
     ok ($name eq $expected_value, "Test name of Role class.")
-	|| diag "$name instead of expected_value.";
+        || diag "$name instead of expected_value.";
 
     my $label = $classes->{Role}->label;
     $expected_value = 'Role';
     ok ($label eq $expected_value, "Test label of Role class.")
-	|| diag "$label instead of expected_value.";
+        || diag "$label instead of expected_value.";
 
     $expected_value = 3;
 
@@ -72,14 +72,14 @@ for my $testdb (@handles) {
     my @cols = $classes->{Role}->columns;
     $count = scalar(@cols);
     ok ($count == $expected_value, "Test number of columns (array)")
-	|| diag "Number of columns: $count instead of $expected_value.";
+        || diag "Number of columns: $count instead of $expected_value.";
 
     # test number of columns
     my $columns = $classes->{Role}->columns;
 
     $count = scalar(keys %$columns);
     ok ($count == $expected_value, "Test number of columns (hash)")
-	|| diag "Number of columns: $count instead of $expected_value.";
+        || diag "Number of columns: $count instead of $expected_value.";
 
     my %expected = (
         roles_id => {
@@ -123,7 +123,7 @@ for my $testdb (@handles) {
     $count = scalar(@cols);
     $expected_value = 2;
     ok ($count == $expected_value, "Test number of columns (array)")
-	|| diag "Number of columns: $count instead of $expected_value.";
+        || diag "Number of columns: $count instead of $expected_value.";
 
     %expected = (
         roles_id => {
@@ -180,54 +180,54 @@ for my $testdb (@handles) {
     $expected_value = 'Users id';
 
     ok($col_label eq $expected_value, "Test label from hashref for column users_id")
-	|| diag "$col_label instead of $expected_value.";
+        || diag "$col_label instead of $expected_value.";
 }
 
 sub test_columns {
     my ($class, $expected) = @_;
 
     while (my ($col_name, $matches) = each %$expected) {
-	my $col_obj = $schema_info->column($class->name, $col_name);
+        my $col_obj = $schema_info->column($class->name, $col_name);
 
-	isa_ok($col_obj, 'TableEdit::ColumnInfo');
+        isa_ok($col_obj, 'TableEdit::ColumnInfo');
 
-	# test column label
-	my $label = $col_obj->label;
-	my $expected_value = $matches->{label} || '';
+        # test column label
+        my $label = $col_obj->label;
+        my $expected_value = $matches->{label} || '';
 
-	ok($label eq $expected_value, "Test label for column $col_name")
-	    || diag "$label instead of $expected_value.";
+        ok($label eq $expected_value, "Test label for column $col_name")
+            || diag "$label instead of $expected_value.";
 
-	# test column types
-	my $data_type = $col_obj->data_type;
-	my $display_type = $col_obj->display_type;
+        # test column types
+        my $data_type = $col_obj->data_type;
+        my $display_type = $col_obj->display_type;
 
-	$expected_value = $matches->{data_type} || 'varchar';
+        $expected_value = $matches->{data_type} || 'varchar';
 
-	ok($data_type eq $expected_value, "Test data type for column $col_name")
-	    || diag "$data_type instead of $expected_value.";
+        ok($data_type eq $expected_value, "Test data type for column $col_name")
+            || diag "$data_type instead of $expected_value.";
 
-	ok($display_type eq $expected_value, "Test display type for column $col_name")
-	    || diag "$display_type instead of $expected_value.";
-	
-	# test whether column is foreign key
-	my $is_fk = $col_obj->is_foreign_key;
-	$expected_value = $matches->{is_foreign_key} || 0;
+        ok($display_type eq $expected_value,
+           "Test display type for column $col_name")
+            || diag "$display_type instead of $expected_value.";
 
-	ok($is_fk eq $expected_value, "Test is_foreign_key for column $col_name")
-	    || diag "$is_fk instead of $expected_value.";
+        # test whether column is foreign key
+        my $is_fk = $col_obj->is_foreign_key;
+        $expected_value = $matches->{is_foreign_key} || 0;
 
+        ok($is_fk eq $expected_value,
+           "Test is_foreign_key for column $col_name")
+            || diag "$is_fk instead of $expected_value.";
 
+        if ($is_fk) {
+            # test name of foreign key
+            my $fk_name = $col_obj->foreign_column;
+            $expected_value = $matches->{foreign_column};
 
-    if ($is_fk) {
-        # test name of foreign key
-        my $fk_name = $col_obj->foreign_column;
-        $expected_value = $matches->{foreign_column};
-
-        ok($fk_name eq $expected_value,
-           "Test foreign_column name for column $col_name")
-            || diag "$fk_name instead of $expected_value.";
-    }
+            ok($fk_name eq $expected_value,
+               "Test foreign_column name for column $col_name")
+                || diag "$fk_name instead of $expected_value.";
+        }
     }
 }
 
