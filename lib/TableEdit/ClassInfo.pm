@@ -43,7 +43,7 @@ L<DBIx::Class::ResultSet> object for this class.
 
 =head2 source
 
-LDBIx::Class::ResultSource> object for this class.
+L<DBIx::Class::ResultSource> object for this class.
 
 =cut
 
