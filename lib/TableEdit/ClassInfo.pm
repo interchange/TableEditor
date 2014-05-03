@@ -120,7 +120,8 @@ sub _build__columns {
 	# check if there is a relationship for this column
 	if (exists $rel_hash{$name}) {
 	    my $rel_obj = $rel_hash{$name};
-	    $info->{foreign_key} = $rel_obj->{foreign_key};
+
+	    $info->{foreign_column} = $rel_obj->{foreign_column};
 	}
 
 	$column_hash{$name} = TableEdit::ColumnInfo->new(

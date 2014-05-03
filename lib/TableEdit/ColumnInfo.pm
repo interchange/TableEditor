@@ -53,13 +53,13 @@ has is_foreign_key => (
     default => 0,
 );
 
-=head2 foreign_key
+=head2 foreign_column
 
 Column name of foreign key.
 
 =cut
 
-has foreign_key => (
+has foreign_column => (
     is => 'ro',
     default => '',
 );
@@ -113,7 +113,7 @@ has hashref => (
 	my %hash = (
 	    data_type => $self->data_type,
 	    display_type => $self->display_type,
-	    foreign_key => $self->foreign_key,
+	    foreign_column => $self->foreign_column,
 	    hidden => $self->hidden,
 	    is_foreign_key => $self->is_foreign_key,
 	    is_nullable => $self->is_nullable,
