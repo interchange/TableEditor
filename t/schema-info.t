@@ -129,12 +129,14 @@ for my $testdb (@handles) {
         roles_id => {
             is_foreign_key => 1,
             foreign_column => 'roles_id',
+            foreign_type => 'belongs_to',
             label => 'Roles id',
             data_type => 'integer',
         },
         users_id => {
             is_foreign_key => 1,
             foreign_column => 'users_id',
+            foreign_type => 'belongs_to',
             label => 'Users id',
             data_type => 'integer',
         },
@@ -227,6 +229,14 @@ sub test_columns {
             ok($fk_name eq $expected_value,
                "Test foreign_column name for column $col_name")
                 || diag "$fk_name instead of $expected_value.";
+
+            # test type of foreign key
+            my $fk_type = $col_obj->foreign_type;
+            $expected_value = $matches->{foreign_type};
+
+            ok($fk_type eq $expected_value,
+               "Test foreign_type name for type $col_name")
+                || diag "$fk_type instead of $expected_value.";
         }
     }
 }
