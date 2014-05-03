@@ -121,6 +121,7 @@ sub _build__columns {
 
             $info->{foreign_column} = $rel_obj->{foreign_column};
             $info->{foreign_type} = $rel_obj->{type};
+            $info->{relationship} = $rel_obj;
         }
 
         $column_hash{$name} = TableEdit::ColumnInfo->new(

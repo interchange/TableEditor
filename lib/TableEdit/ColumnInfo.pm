@@ -106,6 +106,17 @@ has hidden => (
     default => 0,
 );
 
+=head2 relationship
+
+L<TableEdit::RelationshipInfo> object if column
+is foreign key.
+
+=cut
+
+has relationship => (
+    is => 'ro',
+);
+
 has hashref => (
     is => 'lazy',
     default => sub {
