@@ -124,6 +124,23 @@ has relationship => (
     is => 'ro',
 );
 
+=head2 options
+
+Options to select values from for this column.
+
+=cut
+
+has options => (
+    is => 'rw',
+    trigger => sub {
+	my ($self, $value) = @_;
+
+	if (ref($self->{hashref}) eq 'HASH') {
+	    $self->{hashref}->{options} = $value;
+	}
+    },
+);
+
 has hashref => (
     is => 'lazy',
     default => sub {
@@ -145,6 +162,7 @@ sub _as_hashref {
 	is_nullable => $self->is_nullable,
 	label => $self->label,
 	name => $self->name,
+	options => $self->options,
 	size => $self->size,
     );
 
