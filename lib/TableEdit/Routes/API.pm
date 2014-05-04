@@ -508,9 +508,10 @@ sub columns_info {
 
 	# Belongs to or Has one
 	my $foreign_type = $column_info->foreign_type;
-	my $rs = $column_info->relationship->resultset;
 
 	if ($foreign_type eq 'belongs_to' or $foreign_type eq 'might_have') {
+	    my $rs = $column_info->relationship->resultset;
+
 	    # determine number of records in foreign table
 	    my $count = $rs->count;
 	    if ($count <= $dropdown_treshold){
