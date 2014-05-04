@@ -463,15 +463,12 @@ sub columns_static_info {
 	
 	my @selected_columns = $schema_info->columns($class);
 
-debug "SC: ", keys %{$schema_info->columns($class)};
-
 	for my $ci (@selected_columns){
 	    next if $ci->is_foreign_key or $ci->hidden;
 	    column_add_info($ci->name, $ci, $class);
-		
 	    $columns_info->{$ci->name} = $ci;
-	} 
-	debug "CI: ", $columns_info;
+	}
+
 	return $columns_info;
 }
 
@@ -497,9 +494,9 @@ sub columns_info {
     }
 
     for my $column_info (@$selected_columns) {
-	debug "CI for ", $column_info->name, ": ", $column_info;
-	
-# Belongs to or Has one
+	debug "CI for ", $column_info->name, ": ", $column_info->hashref;
+
+	# Belongs to or Has one
 	my $foreign_type = $column_info->foreign_type;
 	my $rs = $column_info->relationship->resultset;
 
@@ -514,8 +511,7 @@ sub columns_info {
 	}
 	push @$columns_info, $column_info;
     }
-    
-    debug "CI for $class: ", $columns_info;
+
     return $columns_info;
 }
 
