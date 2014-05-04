@@ -193,12 +193,15 @@ sub _build__relationships {
             $foreign_type = 'has_many';
         }
 
+	my $resultset = $source->schema->resultset($rel_info->{class});
+
         $rel_hash{$rel_name} = TableEdit::RelationshipInfo->new(
             name => $rel_name,
             type => $foreign_type,
             cond => $rel_info->{cond},
             self_column => $column_name,
             foreign_column => $foreign_column,
+	    resultset => $resultset,
         );
     }
 

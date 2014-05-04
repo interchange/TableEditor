@@ -85,6 +85,21 @@ has hidden => (
     default => 0,
 );
 
+=head2 resultset
+
+L<DBIx::Class::ResultSet> object for this relationship.
+
+=cut
+
+has resultset => (
+    is => 'ro',
+    required => 1,
+    isa => InstanceOf ['DBIx::Class::ResultSet'],
+    handles => {
+	source => 'result_source',
+    },
+);
+
 has hashref => (
     is => 'lazy',
     default => sub {
