@@ -348,18 +348,28 @@ sub class_columns {
     return \@columns;
 }
 
-sub class_grid_columns {
-	my $class = shift;	
-	return class_source($class)->resultset_attributes->{grid_columns} if class_source($class)->resultset_attributes->{grid_columns};	
-	my $columns = [];
-	for my $column_info (@{class_columns($class)}){
-		# Leave out inappropriate columns
-		next if $column_info->data_type eq 'text';
-		next if $column_info->size > 255;
+=head2 class_grid_columns
 
-		push @$columns, $column_info;
-	}
-	return $columns; 
+Return array of all columns suitable for grid display.
+
+=cut
+
+sub class_grid_columns {
+    my $class = shift;
+
+    return class_source($class)->resultset_attributes->{grid_columns} if class_source($class)->resultset_attributes->{grid_columns};
+
+    my $columns = [];
+
+    for my $column_info (@{class_columns($class)}){
+	# Leave out inappropriate columns
+	next if $column_info->data_type eq 'text';
+	next if $column_info->size > 255;
+
+	push @$columns, $column_info;
+    }
+
+    return $columns;
 }
 
 sub class_form_columns {
