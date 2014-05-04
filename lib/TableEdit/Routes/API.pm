@@ -501,13 +501,15 @@ sub columns_info {
 	
 # Belongs to or Has one
 	my $foreign_type = $column_info->foreign_type;
+	my $rs = $column_info->relationship->resultset;
 
 	if ($foreign_type eq 'belongs_to' or $foreign_type eq 'might_have') {
-	    my $count = schema->resultset($column_info->{source})->count;
+	    # determine number of records in foreign table
+	    my $count = $rs->count;
 	    if ($count <= $dropdown_treshold){
 		$column_info->display_type ('dropdown');
-		my @foreign_objects = schema->resultset($column_info->{source})->all;
-		$column_info->{options} = dropdown(\@foreign_objects, $column_info->{foreign_column});
+		my @foreign_objects = $rs->all;
+		$column_info->options(dropdown(\@foreign_objects, $column_info->{foreign_column}));
 	    }
 	}
 	push @$columns_info, $column_info;
