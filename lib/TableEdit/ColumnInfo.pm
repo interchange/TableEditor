@@ -17,6 +17,17 @@ has name => (
     required => 1,
 );
 
+=head2 position
+
+Position of the column in the class, starts with 1.
+
+=cut
+
+has position => (
+    is => 'ro',
+    required => 1,
+);
+
 =head2 data_type
 
 Column data type.

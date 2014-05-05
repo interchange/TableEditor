@@ -104,6 +104,7 @@ sub _build__columns {
     my $self = shift;
     my %column_hash;
     my %rel_hash;
+    my @columns_order = $self->source->columns;
     my $candidates = $self->source->columns_info;
 
     # build relationships first
@@ -113,6 +114,12 @@ sub _build__columns {
         # build hash by source column
         $rel_hash{$rel_info->self_column} = $rel_info;
     }
+
+    # column positions
+    my $pos = 1;
+    my %column_pos;
+
+    map {$column_pos{$_} = $pos++} @columns_order;
 
     while (my ($name, $info) = each %$candidates) {
         # check if there is a relationship for this column
@@ -126,6 +133,7 @@ sub _build__columns {
 
         $column_hash{$name} = TableEdit::ColumnInfo->new(
             name => $name,
+            position => $column_pos{$name},
             %$info);
     }
 

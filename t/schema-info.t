@@ -85,12 +85,15 @@ for my $testdb (@handles) {
         roles_id => {
             label => 'Roles id',
             data_type => 'integer',
+            position => 1,
         },
         name => {
             label => 'Name',
+            position => 2,
         },
         label => {
             label => 'Label',
+            position => 3,
         },
     );
 
@@ -132,6 +135,7 @@ for my $testdb (@handles) {
             foreign_type => 'belongs_to',
             label => 'Roles id',
             data_type => 'integer',
+            position => 2,
         },
         users_id => {
             is_foreign_key => 1,
@@ -139,6 +143,7 @@ for my $testdb (@handles) {
             foreign_type => 'belongs_to',
             label => 'Users id',
             data_type => 'integer',
+            position => 1,
         },
     );
 
@@ -187,15 +192,23 @@ for my $testdb (@handles) {
 
 sub test_columns {
     my ($class, $expected) = @_;
+    my $expected_value;
 
     while (my ($col_name, $matches) = each %$expected) {
         my $col_obj = $schema_info->column($class->name, $col_name);
 
         isa_ok($col_obj, 'TableEdit::ColumnInfo');
 
+        # test_column position
+        my $pos = $col_obj->position;
+        $expected_value = $matches->{position};
+
+        ok($pos eq $expected_value, "Test position for column $col_name")
+            || diag "$pos instead of $expected_value.";
+
         # test column label
         my $label = $col_obj->label;
-        my $expected_value = $matches->{label} || '';
+        $expected_value = $matches->{label} || '';
 
         ok($label eq $expected_value, "Test label for column $col_name")
             || diag "$label instead of $expected_value.";
