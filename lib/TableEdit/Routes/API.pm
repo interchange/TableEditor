@@ -764,19 +764,23 @@ sub grid_where {
 
 =head2 grid_rows
 
+Returns a list of database records suitable for the grid display.
 
 =cut
 
 sub grid_rows {
 	my ($rows, $columns_info, $primary_column, $args) = @_;
-	
-	my @table_rows; 
+
+	my @table_rows;
+
 	for my $row (@$rows){
 		die 'No primary column' unless $primary_column;
+
 		# unravel object
 		my $row_inflated = {$row->get_inflated_columns};
 		my $id = $row->$primary_column;
 		my $row_data = [];
+
 		for my $column (@$columns_info){
 			my $column_name = $column->{foreign} ? "$column->{foreign}" : "$column->{name}";
 			my $value = $row_inflated->{$column_name};
@@ -784,8 +788,14 @@ sub grid_rows {
 			$value = model_to_string($value) if blessed($value);
 			push @$row_data, {value => $value};
 		}
-		push @table_rows, {row => $row_data, id => $id, name => model_to_string($row) };
+
+		push @table_rows, {
+            row => $row_data,
+            id => $id,
+            name => model_to_string($row),
+        };
 	}
+
 	return \@table_rows;
 }
 
