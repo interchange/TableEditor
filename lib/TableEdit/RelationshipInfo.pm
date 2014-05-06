@@ -110,6 +110,7 @@ has hashref => (
             label => $self->label,
             name => $self->name,
             self_column => $self->self_column,
+            type => $self->type,
         );
 
         return \%hash;
