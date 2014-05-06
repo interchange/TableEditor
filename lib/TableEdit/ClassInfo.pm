@@ -126,8 +126,8 @@ sub _build__columns {
         if (exists $rel_hash{$name}) {
             my $rel_obj = $rel_hash{$name};
 
-            $info->{foreign_column} = $rel_obj->{foreign_column};
-            $info->{foreign_type} = $rel_obj->{type};
+            $info->{foreign_column} = $rel_obj->foreign_column;
+            $info->{foreign_type} = $rel_obj->type;
             $info->{relationship} = $rel_obj;
         }
 
