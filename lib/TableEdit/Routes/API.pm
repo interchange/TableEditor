@@ -137,8 +137,9 @@ get '/:class/:id/:related/items' => require_login sub {
 	my ($current_object, $data);
 	my $get_params = params('query') || {};
 	
-	my $relationship_info = $schema->{$class}->{relation}->{$related};
-	my $relationship_class = $relationship_info->{class_name};
+	my $relationship_info = $schema->{info}->relationships($class, $related);
+	my $relationship_class = $relationship_info->{$related}->name;
+
 	# Object lookup
 	$current_object = schema->resultset($class)->find($id);
 	my $related_items = $current_object->$related;
