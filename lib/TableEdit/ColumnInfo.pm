@@ -168,6 +168,7 @@ sub _as_hashref {
 	data_type => $self->data_type,
 	display_type => $self->display_type,
 	foreign_column => $self->foreign_column,
+    foreign_type => $self->foreign_type,
 	hidden => $self->hidden,
 	is_foreign_key => $self->is_foreign_key,
 	is_nullable => $self->is_nullable,
