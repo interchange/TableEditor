@@ -66,17 +66,12 @@ sub columns {
         die "No such class $class.";
     }
 
-    my $columns = $classes->{$class}->columns;
-
     if (wantarray) {
-        if ($self->sort) {
-            return sort values %$columns;
-        }
-
-        return values %$columns;
+        my @columns = $classes->{$class}->columns;
+        return @columns;
     }
 
-    return {%$columns};
+    return $classes->{$class}->columns;
 };
 
 =head2 column $class, $name
@@ -174,7 +169,7 @@ sub _build__classes {
 
     for my $class (@$candidates) {
         my $rs = $self->schema->resultset($class);
-        $class_hash{$class} = TableEdit::ClassInfo->new(name => $class, resultset => $rs);
+        $class_hash{$class} = TableEdit::ClassInfo->new(name => $class, resultset => $rs, sort => $self->sort);
     }
 
     return \%class_hash;

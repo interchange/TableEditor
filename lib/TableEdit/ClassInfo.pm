@@ -80,7 +80,7 @@ Otherwise, returns hash reference.
 sub columns {
     my $self = shift;
 
-    return $self->list_output($self->_columns, wantarray);
+    return $self->list_output($self->_columns, wantarray, 'position');
 }
 
 =head2 column
