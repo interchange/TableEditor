@@ -82,7 +82,7 @@ has foreign_column => (
     default => '',
 );
 
-=head2 foreign type
+=head2 foreign_type
 
 Type of foreign key.
 
