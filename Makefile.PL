@@ -18,6 +18,7 @@ WriteMakefile(
     PL_FILES            => {},
     PREREQ_PM => {
         'Test::Most' => 0,
+        'Test::Database' => 0,
         'YAML'       => 0,
         'Array::Utils' => 0,
         'DBD::SQLite' => 1.38_01,
