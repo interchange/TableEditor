@@ -17,7 +17,7 @@ WriteMakefile(
       : ()),
     PL_FILES            => {},
     PREREQ_PM => {
-        'Test::More' => 0,
+        'Test::Most' => 0,
         'YAML'       => 0,
         'Array::Utils' => 0,
         'DBD::SQLite' => 1.38_01,
