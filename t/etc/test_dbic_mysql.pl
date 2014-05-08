@@ -1,0 +1,3 @@
+{
+    traits       => 'Testmysqld',
+};
