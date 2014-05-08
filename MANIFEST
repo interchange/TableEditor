@@ -160,11 +160,11 @@ sessions/985858895346264932406846515749810923.yml
 sessions/991661703568977017534569722513579384.yml
 sessions/993112105075934538418807618615274645.yml
 sessions/99783473960610545403886145053488712.yml
-t/driver-info.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
-t/schema-info.t
+t/schema-info/driver-info.t
+t/schema-info/schema-info.t
 TODO
 views/field/boolean.html
 views/field/boolean.xml
