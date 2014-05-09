@@ -58,6 +58,7 @@ lib/TableEdit/Schema/Result/UsersAttributesValue.pm
 lib/TableEdit/SchemaInfo.pm
 lib/TableEdit/SchemaInfo/Role/Label.pm
 lib/TableEdit/SchemaInfo/Role/ListUtils.pm
+lib/TableEdit/SchemaInfo/Test/Relationships.pm
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
