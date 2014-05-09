@@ -42,4 +42,24 @@ my %expected = (
 
 test_relationships($schema_info->classes->{'Company::Employee'}, \%expected);
 
+%expected = (
+    phone_rs => {
+        type => 'has_many',
+        self_column => 'person_id',
+        foreign_column => 'fk_person_id',
+    },
+    employee => {
+        type => 'might_have',
+        self_column => 'person_id',
+        foreign_column => 'employee_id',
+    },
+    artist => {
+        type => 'might_have',
+        self_column => 'person_id',
+        foreign_column => 'artist_id',
+    },
+);
+
+test_relationships($schema_info->classes->{'Person'}, \%expected);
+
 done_testing;
