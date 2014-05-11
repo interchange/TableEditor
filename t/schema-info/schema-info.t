@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::Most;
 use Test::Database;
 
 use Interchange6::Schema;
@@ -56,6 +56,9 @@ for my $testdb (@handles) {
 
     ok (exists $classes->{Role}, "Test for Role class.");
 
+    # set sorting for Role class
+    $classes->{Role}->sort(1);
+
     # test name and label of class
     my $name = $classes->{Role}->name;
     $expected_value = 'Role';
@@ -81,6 +84,12 @@ for my $testdb (@handles) {
     $count = scalar(keys %$columns);
     ok ($count == $expected_value, "Test number of columns (hash)")
         || diag "Number of columns: $count instead of $expected_value.";
+
+    # test order in array
+    my @expected_order = qw/roles_id name label/;
+    my @order = map {$_->name} @cols;
+
+    is_deeply(\@order, \@expected_order, "Order of columns (array)");
 
     my %expected = (
         roles_id => {
