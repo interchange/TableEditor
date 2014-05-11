@@ -113,6 +113,16 @@ has size => (
     is => 'ro',
 );
 
+=head2 default_value
+
+Default value for column.
+
+=cut
+
+has default_value => (
+    is => 'ro',
+);
+
 =head2 hidden
 
 Whether column is hidden or not.

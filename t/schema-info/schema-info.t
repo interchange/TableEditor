@@ -191,6 +191,15 @@ for my $testdb (@handles) {
                       $classes->{Permission}->relationships->{Role},
                        \%expected);
 
+    test_columns($classes->{Tax}, {
+	decimal_places => {
+	    data_type => 'integer',
+	    default_value => 2,
+	    label => 'Decimal places',
+	    position => 5,
+	}
+    });
+
     # test hashref
     my $col_info = $schema_info->column('UserRole', 'users_id');
     my $col_label = $col_info->hashref->{label};
@@ -235,6 +244,16 @@ sub test_columns {
         ok($display_type eq $expected_value,
            "Test display type for column $col_name")
             || diag "$display_type instead of $expected_value.";
+
+	# test default value
+	my $default_value = $col_obj->default_value;
+	my $expected_value = $matches->{default_value};
+
+	if (defined $default_value || defined $expected_value) {
+	    ok($default_value eq $expected_value,
+	       "Test default value for column $col_name")
+		|| diag "$default_value instead of $expected_value.";
+	}
 
         # test whether column is foreign key
         my $is_fk = $col_obj->is_foreign_key;
