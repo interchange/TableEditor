@@ -224,7 +224,6 @@ get '/:class/:id' => require_login sub {
 	my $class = params->{class};
 	my $columns = columns_info($class); 
 
-	debug "Columns: ", $columns;
 	$data->{fields} = [map {$_->hashref} @$columns];
 	debug "Fields: ", $data->{fields};
 	# Object lookup
