@@ -6,7 +6,7 @@ use TableEdit::Plugins::Locator::API;
 my $active_plugin_list = config->{table_editor_plugins};
 my $plugins;
 for my $plugin (@$active_plugin_list){
-	push @$plugins, {name => $plugin, js => "/api/plugins/$plugin/public/js/app.js"};
+	push @$plugins, {name => $plugin, js => "api/plugins/$plugin/public/js/app.js"};
 }
 
 prefix '/api';

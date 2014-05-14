@@ -7,14 +7,15 @@ appname: "TableEdit"
 charset: "UTF-8"
 session: YAML
 session_expires: 8 hours
+table_editor_plugins: [ "Locator", "SomePlugin"]
+#base_url: "admin/"
 
 # Template engine for front page
-template: "template_flute"
+template: "template_toolkit"
 
 # include timestamp in log format
 logger_format: "%t [%P] %L @%D> %m in %f l. %l"
 
-table_editor_plugins: [ "Locator", "Krneki"]
 
 plugins:
 

@@ -9,30 +9,22 @@ use TableEdit::Plugins;
 use TableEdit::Routes::API;
 use TableEdit::Auth;
 
-hook 'before_template_render' => sub {
-	my $tokens = shift;
-	$tokens->{'site-title'} = 'Table Edit';
-};
 
 prefix '/';
-get '/' => sub { return forward '/index.html'};
-get '/index.html' => sub { template 'index';};
 
-=head2 get '/views/**.html'
+=head2 Base url
 
-Route which returns the views used by Angular as
-templates.
-
-We use this instead of HTML files to adjust the
 URIs when the application is mounted at /myurl/.
 
 =cut
 
-get '/views/**.html' => sub {
-    my ($view) = splat;
-    my $template = join('/', @$view);
+get '/' => sub {
 
-    template $template;
+    template 'index.html', {
+    	base_url => config->{base_url}, 
+    	plugins => config->{table_editor_plugins},
+    };
 };
+
 
 true;

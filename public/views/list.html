@@ -1,0 +1,12 @@
+<div ng-if="!data.field_list" class="loading">
+	<div>
+		<span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Loading...
+	</div>
+</div>
+<div ng-if="data.field_list">
+	<h1>{{data.class_label}} - List of items</h1>
+		<p style="text-align: right"><a ng-click="create()" href="#/{{data.class}}/new" class=""><i class="glyphicon glyphicon-plus"></i>New {{data.class_label}}</a></p>
+		<div class="panel">
+			<div id="list-grid" ng-include="'views/list_grid.html'" ></div>
+		</div>
+</div>

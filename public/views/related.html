@@ -1,0 +1,35 @@
+<script type="text/javascript" src="/javascripts/list.js"></script>
+<!-- Page heading -->
+<div class="page-head">
+	<!-- Page heading -->
+	<h1 ng-if="item_info.title" class="title"><span class="grey super-title">{{ item_info.class }}</span> {{ item_info.title }}</h1>
+	<div class="clearfix"></div>
+
+</div>
+<!-- Page heading ends -->
+
+<div class="matter bundle-page">
+	<ul ng-show="class.relations" class="nav nav-tabs">
+			<li ><a href="/#/{{item_info.class}}/edit/{{item_info.id}}/">General</a></li>
+			
+			<li ng-class="{active: link.foreign == relation}" class="sub-menu-item" ng-repeat="link in class.relations">
+				<a class="sub-menu-link" href="/#/{{item_info.class}}/{{item_info.id}}/{{link.foreign}}/{{link.foreign_type}}">{{link.label}}</a>
+			</li>
+		</ul>
+
+	<div ng-if="!item_info.class" class="loading">
+		<div>
+			<span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Loading...
+		</div>
+	</div>
+
+	<div ng-show="item_info.class">
+		<a ng-click="create()" class="pull-right"><i class="glyphicon glyphicon-plus"></i> New {{item_info.related_class_label}}</a>
+		<div class="row-fluid">
+	
+			<h2>Related {{item_info.related_class_label}}</h2>
+			<div id="list-grid" ng-include='"views/list_grid.html"' ng-controller='RelatedItemsCtrl' ng-init="actions='has_many_items_list';"></div>
+	
+		</div>	
+	</div>
+</div>

@@ -12,6 +12,7 @@ use TableEdit::DriverInfo;
 
 my $appdir = realpath( "$FindBin::Bin/..");
 my $SQLite = _bootstrap_config_schema();
+set views => "$appdir/public/views";
 
 hook 'before' => sub {
 	# Set schema settings

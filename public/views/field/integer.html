@@ -1,0 +1,9 @@
+<input
+	name="field" 
+	class="form-control number"
+	ng-required="field.required" 
+	ng-readonly="field.readonly || (field.primary_key && !create)" 
+	ng-model="item.values[field.name]" 
+	maxlength="{{field.size}}"
+	type="text" >
+	<span ng-include="'views/field/partials/standard_validation.html'"></span>

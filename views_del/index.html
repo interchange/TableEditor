@@ -2,23 +2,23 @@
 <html lang="en" ng-app="CrudApp" check-user ng-controller="RootCtrl">
 <head>
 
-<base href="/" />
+<base  href="/<% base_url %>" />
 
 <!-- Title and other stuffs -->
 <title class="site-title">Administration</title>
 
-<link href="/css/bootstrap.css" rel="stylesheet" />
-<link href="/css/crud.css" rel="stylesheet" />
-<!-- <script src="/javascripts/jquery.js"></script> -->
+<link href="/<% base_url %>css/bootstrap.css" rel="stylesheet" />
+<link href="/<% base_url %>css/crud.css" rel="stylesheet" />
+<!-- <script src="/<% base_url %>javascripts/jquery.js"></script> -->
 <!-- jQuery -->
 
 
-<script src="/javascripts/angular.js"></script>
-<script src="/javascripts/angular-resource.js"></script>
-<script src="/javascripts/angular-route.js"></script>
+<script src="/<% base_url %>javascripts/angular.js"></script>
+<script src="/<% base_url %>javascripts/angular-resource.js"></script>
+<script src="/<% base_url %>javascripts/angular-route.js"></script>
 <script src="{{item.js}}" ng-repeat="item in javascripts"></script>
-<script src="/customization.js"></script>
-<script src="/app.js"></script>
+<script src="/<% base_url %>customization.js"></script>
+<script src="/<% base_url %>app.js"></script>
 </head>
 
 <body>
@@ -40,13 +40,13 @@
 				</form>
 			</div>
 				<span ng-show="!user.username">
-				<a href="/#/login">Log in</a>
+				<a href="#/login">Log in</a>
 			</span>
 			<span ng-show="user.username">
 				Logged in as {{user.username}}. <a ng-click="logout()">Logout</a>
 			</span>
 		</div>
-			<a href="/#/"><span id="site-title">Table Editor</span></a>
+			<a href="#/"><span id="site-title">Table Editor</span></a>
 
 		</div>
 	</header>
@@ -66,7 +66,7 @@
 				        <h3 class="panel-title">Configuration</h3>
 				      </div>
 						<ul class="nav nav-pills nav-stacked">
-							<li><a href="/#/status">Status</a></li>
+							<li><a href="#/status">Status</a></li>
 						</ul>
 			      </div>
 							<!-- Use the class nred, ngreen, nblue, nlightblue, nviolet or norange to add background color. You need to use this in <li> tag. -->

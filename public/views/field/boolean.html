@@ -1,0 +1,13 @@
+<select 
+	name="field" 
+	class="form-control" 
+	id="media_format" 
+	ng-model="item.values[field.name]" 
+	ng-required="!field.is_nullable" 
+	ng-readonly="field.readonly || (field.primary_key && !create)" 
+	>
+	<option></option>
+	<option value="0">No</option>
+	<option value="1">Yes</option>
+</select>
+<span ng-include="'views/field/partials/standard_validation.html'"></span>
