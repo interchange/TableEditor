@@ -14,6 +14,8 @@ template: "template_flute"
 # include timestamp in log format
 logger_format: "%t [%P] %L @%D> %m in %f l. %l"
 
+table_editor_plugins: [ "Locator", "Krneki"]
+
 plugins:
 
 # Sample configuration for authentication with Dancer::Plugin::Auth::Extensible

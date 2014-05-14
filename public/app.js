@@ -1,22 +1,22 @@
 'use strict';
 
 /* App Module */
+var custom_routes;
+var default_routes = {
+		'/login': { templateUrl: 'views/login.html', controller: 'LoginCtrl', public: true },
+		'/status': { templateUrl: 'views/status.html', controller: 'StatusCtrl', public: true },
+		'/:class/list': { templateUrl: 'views/list.html', controller: 'ListCtrl' },
+		'/:class/new': { templateUrl: 'views/form.html', controller: 'CreateCtrl' },
+		'/:class/edit/:id': { templateUrl: 'views/form.html', controller: 'EditCtrl' },
+		'/:class/:id/new/:related/:field/:value/': { templateUrl: 'views/form.html', controller: 'CreateRelatedCtrl' },
+		'/:class/:id/:related/has_many': { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' },
+		'/:class/:id/:related/might_have': { templateUrl: 'views/form.html', controller: 'EditRelatedCtrl' },
+		};
 
-var CrudApp = angular.module('CrudApp', ['CrudAppCustom', 'ngResource', 'ngRoute']).
-config(function($routeProvider) {
-	$routeProvider.
-	when('/login', { templateUrl: 'views/login.html', controller: 'LoginCtrl', public: true }).
-	when('/status', { templateUrl: 'views/status.html', controller: 'StatusCtrl', public: true }).
-	when('/:class/list', { templateUrl: 'views/list.html', controller: 'ListCtrl' }).
-	when('/:class/new', { templateUrl: 'views/form.html', controller: 'CreateCtrl' }).
-	when('/:class/edit/:id', { templateUrl: 'views/form.html', controller: 'EditCtrl' }).
-	when('/:class/:id/new/:related/:field/:value/', { templateUrl: 'views/form.html', controller: 'CreateRelatedCtrl' }).
-	when('/:class/:id/:related/has_many', { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' }).
-	when('/:class/:id/:related/might_have', { templateUrl: 'views/form.html', controller: 'EditRelatedCtrl' }).
-	when('/:class/:id/:related/many_to_many', { templateUrl: 'views/many_to_many.html', controller: 'RelatedListCtrl' }).
-	otherwise({redirectTo: '/status'});
-});
+var CrudApp = angular.module('CrudApp', ['ngResource', 'ngRoute'])
 
+
+//TODO: Move routes to HASH so custom routes can be added
 
 CrudApp.directive('checkUser', function ($rootScope, $location, $route, Url, Auth) {
 	return {
@@ -83,6 +83,10 @@ CrudApp.factory('Auth', function($resource){
 		logout: $resource('logout', {}, {method:'POST'}),
 	};
 });
+CrudApp.factory('Plugins', function($resource) { 
+	return $resource('api/plugins');
+});
+
 
 CrudApp.factory('Class', function($resource) { 
 	return $resource('api/:class/list', { class: '@class' });
@@ -126,8 +130,13 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route) {
 				item: item,
 			},
 			// Success
-			function() {
-				$location.path(url);							
+			function(data) {
+				if(data.error){
+					alert('There has been an error saving '+class_label+'! '+data.error);
+				}
+				else {
+					$location.path(url);							
+				}
 			},
 			// Error
 			function() {
@@ -192,6 +201,20 @@ CrudApp.factory('RelatedType', function () {
 
 CrudApp.factory('Url', function () {
 	return { edit: "" };
+});
+
+
+// Routes
+CrudApp.config(function($routeProvider) {
+	
+	angular.forEach(custom_routes, function(value, key){		
+		$routeProvider.when(key, value);
+	});
+	angular.forEach(default_routes, function(value, key){		
+		$routeProvider.when(key, value);
+	});
+	
+	$routeProvider.otherwise({redirectTo: '/status'});
 });
 
 
@@ -621,7 +644,7 @@ var SidebarCtrl = function ($scope, Menu) {
 };
 
 
-var RootCtrl = function ($scope, $rootScope, Auth, Url, $location) {
+var RootCtrl = function ($scope, $rootScope, Auth, Url, $location, Plugins) {
 	$rootScope.logout = function(){
 		Auth.logout.save(
 				{},
@@ -632,6 +655,19 @@ var RootCtrl = function ($scope, $rootScope, Auth, Url, $location) {
 				}
 		);
 	};
+	
+	// Load JS from plugins
+	$rootScope.javascripts = Plugins.query(
+			{},
+			// Success
+			function(data){
+				angular.forEach(data, function(value, key){							
+					loadjscssfile(value.js, "js");
+				});
+			
+			}
+		
+	);
 }
 
 var LoginCtrl = function ($scope, $rootScope, Auth, Url, $location) {

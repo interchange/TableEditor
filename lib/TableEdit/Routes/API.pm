@@ -399,7 +399,6 @@ sub grid_columns_info {
 	my $columns = class_grid_columns($class);
 	for my $col (@$columns){
 	    my $col_info = $col->hashref;
-	    debug "Get grid column info for $class and $col: ", $col_info;
 		my %col_copy = %{$col_info};
 
 	# Cleanup for grid
@@ -502,7 +501,6 @@ sub columns_info {
     }
 
     for my $column_info (@$selected_columns) {
-	debug "CI for ", $column_info->name, ": ", $column_info->hashref;
 
 	# Belongs to or Has one
 	my $foreign_type = $column_info->foreign_type;
@@ -608,8 +606,6 @@ sub column_add_info {
 	
 	return undef if $column_info->{hidden};
 	
-	debug "CAI for $column_name: ", $column_info;
-    debug "Field type For $column_name, ", field_type($column_info);
 	# Coulumn calculated properties - can be overwritten in model
 	$column_info->{display_type} ||= field_type($column_info);
 	$column_info->{default_value} = ${$column_info->{default_value}} if ref($column_info->{default_value}) eq 'SCALAR' ;
@@ -626,7 +622,7 @@ sub required_field {
 	my $field_info = shift;
 	return 'required' if defined $field_info->{is_nullable} and !defined $field_info->{default_value} and $field_info->{is_nullable} == 0;
 	if(defined $field_info->{foreign}){
-		return undef if $field_info->{foreign_type} eq 'might_have';
+		return undef if $field_info->{foreign_type} and $field_info->{foreign_type} eq 'might_have';
 		return 'required' unless defined $field_info->{is_nullable} and $field_info->{is_nullable} != 1;
 	}
 	return undef;
@@ -782,7 +778,6 @@ sub grid_rows {
 		for my $column (@$columns_info){
 			my $column_name = $column->{foreign} ? "$column->{foreign}" : "$column->{name}";
 			my $value = $row_inflated->{$column_name};
-			debug "ID $id, column $column_name, value: ", $value;
 			$value = model_to_string($value) if blessed($value);
 			push @$row_data, {value => $value};
 		}

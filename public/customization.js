@@ -1,39 +1,25 @@
 'use strict';
 
-/* App Module */
-var CrudAppCustom = angular.module('CrudAppCustom', ['ngResource', 'ngRoute'])
-//	.config(function($routeProvider) {
-//		$routeProvider.
-//	     when('/Product/edit/:id', { templateUrl: 'views/product_form.html', controller: 'ProductEditCtrl' }).
-//	     otherwise({redirectTo: '/'});
-//});
 /*
-
-
-// Controllers
-
-
-var ProductEditCtrl = function ($scope, $routeParams, $location, Item, ClassItem, $rootScope) {
-	$scope.item = Item.get({
-		class: 'Product', 
-		id: $routeParams.id}
-	);
-	$scope.data = ClassItem.get({
-		class: 'Product',
-	},
-	// Success
-	function(data) {
-		$rootScope.breadcrumbs = data.bread_crumbs;
-	}
-	);
-	
-	$scope.save = Item.update;
-	
-	$scope.related = function(){
-		var related = this.link.foreign;
-		var type = this.link.foreign_type;
-		$location.path('/Product/'+$routeParams.id+'/'+related+'/'+type);
-	};
-};
-
+var custom_routes = {
+		'/Role/list': { templateUrl: 'views/form.html', controller: 'CreateCtrl' },		
+		};
 */
+
+function loadjscssfile(filename, filetype){
+	 if (filetype=="js"){ //if filename is a external JavaScript file
+	  var fileref=document.createElement('script');
+	  fileref.setAttribute("type","text/javascript");
+	  fileref.setAttribute("src", filename);
+	 }
+	 else if (filetype=="css"){ //if filename is an external CSS file
+	  var fileref=document.createElement("link");
+	  fileref.setAttribute("rel", "stylesheet");
+	  fileref.setAttribute("type", "text/css");
+	  fileref.setAttribute("href", filename);
+	 }
+	 if (typeof fileref!="undefined")
+	  document.getElementsByTagName("head")[0].appendChild(fileref);
+	}
+
+

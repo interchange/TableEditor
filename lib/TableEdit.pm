@@ -5,6 +5,7 @@ our $VERSION = '0.1';
 
 use Dancer::Plugin::DBIC qw(schema resultset rset);
 use TableEdit::Config;
+use TableEdit::Plugins;
 use TableEdit::Routes::API;
 use TableEdit::Auth;
 
@@ -30,8 +31,6 @@ URIs when the application is mounted at /myurl/.
 get '/views/**.html' => sub {
     my ($view) = splat;
     my $template = join('/', @$view);
-
-    debug "Template: $template.";
 
     template $template;
 };
