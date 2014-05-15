@@ -8,10 +8,15 @@
 	<!-- Page heading -->
 	<div class="page-head" ng-init="view='form'" checkUser>
 		<!-- Page heading -->
-		<h1 ng-if="create" class="title">New {{ data.class_label }}</h1>
+		<img style="float:right; " src="api/plugins/Locator/public/images/speaker.png" />
+		<h1 ng-if="create" class="title">New speaker</h1>
 		<h1 ng-if="!create" class="title">
-			<span class="grey super-title">Totaly custum {{ data.class_label }}</span> {{ item.title }}
+			<span class="grey super-title">Totally custom page for editing speaker</span> 
+			{{ item.title }}
 		</h1>
+		<p>
+		Speaker from event {{ item.values.event_id }}.
+		</p> 
 		<!-- Breadcrumb -->
 	
 		<div class="clearfix"></div>
@@ -25,42 +30,32 @@
 			<div class="row-fluid">
 				<div class="alert-box span12"></div>
 			</div>
-			<ul ng-show="data.relations" class="nav nav-tabs" ng-if="!create">
-				<li class="active"><a href="#">General</a></li>
-				<li class="sub-menu-item" ng-repeat="link in data.relations">
-					<a class="sub-menu-link" href="/#/{{item.class}}/{{item.id}}/{{link.name}}/{{link.type}}">{{link.label}}</a>
-				</li>
-			</ul>
-	
+			
+			
+			
 			<div class="row-fluid">
 				<div class="span12">
 					<form name="form" method="post" enctype="multipart/form-data" class="form-horizontal form" novalidate>
-						<fieldset>
 	
 	
 							<!-- Form Name -->
 							<div class="messages"></div>
 	
-							<!-- Text input-->
-							<div ng-repeat="field in data.fields">
-								<div ng-if="!(field.is_auto_increment || (field.readonly && !field.primary_key) && create)">
-									<div class="form-group form-field">
-										<label class="control-label ">{{ field.label }}</label>
-										<ng-form name="validationScope">
-										<div class="controls control-group" ng-class="{'error': validationScope.field.$invalid}">
-											<div ng-include="'views/field/'+field.display_type+'.html'"></div>
-										</div>
-										</ng-form>
-									</div>
+								
+				
+								<div style="border: 1px grey solid; border-round: 5px; padding: 10px; margin:10px">
+												ID :<input name="field" ng-model="item.values['id']" maxlength="" type="text" />											
+												Name :<input name="field" ng-model="item.values['name_and_title']" maxlength="" type="text" />											
+												Event :<input name="field"  ng-model="item.values['event_id']" maxlength="" type="text" />											
 								</div>
-							</div>
-	
+								
+							
 	
 							<div class="form-group">
+							<a class="btn btn-primary  ng-binding" href="/#/Speaker/profile/{{item.values['id']}}">See profile</a>
+							<a class="btn btn-primary  ng-binding" href="/#/Speaker/{{item.values['id']}}/event/belongs_to">Event that speaker participated in</a>
 								<button ng-disabled="form.$invalid || isUnchanged(item)" ng-click="save()" class="btn btn-success pull-right">Save</button>
-								</div>
 							</div>
-						</fieldset>
 					</form>
 				</div>
 			</div>

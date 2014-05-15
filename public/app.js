@@ -1,7 +1,7 @@
 'use strict';
 
 /* App Module */
-var custom_routes;
+
 var default_routes = {
 		'/login': { templateUrl: 'views/login.html', controller: 'LoginCtrl', public: true },
 		'/status': { templateUrl: 'views/status.html', controller: 'StatusCtrl', public: true },
@@ -13,10 +13,9 @@ var default_routes = {
 		'/:class/:id/:related/might_have': { templateUrl: 'views/form.html', controller: 'EditRelatedCtrl' },
 		};
 
-var CrudApp = angular.module('CrudApp', ['ngResource', 'ngRoute'])
+var CrudApp = angular.module('CrudApp', ['ngResource', 'ngRoute']);
 
 
-//TODO: Move routes to HASH so custom routes can be added
 
 CrudApp.directive('checkUser', function ($rootScope, $location, $route, Url, Auth) {
 	return {
@@ -51,7 +50,7 @@ CrudApp.directive('checkUser', function ($rootScope, $location, $route, Url, Aut
 				}
 			});
 		}
-	}
+	};
 });
 
 
