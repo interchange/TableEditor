@@ -171,13 +171,8 @@ sub _build__relationships {
 
         my ($foreign_column, $column_name) = %{$rel_info->{cond}};
 
-        unless ($foreign_column =~ s/^foreign\.//) {
-            die "no match for $foreign_column.";
-        }
-
-        unless ($column_name =~ s/^self\.//) {
-            die "no match for $column_name.";
-        }
+        $foreign_column =~ s/^foreign\.//;
+        $column_name =~ s/^self\.//;
 
         my $column_info = $columns->{$column_name};
         $rel_info->{foreign} = $rel_name;
