@@ -10,10 +10,10 @@
 
 <div class="matter bundle-page">
 	<ul ng-show="class.relations" class="nav nav-tabs">
-			<li ><a href="/#/{{item_info.class}}/edit/{{item_info.id}}/">General</a></li>
+			<li ><a href="#/{{item_info.class}}/edit/{{item_info.id}}/">General</a></li>
 			
 			<li ng-class="{active: link.foreign == relation}" class="sub-menu-item" ng-repeat="link in class.relations">
-				<a class="sub-menu-link" href="/#/{{item_info.class}}/{{item_info.id}}/{{link.foreign}}/{{link.foreign_type}}">{{link.label}}</a>
+				<a class="sub-menu-link" href="#/{{item_info.class}}/{{item_info.id}}/{{link.foreign}}/{{link.foreign_type}}">{{link.label}}</a>
 			</li>
 		</ul>
 
