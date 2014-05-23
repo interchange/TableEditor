@@ -3,7 +3,6 @@ package TableEdit::SchemaInfo;
 use Moo;
 use MooX::Types::MooseLike::Base qw/InstanceOf/;
 
-use TableEdit::ResultInfo;
 use TableEdit::ClassInfo;
 
 =head1 ATTRIBUTES
@@ -37,18 +36,21 @@ has _classes => (
 
 =head1 METHODS
 
-=head2 resultset
+=head2 resultset $class
 
-Returns L<TableEdit::ResultsetInfo> object for given name.
+Returns L<DBIx::Class::ResultSet> object for $class.
 
 =cut
 
 sub resultset {
-    my ($self, $name) = @_;
+    my ($self, $class, $name) = @_;
+    my $classes = $self->_classes;
 
-    my $rs = $self->schema->resultset($name);
+    if (! exists $classes->{$class}) {
+        die "No such class $class.";
+    }
 
-    return TableEdit::ResultInfo->new(resultset => $rs);
+    return $classes->{$class}->resultset;
 };
 
 =head2 columns $class
