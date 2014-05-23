@@ -47,8 +47,8 @@ get '/:class/:id/:related/list' => require_login sub {
 	my $related = params->{related};
 	my ($current_object, $data);
 	
-	my $relationship_info = $schema->{$class}->{relation}->{$related};
-	my $relationship_class = $relationship_info->{class_name};
+	my $relationship_info = $schema->{info}->relationship($class, $related);
+
 	# Object lookup
 	$current_object = schema->resultset($class)->find($id);
 	my $related_items = $current_object->$related;
@@ -56,10 +56,9 @@ get '/:class/:id/:related/list' => require_login sub {
 	return '{}' unless ( defined $current_object );	
 	$data->{'id'} = $id;
 	$data->{'class'} = $class;
-	$data->{'related_class'} = $relationship_class;
-	$data->{'related_class_label'} = $schema->{$relationship_class}->{label};
-	$data->{'related'} = $relationship_info;
-	$data->{'related_type'} = $relationship_info->{foreign_type};
+	$data->{'related_class'} = $relationship_info->name;
+	$data->{'related_class_label'} = $relationship_info->label;
+	$data->{'related_type'} = $relationship_info->type;
 	$data->{'title'} = model_to_string($current_object);
 	
 	return to_json $data;
