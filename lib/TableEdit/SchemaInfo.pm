@@ -163,6 +163,21 @@ sub classes_with_single_primary_key {
     return \@pk_classes;
 }
 
+=head2 class $name
+
+Returns L<TableEdit::ClassInfo> object for $name.
+
+=cut
+
+sub class {
+    my ($self, $name) = @_;
+    my $classes = $self->_classes;
+
+    if (exists $classes->{$name}) {
+	return $classes->{$name};
+    }
+}
+
 sub _build__classes {
     my $self = shift;
     my %class_hash;
