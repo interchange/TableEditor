@@ -157,6 +157,23 @@ sub relationships {
     return $self->list_output($self->_relationships, wantarray);
 }
 
+=head2 relationship $name
+
+Returns relationship name.
+
+=cut
+
+sub relationship {
+    my ($self, $name) = @_;
+    my $relationships = $self->_relationships;
+
+    if (! exists $relationships->{$name}) {
+        die "No such relationship $name.";
+    }
+
+    return $relationships->{$name};
+}
+
 sub _build__relationships {
     my $self = shift;
     my $source = $self->source;
