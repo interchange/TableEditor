@@ -233,7 +233,6 @@ get '/:class/:id' => require_login sub {
 	$data->{id} = $id;
 	$data->{class} = $class;
 	$data->{values} = $object_data;
-	add_values($columns, $object_data, $object);
 debug "Displaying class $class and id $id: ", $data;	
 	return to_json($data, {allow_unknown => 1});
 };
