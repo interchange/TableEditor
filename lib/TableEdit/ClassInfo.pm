@@ -140,6 +140,26 @@ sub _build__columns {
     return \%column_hash;
 }
 
+=head2 primary_key
+
+Returns primary key(s) for this class.
+
+=cut
+
+sub primary_key {
+    my $self = shift;
+    my @pk;
+
+    @pk = $self->source->primary_columns;
+
+    if (@pk > 1) {
+	return \@pk;
+    }
+    else {
+	return $pk[0];
+    }
+}
+
 =head2 relationships
 
 Returns relationships for this class.

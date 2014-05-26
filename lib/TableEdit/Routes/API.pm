@@ -694,7 +694,7 @@ sub grid_template_params {
 	
 	my $rs = $related_items || schema->resultset(ucfirst($class));
 
-	my $primary_column = $schema->{info}->resultset($class)->primary_key;
+	my $primary_column = $schema->{info}->class($class)->primary_key;
     
 	my $page = $get_params->{page} || 1;
 	$page_size = $get_params->{page_size} if $get_params->{page_size};
