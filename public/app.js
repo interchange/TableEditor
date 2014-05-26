@@ -8,9 +8,12 @@ var default_routes = {
 		'/:class/list': { templateUrl: 'views/list.html', controller: 'ListCtrl' },
 		'/:class/new': { templateUrl: 'views/form.html', controller: 'CreateCtrl' },
 		'/:class/edit/:id': { templateUrl: 'views/form.html', controller: 'EditCtrl' },
-		'/:class/:id/new/:related/:field/:value/': { templateUrl: 'views/form.html', controller: 'CreateRelatedCtrl' },
+		'/:class/:id/new/:related': { templateUrl: 'views/form.html', controller: 'CreateRelatedCtrl' },
+		//'/:class/:id/:related/has_many': { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' },
+		//'/:class/:id/:related/might_have': { templateUrl: 'views/form.html', controller: 'EditRelatedCtrl' },
 		'/:class/:id/:related/has_many': { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' },
-		'/:class/:id/:related/might_have': { templateUrl: 'views/form.html', controller: 'EditRelatedCtrl' },
+		'/:class/:id/:related/might_have': { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' },
+		'/:class/:id/:related/many_to_many': { templateUrl: 'views/many_to_many.html', controller: 'RelatedListCtrl' },
 		};
 
 var CrudApp = angular.module('CrudApp', ['ngResource', 'ngRoute']);
@@ -289,7 +292,7 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 
 	$scope.create = function () {
 		Url.edit = $location.path();
-		$location.path('/'+$scope.item_info.class+'/'+$scope.item_info.id+'/new/'+$scope.item_info.related_class+'/'+$scope.item_info.related.name+'/'+$scope.item_info.id);		
+		$location.path('/'+$scope.item_info.class+'/'+$scope.item_info.id+'/new/'+$scope.item_info.related_class);		
 	};
 
 

@@ -211,4 +211,10 @@ sub _build__classes {
     return \%class_hash;
 }
 
+sub relationship_class {
+	my ($self, $rel_info) = @_;
+	my $class = $rel_info->resultset->result_class;
+	return $self->schema->class_mappings->{$class};
+}
+
 1;

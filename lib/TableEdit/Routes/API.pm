@@ -47,7 +47,8 @@ get '/:class/:id/:related/list' => require_login sub {
 	my $related = params->{related};
 	my ($current_object, $data);
 	
-	my $relationship_info = $schema->{info}->relationship($class, $related);
+	#my $relationship_info = $schema->{info}->relationship($class, $related);
+	my $relationship_info = $schema->{info}->class($class)->relationship($related);
 
 	# Object lookup
 	$current_object = schema->resultset($class)->find($id);
@@ -135,9 +136,10 @@ get '/:class/:id/:related/items' => require_login sub {
 	my $related = params->{related};
 	my ($current_object, $data);
 	my $get_params = params('query') || {};
+	my $relationship_info = $schema->{info}->class($class)->relationship($related);
 	
-	my $relationship_info = $schema->{info}->relationships($class, $related);
-	my $relationship_class = $relationship_info->{$related}->name;
+	$schema_info ||= TableEdit::SchemaInfo->new(schema => schema);
+	my $relationship_class = $schema_info->relationship_class($relationship_info);
 
 	# Object lookup
 	$current_object = schema->resultset($class)->find($id);
