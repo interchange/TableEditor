@@ -116,6 +116,25 @@ sub relationships {
     return $classes->{$class}->relationships;
 };
 
+=head2 relationship $class $name
+
+Returns L<TableEdit::RelationshipInfo> object for relationship $name in
+class $class.
+
+=cut
+
+sub relationship {
+    my ($self, $class, $name) = @_;
+
+    my $classes = $self->_classes;
+
+    if (! exists $classes->{$class}) {
+        die "No such class $class.";
+    }
+
+    return $classes->{$class}->relationship($name);
+}
+
 =head2 classes
 
 Returns available classes for this schema.
@@ -183,7 +202,7 @@ sub _build__classes {
     my %class_hash;
     my $schema = $self->schema;
     my $candidates = [sort values %{$schema->{class_mappings}}];
-
+    Dancer::Logger::debug("Cand: ", [keys %{$schema->{class_mappings}}]);
     for my $class (@$candidates) {
         my $rs = $self->schema->resultset($class);
         $class_hash{$class} = TableEdit::ClassInfo->new(name => $class, resultset => $rs, sort => $self->sort);
