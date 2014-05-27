@@ -202,7 +202,7 @@ sub _build__classes {
     my %class_hash;
     my $schema = $self->schema;
     my $candidates = [sort values %{$schema->{class_mappings}}];
-    Dancer::Logger::debug("Cand: ", [keys %{$schema->{class_mappings}}]);
+
     for my $class (@$candidates) {
         my $rs = $self->schema->resultset($class);
         $class_hash{$class} = TableEdit::ClassInfo->new(name => $class, resultset => $rs, sort => $self->sort);
