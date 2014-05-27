@@ -9,7 +9,7 @@ with 'TableEdit::SchemaInfo::Role::Label';
 
 =head2 name
 
-Name of class.
+Name of this relationship.
 
 =cut
 
