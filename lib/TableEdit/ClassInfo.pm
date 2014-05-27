@@ -241,7 +241,8 @@ sub _build__relationships {
             cond => $rel_info->{cond},
             self_column => $column_name,
             foreign_column => $foreign_column,
-	    resultset => $resultset,
+            origin_class => $self,
+            resultset => $resultset,
         );
     }
 

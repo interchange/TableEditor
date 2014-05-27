@@ -74,6 +74,18 @@ has foreign_column => (
     required => 1,
 );
 
+=head2 origin_class
+
+Returns L<TableEdit::ClassInfo> object where this relationship originates.
+
+=cut
+
+has origin_class => (
+    is => 'ro',
+    required => 1,
+    isa => InstanceOf ['TableEdit::ClassInfo'],
+);
+
 =head2 hidden
 
 Whether relationship is hidden or not.

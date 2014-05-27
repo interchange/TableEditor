@@ -65,6 +65,17 @@ sub test_relationship {
     ok($foreign_column eq $expected_value,
        "Test foreign column for class $class_name and relationship $rel_name.")
         || diag "$foreign_column instead of $expected_value";
+
+	# origin class
+	my $origin_class = $relationship->origin_class;
+	isa_ok($origin_class, 'TableEdit::ClassInfo');
+
+	my $origin_class_name = $origin_class->name;
+	$expected_value = $class_name;
+
+	ok($origin_class_name eq $expected_value,
+       "Test origin class name for class $class_name and relationship $rel_name.")
+        || diag "$origin_class_name instead of $expected_value";
 }
 
 1;
