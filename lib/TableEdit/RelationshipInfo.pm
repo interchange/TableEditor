@@ -117,12 +117,15 @@ has hashref => (
     default => sub {
         my $self = shift;
         my %hash = (
+            class_name => $self->class_name,
             foreign_column => $self->foreign_column,
             hidden => $self->hidden,
             label => $self->label,
             name => $self->name,
             self_column => $self->self_column,
             type => $self->type,
+            origin_class_name => $self->origin_class->name,
+            origin_class_label => $self->origin_class->label,
         );
 
         return \%hash;
