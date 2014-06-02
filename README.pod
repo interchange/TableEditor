@@ -204,11 +204,11 @@ These field types are used on detail view and on list search.
  
 =head1 PLUGINS
  
-New functionalities and custumization can be achieved by adding plugins.
+New functionalities and customization can be achieved by adding plugins.
 
 =head2 Adding plugin
 
-All plugins are located in /Plugins/name_of_plugin dir. Inside they usualy have folowing stucture:
+All plugins are located in /Plugins/name_of_plugin dir. Inside they usually have following stucture:
 
 	Plugins
 	|-Some_plugin
@@ -228,9 +228,9 @@ Active plugins are listed in config.
 
 	table_editor_plugins: [ "SomePlugin", "SomeOtherPlugin" ]
 
-=head2 Custum pages
+=head2 Custom pages
 
-You can add new or redifine any page by adding custom route and redirect it to custum controller (or leave default) and custum template (or default). In js/app.js.
+You can add new or redefine any page by adding custom route and redirect it to custom controller (or leave default) and custom template (or default). In js/app.js.
 
 	custom_routes['/User/edit/:id'] = { templateUrl: '/api/plugins/SomePlugin/public/views/user-form.html', controller: 'UserEditCtrl' };
 	
@@ -247,7 +247,7 @@ You can add new or redifine any page by adding custom route and redirect it to c
 
 =head2 Custom API 
 
-In api.pm routes can be overridden. This is usefull for data manipulation before saving, data validation, custom information or similar. 
+In api.pm routes can be overridden. This is useful for data manipulation before saving, data validation, custom information or similar. 
 
 
 Example usage:
