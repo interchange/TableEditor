@@ -136,14 +136,13 @@ get '/:class/:id/:related/items' => require_login sub {
 	my $related = params->{related};
 	my ($current_object, $data);
 	my $get_params = params('query') || {};
-	my $relationship_info = $schema->{info}->class($class)->relationship($related);
-	
-	$schema_info ||= TableEdit::SchemaInfo->new(schema => schema);
-	my $relationship_class = $schema_info->relationship_class($relationship_info);
+
+	my $relationship_info = $schema->{info}->relationship($class, $related);
+	my $relationship_class = $relationship_info->class_name;
 
 	# Object lookup
 	$current_object = schema->resultset($class)->find($id);
-	my $related_items = $current_object->$related;
+	my $related_items = $relationship_info->resultset;
 	
 	#return to_json '{}' unless ( defined $current_object );	
 	# Related bind
