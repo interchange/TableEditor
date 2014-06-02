@@ -76,6 +76,14 @@ sub test_relationship {
 	ok($origin_class_name eq $expected_value,
        "Test origin class name for class $class_name and relationship $rel_name.")
         || diag "$origin_class_name instead of $expected_value";
+
+    # class name
+    my $rel_class_name = $relationship->class_name;
+    $expected_value = $expected->{class_name} || $rel_name;
+
+    ok($rel_class_name eq $expected_value,
+       "Test class name for class $rel_class_name and relationship $rel_name.")
+        || diag "$rel_class_name instead of $expected_value";
 }
 
 1;

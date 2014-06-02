@@ -27,16 +27,19 @@ my %expected = (
         type => 'belongs_to',
         self_column => 'fk_job_id',
         foreign_column => 'job_id',
+        class_name => 'Job',
     },
     company => {
         type => 'belongs_to',
         self_column => 'fk_company_id',
         foreign_column => 'company_id',
+        class_name => 'Company',
     },
     employee => {
         type => 'belongs_to',
         self_column => 'fk_employee_id',
         foreign_column => 'employee_id',
+        class_name => 'Employee',
     },
 );
 
@@ -47,16 +50,19 @@ test_relationships($schema_info->classes->{'Company::Employee'}, \%expected);
         type => 'has_many',
         self_column => 'person_id',
         foreign_column => 'fk_person_id',
+        class_name => 'Phone',
     },
     employee => {
         type => 'might_have',
         self_column => 'person_id',
         foreign_column => 'employee_id',
+        class_name => 'Employee',
     },
     artist => {
         type => 'might_have',
         self_column => 'person_id',
         foreign_column => 'artist_id',
+        class_name => 'Employee',
     },
 );
 

@@ -45,6 +45,17 @@ has type => (
                 'has_one', 'many_to_many'],
 );
 
+=head2 class_name
+
+Name of class where this relationship points to.
+
+=cut
+
+has class_name => (
+    is => 'ro',
+    required => 1,
+);
+
 =head2 cond
 
 Relationship condition.

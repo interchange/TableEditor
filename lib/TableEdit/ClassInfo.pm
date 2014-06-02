@@ -202,9 +202,12 @@ sub _build__relationships {
 
     for my $rel_name ($source->relationships){
         my $rel_info = $source->relationship_info($rel_name);
-        my $relationship_class_package = $rel_info->{class};
 
         next if $rel_info->{hidden};
+
+        # Determine name of class this relationship points to
+        my $class_name = $rel_info->{class};
+        $class_name =~ s/\w+:://g;
 
         my ($foreign_column, $column_name) = %{$rel_info->{cond}};
 
@@ -242,6 +245,7 @@ sub _build__relationships {
             self_column => $column_name,
             foreign_column => $foreign_column,
             origin_class => $self,
+            class_name => $class_name,
             resultset => $resultset,
         );
     }
