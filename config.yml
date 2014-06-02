@@ -7,7 +7,7 @@ appname: "TableEdit"
 charset: "UTF-8"
 session: YAML
 session_expires: 8 hours
-table_editor_plugins: [ "Locator", "SomePlugin"]
+table_editor_plugins: [ "Event", "Locator" ]
 #base_url: "admin/"
 
 # Template engine for front page
@@ -17,8 +17,8 @@ template: "template_toolkit"
 logger_format: "%t [%P] %L @%D> %m in %f l. %l"
 
 
-plugins:
 
+plugins:
 # Sample configuration for authentication with Dancer::Plugin::Auth::Extensible
   Auth::Extensible:
     disable_roles: 0

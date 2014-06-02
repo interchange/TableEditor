@@ -200,4 +200,92 @@ For example 	/public/views/field/email_widget.html
 	
 These field types are used on detail view and on list search. 	
 	
+	
+ 
+=head1 PLUGINS
+ 
+New functionalities and custumization can be achieved by adding plugins.
+
+=head2 Adding plugin
+
+All plugins are located in /Plugins/name_of_plugin dir. Inside they usualy have folowing stucture:
+
+	Plugins
+	|-Some_plugin
+		|-api.pm
+		|-public
+			|-images
+			|-js
+				|-app.js
+			|-views
+	
+URL to images folder is: 
+api/plugins/Locator/public/images/
+
+=head2 Activating plugin
+
+Active plugins are listed in config.
+
+	table_editor_plugins: [ "SomePlugin", "SomeOtherPlugin" ]
+
+=head2 Custum pages
+
+You can add new or redifine any page by adding custom route and redirect it to custum controller (or leave default) and custum template (or default). In js/app.js.
+
+	custom_routes['/User/edit/:id'] = { templateUrl: '/api/plugins/SomePlugin/public/views/user-form.html', controller: 'UserEditCtrl' };
+	
+	var UserEditCtrl = function ($scope, $rootScope, $routeParams, Item, ClassItem, Url) {
+		$scope.item = Item.read.get({
+			class: 'User', 
+			id: $routeParams.id}
+		);
+		$scope.data = ClassItem.get({class: 'User'});
+
+		$scope.save = Item.update;
+		$scope.related = Item.related_link;
+	};
+
+=head2 Custom API 
+
+In api.pm routes can be overridden. This is usefull for data manipulation before saving, data validation, custom information or similar. 
+
+
+Example usage:
+
+	package TableEdit::Plugins::SomePlugin::API;
+	use Dancer ':syntax';
+
+
+	prefix '/api';
+
+	# Data validation
+	post '/User' => sub {		
+		my $post_data = from_json request->body;
+		my $values = $post_data->{item}->{values};
+		unless ($values->{last_name} eq 'Smith') {
+			return to_json {error => {last_name => "Family only!"}};
+		}
+		
+		pass;
+	};
+	
+	
+	get '/User' => require_login sub {
+		my (@languages, $errorMessage);
+		my $class = 'User';
+		$schema_info ||= TableEdit::SchemaInfo->new(schema => schema);
+		my $columns = [map {$_->hashref} @{TableEdit::Routes::API::columns_info($class, TableEdit::Routes::API::class_form_columns($class))}];
+		my $relationships = [map {$_->hashref} $schema_info->relationships($class)];
+
+		return to_json({ 
+			custom_information => 'this is custom!',
+			fields => $columns,
+			class => $class,
+			class_label => $schema_info->{$class}->{label},
+			relations => $relationships,
+		}, {allow_unknown => 1}); 
+	};
+
+	1;
+
 =cut	
