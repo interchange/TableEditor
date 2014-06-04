@@ -9,8 +9,7 @@ var default_routes = {
 		'/:class/new': { templateUrl: 'views/form.html', controller: 'CreateCtrl' },
 		'/:class/edit/:id': { templateUrl: 'views/form.html', controller: 'EditCtrl' },
 		'/:class/:id/new/:related': { templateUrl: 'views/form.html', controller: 'CreateRelatedCtrl' },
-		//'/:class/:id/:related/has_many': { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' },
-		//'/:class/:id/:related/might_have': { templateUrl: 'views/form.html', controller: 'EditRelatedCtrl' },
+		'/:class/:id/:related/belongs_to': { templateUrl: 'views/related.html', controller: 'BelongsToCtrl' },
 		'/:class/:id/:related/has_many': { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' },
 		'/:class/:id/:related/might_have': { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' },
 		'/:class/:id/:related/many_to_many': { templateUrl: 'views/many_to_many.html', controller: 'RelatedListCtrl' },
@@ -361,6 +360,10 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 	
 };
 
+var BelongsToCtrl = function ($scope, $routeParams, RelatedItem, RelatedClass, $location, ClassItem) {
+	$scope.data = ClassItem.get({class: $routeParams.related});
+//	$location.path('/'+$routeParams.related+'/edit/'+$routeParams.id);	
+};
 
 var RelatedClassCtrl = function ($scope, $routeParams, RelatedItem, RelatedClass, RelatedType) {
 	$scope.related_type = RelatedType;
@@ -555,7 +558,18 @@ var EditCtrl = function ($scope, $rootScope, $routeParams, Item, ClassItem, Url)
 		class: $routeParams.class, 
 		id: $routeParams.id}
 	);
-	$scope.data = ClassItem.get({class: $routeParams.class});
+	$scope.data = ClassItem.get({class: $routeParams.class},
+			// Success
+			function(data) {
+				// Pagination
+				var page_scope = 5;			
+		
+			
+				
+				angular.forEach(data.relations, function(value, key){		
+					value.foreign_id = eval("$scope.item.values." + value.self_column);
+				});
+		});
 
 	$scope.save = Item.update;
 

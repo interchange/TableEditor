@@ -28,7 +28,8 @@
 			<ul ng-show="data.relations" class="nav nav-tabs" ng-if="!create">
 				<li class="active"><a href="#">General</a></li>
 				<li class="sub-menu-item" ng-repeat="link in data.relations">
-					<a class="sub-menu-link" href="#/{{item.class}}/{{item.id}}/{{link.name}}/{{link.type}}">{{link.label}}</a>
+					<a ng-if="link.type != 'belongs_to'" class="sub-menu-link mn" href="#/{{item.class}}/{{item.id}}/{{link.name}}/{{link.type}}">{{link.label}}</a>
+					<a ng-if="link.type == 'belongs_to'" class="sub-menu-link bt" href="#/{{link.class_name}}/edit/{{link.foreign_id}}">{{link.label}}</a>
 				</li>
 			</ul>
 	
