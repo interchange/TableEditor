@@ -47,7 +47,8 @@ get '/schema' => sub {
 	# Check if DB configuration exists
 	my $db = config->{plugins}->{DBIC}->{default};
 	if($db){
-		$schema_info->{db_info} = $db;
+		my $db_settings = $SQLite->resultset('Db')->find('default');
+		$schema_info->{db_info} = {$db_settings->get_columns};
 	}
 	
 	# Check for DB connection
@@ -95,7 +96,8 @@ post '/db-config' => sub {
 		return undef if $error;
 	}
 	
-	# Success
+	# Default schema
+	$post->{config}->{schema_class} ||= 'TableEdit::Schema';
 	
 	# Save to db
 	my $db = $SQLite->resultset('Db')->create({name => 'default', %{$post->{config}} });
@@ -151,7 +153,8 @@ sub set_db {
 			dsn => $dsn,
             user => $db_settings->{user} || '',
             pass => $db_settings->{pass} || '',
-            schema_class => $db_settings->{schema_class} ? $db_settings->{schema_class} : 'TableEdit::Schema'};
+            schema_class => $db_settings->{schema_class}
+        };
 
         # Retrieve current settings
         my $dbic_settings = config->{plugins}->{DBIC};
