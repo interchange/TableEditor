@@ -63,12 +63,12 @@ for my $testdb (@handles) {
     my $name = $classes->{Role}->name;
     $expected_value = 'Role';
     ok ($name eq $expected_value, "Test name of Role class.")
-        || diag "$name instead of expected_value.";
+        || diag "$name instead of $expected_value.";
 
     my $label = $classes->{Role}->label;
     $expected_value = 'Role';
     ok ($label eq $expected_value, "Test label of Role class.")
-        || diag "$label instead of expected_value.";
+        || diag "$label instead of $expected_value.";
 
     # test resultset for class (from schema and from class)
     my ($rs, $rs_name);
@@ -80,14 +80,14 @@ for my $testdb (@handles) {
 
     $rs_name = $rs->result_class;
     ok ($rs_name eq $expected_value, "Test name of Role resultset.")
-	|| diag "$rs_name instead of expected_value.";
+	|| diag "$rs_name instead of $expected_value.";
 
     $rs = $classes->{Role}->resultset;
     isa_ok($rs, 'DBIx::Class::ResultSet');
 
     $rs_name = $rs->result_class;
     ok ($rs_name eq $expected_value, "Test name of Role resultset.")
-	|| diag "$rs_name instead of expected_value.";
+	|| diag "$rs_name instead of $expected_value.";
 
     $expected_value = 3;
 
