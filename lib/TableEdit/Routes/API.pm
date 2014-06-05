@@ -57,7 +57,7 @@ get '/:class/:id/:related/list' => require_login sub {
 	return '{}' unless ( defined $current_object );	
 	$data->{'id'} = $id;
 	$data->{'class'} = $class;
-	$data->{'related_class'} = $relationship_info->name;
+	$data->{'related_class'} = $relationship_info->class_name;
 	$data->{'related_class_label'} = $relationship_info->label;
 	$data->{'related_type'} = $relationship_info->type;
 	$data->{'title'} = model_to_string($current_object);
