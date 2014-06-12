@@ -15,7 +15,7 @@ var default_routes = {
 		'/:class/:id/:related/many_to_many': { templateUrl: 'views/many_to_many.html', controller: 'RelatedListCtrl' },
 		};
 
-var CrudApp = angular.module('CrudApp', ['ngResource', 'ngRoute']);
+var CrudApp = angular.module('CrudApp', ['ngResource', 'ngRoute', 'summernote']);
 
 
 

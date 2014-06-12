@@ -9,8 +9,12 @@
 
 <link href="/<% base_url %>css/bootstrap.css" rel="stylesheet" />
 <link href="/<% base_url %>css/crud.css" rel="stylesheet" />
-<!-- <script src="/<% base_url %>javascripts/jquery.js"></script> -->
+<link rel="stylesheet" type="text/css" href="http://hackerwins.github.io/summernote/summernote-dist/summernote.css">
+<link href="/css/summernote.css" />
+<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
 <!-- jQuery -->
+<script type="text/javascript" src="//code.jquery.com/jquery-2.0.2.js"></script>
+<script type="text/javascript" src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
 <script type="text/javascript">
 var custom_routes = {};
 </script>
@@ -19,8 +23,20 @@ var custom_routes = {};
 <script src="/<% base_url %>javascripts/angular-resource.js"></script>
 <script src="/<% base_url %>javascripts/angular-route.js"></script>
 <% FOREACH p = plugins %>
-			<script src="/<% base_url %>api/plugins/<% p %>/public/js/app.js"></script>
+<script src="/<% base_url %>api/plugins/<% p %>/public/js/app.js"></script>
 <% END %>
+
+<script src="/<% base_url %>javascripts/angular-summernote.min.js"></script>
+<script src="/<% base_url %>javascripts/summernote.min.js"></script>
+
+<style type="text/css">
+	body {
+		margin: 10px 20px 50px 20px;
+	}
+</style>
+  
+</head>
+
 <script src="/<% base_url %>customization.js"></script>
 <script src="/<% base_url %>app.js"></script>
 </head>

@@ -25,7 +25,7 @@ my $schema_info;
 # Compile schema metadata
 my $schema = {};
 
-my $field_types;
+my @field_types;
 my $menu;
 
 prefix '/api';
@@ -638,15 +638,15 @@ sub add_values {
 
 sub field_type {
 	my $field = shift;
-	my $data_type = $field->{data_type} || 'varchar';
-	$data_type = 'varchar' unless grep( /^$data_type/, @$field_types );
-	return $data_type;
+	my $field_type = $field->{field_type} || 'varchar';
+	$field_type = 'varchar' unless grep( /^$field_type/, field_types() );
+	return $field_type;
 }
 
 
 sub field_types {
-	my $dir = $appdir.'/views/field';
-	my @types;
+	my $dir = $appdir.'/public/views/field';
+	return @field_types if @field_types;
     opendir(DIR, $dir) or die $!;
 
     while (my $file = readdir(DIR)) {
@@ -655,10 +655,10 @@ sub field_types {
         # remove .html
         $file =~ s/\.html//;
         $file =~ s/\.htm//;
-		push @types, $file;
+		push @field_types, $file;
     }
     closedir(DIR);
-    return \@types;
+    return @field_types;
 }
 
 

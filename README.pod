@@ -117,7 +117,7 @@ For this example we will use following model.
 	
 	__PACKAGE__->columns_info->{created_date}->{readonly} = 1;
 	__PACKAGE__->columns_info->{internal_code}->{hidden} = 1;
-	__PACKAGE__->columns_info->{email}->{data_type} = 'text';
+	__PACKAGE__->columns_info->{email}->{field_type} = 'text';
 	
 	# You can replace this text with custom code or comments, and it will be preserved on regeneration
 	1;
@@ -188,19 +188,22 @@ You can set user friendly name of the table.
 	
 =head2 Field data type
 
-Fields have basic data types based on types in db. You can override them to use different form element.
+Fields have basic field types based on data types in db. You can override them to use different form element.
 
-	__PACKAGE__->columns_info->{email}->{data_type} = 'text';
+	__PACKAGE__->columns_info->{email}->{field_type} = 'text';
+	__PACKAGE__->columns_info->{description}->{field_type} = 'html';
 	
 You can also set them to use your custom widget. You create a HTML file with the matching name in /public/views/field directory.
 
 For example 	/public/views/field/email_widget.html
 	
-	__PACKAGE__->columns_info->{email}->{data_type} = 'email_widget';
+	__PACKAGE__->columns_info->{email}->{field_type} = 'email_widget';
 	
 These field types are used on detail view and on list search. 	
 	
-	
+=head3 Bulit in types
+
+TE has some common types built in. Type 'html' is wysiwyg editor in texarea. You can find other in /public/views/field.
  
 =head1 PLUGINS
  

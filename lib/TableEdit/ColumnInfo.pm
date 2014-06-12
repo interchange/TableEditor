@@ -39,6 +39,17 @@ has data_type => (
     required => 1,
 );
 
+=head2 data_type
+
+Column field type.
+
+=cut
+
+has field_type => (
+    is => 'ro',
+    required => 0,
+);
+
 =head2 display_type
 
 Column display type.
