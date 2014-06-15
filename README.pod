@@ -193,9 +193,9 @@ Fields have basic field types based on data types in db. You can override them t
 	__PACKAGE__->columns_info->{email}->{field_type} = 'text';
 	__PACKAGE__->columns_info->{description}->{field_type} = 'html';
 	
-You can also set them to use your custom widget. You create a HTML file with the matching name in /public/views/field directory.
+You can also set them to use your custom widget. You create a HTML file with the matching name in F<public/views/field> directory.
 
-For example 	/public/views/field/email_widget.html
+For example F<public/views/field/email_widget.html>:
 	
 	__PACKAGE__->columns_info->{email}->{field_type} = 'email_widget';
 	
@@ -203,7 +203,7 @@ These field types are used on detail view and on list search.
 	
 =head3 Bulit in types
 
-TE has some common types built in. Type 'html' is wysiwyg editor in texarea. You can find other in /public/views/field.
+TE has some common types built in. Type 'html' is wysiwyg editor in texarea. You can find other in F<public/views/field>.
  
 =head1 PLUGINS
  
