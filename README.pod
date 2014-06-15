@@ -203,7 +203,7 @@ These field types are used on detail view and on list search.
 	
 =head3 Built-in types
 
-TE has some common types built in. Type 'html' is wysiwyg editor in texarea. You can find other in F<public/views/field>.
+TE has some common types built in. Type 'html' is wysiwyg editor in text area. You can find other in F<public/views/field>.
  
 =head1 PLUGINS
  
