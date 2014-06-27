@@ -205,6 +205,7 @@ get '/:class/list' => require_login sub {
 	return to_json($grid_params, {allow_unknown => 1});
 };
 
+
 get '/menu' => sub {
     if (! $menu) {
         $menu = to_json [map { 
@@ -217,6 +218,23 @@ get '/menu' => sub {
 
     return $menu;
 };
+
+
+post '/:class/upload_image' => require_login sub {
+	my $class = param('class');
+	my $file = upload('file');
+	$file->copy_to('/my/upload/folder');
+	
+	# Upload image
+    if($file){
+		my $fileName = $file->{filename};
+		if($file->copy_to("$appdir/public/images/upload/$class/$fileName")){			
+			return "/$fileName";
+		}		
+    }
+	return 0;
+};
+
 
 get '/:class/:id' => require_login sub {
 	my ($data);
@@ -233,7 +251,6 @@ get '/:class/:id' => require_login sub {
 	$data->{id} = $id;
 	$data->{class} = $class;
 	$data->{values} = $object_data;
-debug "Displaying class $class and id $id: ", $data;	
 	return to_json($data, {allow_unknown => 1});
 };
 

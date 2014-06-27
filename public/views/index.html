@@ -22,6 +22,7 @@ var custom_routes = {};
 <script src="/<% base_url %>javascripts/angular.js"></script>
 <script src="/<% base_url %>javascripts/angular-resource.js"></script>
 <script src="/<% base_url %>javascripts/angular-route.js"></script>
+<script src="/<% base_url %>javascripts/angular-file-upload.min.js"></script>
 <% FOREACH p = plugins %>
 <script src="/<% base_url %>api/plugins/<% p %>/public/js/app.js"></script>
 <% END %>
@@ -34,8 +35,6 @@ var custom_routes = {};
 		margin: 10px 20px 50px 20px;
 	}
 </style>
-  
-</head>
 
 <script src="/<% base_url %>customization.js"></script>
 <script src="/<% base_url %>app.js"></script>

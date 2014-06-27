@@ -39,7 +39,7 @@ has data_type => (
     required => 1,
 );
 
-=head2 data_type
+=head2 field_type
 
 Column field type.
 
@@ -153,6 +153,16 @@ is foreign key.
 =cut
 
 has relationship => (
+    is => 'ro',
+);
+
+=head2 upload dir
+
+Dir to save uploads to.
+
+=cut
+
+has upload_dir => (
     is => 'ro',
 );
 

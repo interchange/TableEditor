@@ -1,0 +1,28 @@
+<div ng-if="view != 'grid' ">
+	{{item.values[field.name]}}<br />
+	<img src="/images/upload/{{data.class}}{{item.values[field.name]}}" style="height: 100px" />
+		<div style="margin-bottom: 10px">
+			<!-- 
+			 input class="form-control" type="file" name="filename" file-model="myFile" ng-model="upload_image_file">
+			 -->
+			<input type="file" ng-file-select="onFileSelect($files)" >
+		</div>
+		<!-- 
+		<input class="btn btn-default" type="submit" value="Upload" ng-click="uploadImage()">
+		 -->
+		<button ng-click="upload.abort()">Cancel Upload</button>
+	<span ng-include="'views/field/partials/standard_validation.html'"></span>
+</div>
+
+<span ng-if="view == 'grid' ">
+<!-- This is grid version -->
+<input 
+	name="field"
+	class="form-control"
+	ng-required="field.required" 
+	ng-readonly="field.readonly || (field.primary_key && !create)" 
+	ng-model="item.values[field.name]" 
+	maxlength="{{field.size}}"
+	type="text" >
+
+</span>
