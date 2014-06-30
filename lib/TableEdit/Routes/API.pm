@@ -220,19 +220,28 @@ get '/menu' => sub {
 };
 
 
-post '/:class/upload_image' => require_login sub {
+post '/:class/:field/upload_image' => require_login sub {
 	my $class = param('class');
+	my $field = param('field');
 	my $file = upload('file');
-	$file->copy_to('/my/upload/folder');
+	my $result_source = class_source($class);
+	
+	# Upload dir
+	my $path = $result_source->{_columns}->{$field}->{upload_dir}; 
+	$path ||= "images/upload/$class/$field/";
 	
 	# Upload image
     if($file){
 		my $fileName = $file->{filename};
-		if($file->copy_to("$appdir/public/images/upload/$class/$fileName")){			
-			return "/$fileName";
+		
+		my $dir = "$appdir/public/$path";
+		mkdir $dir unless (-e $dir);       
+		
+		if($file->copy_to($dir.$fileName)){			
+			return "/$path$fileName";
 		}		
     }
-	return 0;
+	return undef;
 };
 
 

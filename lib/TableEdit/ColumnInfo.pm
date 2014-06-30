@@ -165,6 +165,24 @@ Dir to save uploads to.
 has upload_dir => (
     is => 'ro',
 );
+=head2 upload dir
+
+Dir to save uploads to.
+
+=cut
+
+has upload_extensions => (
+    is => 'ro',
+);
+=head2 upload dir
+
+Dir to save uploads to.
+
+=cut
+
+has upload_max_size => (
+    is => 'ro',
+);
 
 =head2 options
 
@@ -207,6 +225,9 @@ sub _as_hashref {
 	name => $self->name,
 	options => $self->options,
 	size => $self->size,
+	upload_max_size => $self->upload_max_size,
+	upload_extensions => $self->upload_extensions ? [map {lc($_)} @{$self->upload_extensions}] : undef,
+	upload_dir => $self->upload_dir,
     );
 
     return \%hash;

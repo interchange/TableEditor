@@ -204,6 +204,14 @@ These field types are used on detail view and on list search.
 =head3 Bulit in types
 
 TE has some common types built in. Type 'html' is wysiwyg editor in texarea. You can find other in /public/views/field.
+
+=head4 Image upload
+
+Example of image field conf:
+__PACKAGE__->columns_info->{avatar}->{field_type} = 'image_upload';
+__PACKAGE__->columns_info->{avatar}->{upload_dir} = 'lib_item_img/'; # default is "images/upload/$class/$field/"
+__PACKAGE__->columns_info->{avatar}->{upload_max_size} = 1000000; # in bytes, default is unlimited
+__PACKAGE__->columns_info->{avatar}->{upload_extensions} = ['jpg', 'jpeg', 'gif', 'PNG']; # case insensitive
  
 =head1 PLUGINS
  
