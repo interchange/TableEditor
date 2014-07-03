@@ -15,14 +15,16 @@
 <!-- jQuery -->
 <script type="text/javascript" src="//code.jquery.com/jquery-2.0.2.js"></script>
 <script type="text/javascript" src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
-<script type="text/javascript">
-var custom_routes = {};
-</script>
 
 <script src="/<% base_url %>javascripts/angular.js"></script>
 <script src="/<% base_url %>javascripts/angular-resource.js"></script>
 <script src="/<% base_url %>javascripts/angular-route.js"></script>
 <script src="/<% base_url %>javascripts/angular-file-upload.min.js"></script>
+
+<script type="text/javascript">
+var CrudApp = angular.module('CrudApp', ['ngResource', 'ngRoute', 'summernote', 'angularFileUpload']);
+var custom_routes = {};
+</script>
 <% FOREACH p = plugins %>
 <script src="/<% base_url %>api/plugins/<% p %>/public/js/app.js"></script>
 <% END %>
@@ -45,7 +47,7 @@ var custom_routes = {};
 
 
 	<!-- Main content starts -->
-	<header class="jumbotron">
+	<header>
 		<div class="container">
 		<div class="pull-right">
 			<div>

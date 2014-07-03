@@ -142,7 +142,7 @@ get '/:class/:id/:related/items' => require_login sub {
 
 	# Object lookup
 	$current_object = schema->resultset($class)->find($id);
-	my $related_items = $relationship_info->resultset;
+	my $related_items = $current_object->$related;
 	
 	#return to_json '{}' unless ( defined $current_object );	
 	# Related bind
@@ -740,6 +740,8 @@ sub grid_template_params {
 		$grid_params->{field_list} , 
 		$primary_column, 
 	);
+
+	
 	
 	$grid_params->{class} = $class;
 	$grid_params->{page} = $page;
@@ -794,7 +796,7 @@ sub grid_rows {
 
 	for my $row (@$rows){
 		die 'No primary column' unless $primary_column;
-
+		
 		# unravel object
 		my $row_inflated = {$row->get_inflated_columns};
 		my $id = $row->$primary_column;
@@ -811,6 +813,7 @@ sub grid_rows {
             row => $row_data,
             id => $id,
             name => model_to_string($row),
+            columns => $row_inflated,
         };
 	}
 

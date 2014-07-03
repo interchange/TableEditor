@@ -9,7 +9,6 @@ use TableEdit::Plugins;
 use TableEdit::Routes::API;
 use TableEdit::Auth;
 
-
 prefix '/';
 
 =head2 Base url

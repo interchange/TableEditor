@@ -7,7 +7,7 @@ appname: "TableEdit"
 charset: "UTF-8"
 session: YAML
 session_expires: 8 hours
-table_editor_plugins: [ "Event", "Locator" ]
+
 #base_url: "admin/"
 
 # Template engine for front page
@@ -16,7 +16,11 @@ template: "template_toolkit"
 # include timestamp in log format
 logger_format: "%t [%P] %L @%D> %m in %f l. %l"
 
-
+engines:
+    JSON:
+        allow_blessed:   '1'
+        canonical:       '1'
+        convert_blessed: '1'
 
 plugins:
 # Sample configuration for authentication with Dancer::Plugin::Auth::Extensible

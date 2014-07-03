@@ -233,9 +233,12 @@ sub _build__relationships {
             }
         }
         elsif ($rel_type eq 'filter') {
-            if ($rel_info->{attrs}->{join_type} eq 'LEFT') {
+            if ($rel_info->{attrs}->{join_type} and $rel_info->{attrs}->{join_type} eq 'LEFT') {
                 # example: Strehler::Schema::Result::Description
                 $foreign_type = 'belongs_to';
+            }
+            else {
+                $foreign_type = 'has_many';
             }
         }
         elsif ($rel_type eq 'multi') {

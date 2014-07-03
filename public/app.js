@@ -15,9 +15,6 @@ var default_routes = {
 		'/:class/:id/:related/many_to_many': { templateUrl: 'views/many_to_many.html', controller: 'RelatedListCtrl' },
 		};
 
-var CrudApp = angular.module('CrudApp', ['ngResource', 'ngRoute', 'summernote', 'angularFileUpload']);
-
-
 
 CrudApp.directive('checkUser', function ($rootScope, $location, $route, Url, Auth) {
 	return {
@@ -126,7 +123,7 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route) {
 		update: function(){
 			var class_name = this.data.class;
 			var class_label = this.data.class_label;
-			var url = Url.edit;
+			var url = Url.edit || "/"+class_name+"/list";
 			var item = this.item;
 			// ClassItem.item
 			ClassItem.save({

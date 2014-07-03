@@ -5,7 +5,7 @@
 			<thead>
 				<tr>
 					<th class="field" ng-repeat="field in data.field_list">
-						<a ng-class="{active: field.name==sort_column}" ng-click="sort('{{field.name}}')" class="field-label sort">{{field.label}}</a>
+						<a ng-class="{active: field.name==sort_column}" ng-click="sort(field.name)" class="field-label sort">{{field.label}}</a>
 						<i ng-class="{'icon-chevron-down': field.name==sort_column && sort_desc, 'icon-chevron-up': field.name==sort_column && !sort_desc}" ></i>
 					</th>
 					<th>
@@ -44,8 +44,8 @@
 
 <div ng-if="data.pages > 1" >
 	<ul class="pagination">
-		<li ng-if="data.page > 1"><a ng-click="go_to_page('{{ data.page - 1 }}')">«</a></li>
+		<li ng-if="data.page > 1"><a ng-click="go_to_page(data.page - 1)">«</a></li>
 		<li ng-class="{active: page==data.page}" ng-repeat="page in page_list"><a ng-click="go_to_page( page )">{{ page }}</a></li>
-		<li ng-if="data.page < data.pages"><a ng-click="go_to_page('{{ data.page + 1 }}')">»</a></li>
+		<li ng-if="data.page < data.pages"><a ng-click="go_to_page( data.page + 1)">»</a></li>
 	</ul>
 </div>
