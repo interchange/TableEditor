@@ -1,0 +1,63 @@
+<h1>Orders: {{ title }}</h1>
+
+<ul class="nav nav-tabs" >
+				<li class="sub-menu-item" ng-repeat="link in types">
+					<a class="sub-menu-link mn" href="#/Order/list/{{link.type}}">{{link.label}}</a>
+				</li>
+	</ul>
+
+<table class="table">
+	<tbody>
+		<tr class="rhead">
+			<td>&nbsp;</td>
+			<td class="rhead"><a >Order</a></td>
+			<td class="rhead"><a >User</a></td>
+			<td class="rhead"><a >Location</a></td>
+			<td class="rhead"><a >Date/Time</a></td>
+			<td class="rhead" align="right"><a>Items</a></td>
+			<td class="rhead" align="right"><a>Total</a></td>
+			<td align="right" class="rhead"><a>Status</a></td>
+		</tr>
+
+		<tr class="rowalt"  ng-repeat="row in data.rows">
+			<td>
+				<input ng-model="row.checked" type="checkbox" name="order" value="{{ row.order_number }}"> 
+				<a ng-click="single('archive', row.orders_id )">></a> 
+				<a ng-click="single('delete', row.orders_id )">X</a> 
+				<input type="radio" name="item_radio" value="TEST0001" title="Select target for merge">
+			</td>
+			<td><a href="#/Order/view/{{ row.orders_id }}">{{ row.order_number }}</a></td>
+			<td><a href="#/User/edit/{{ row.users_id }}">{{ row.user }}</a></td>
+			<td>Ljubljana, AL US</td>
+			<td align="left">{{ row.order_date }}</td>
+			<td align="right">{{ row.items_count }}</td>
+			<td align="right">{{ row.total_cost }}</td>
+			<td align="right">{{ row.status }}</td>
+		</tr>
+
+
+
+	</tbody>
+</table>
+
+<div class="btn-group btn-group-xs">
+	<button class="btn btn-success" ng-click="check('all')" ng-class="{'active': checked == 'all'}">Check all</button>
+	<button class="btn btn-primary" ng-click="check('shipped')" ng-class="{'active': checked == 'shipped'}"> Check all shipped	</button>
+	<button class="btn btn-primary" ng-click="check('pending')" ng-class="{'active': checked == 'pending'}"> Check all pending	</button>
+	<button class="btn btn-primary" ng-click="check('waiting')" ng-class="{'active': checked == 'waiting'}">Check all waiting	</button>
+	<button class="btn btn-primary" ng-click="check('partial')" ng-class="{'active': checked == 'partial'}"> Check all partial	</button>
+	<button class="btn btn-warning" ng-click="check('none')" ng-class="{'active': checked == 'none'}">Uncheck all</button>
+</div>
+
+<div class="well" style="margin-top:20px; text-align: right">
+	<div class="btn-group btn-group-xs">
+		<button class="btn btn-default" ng-click="multi('delete')" >Delete checked</button>
+		<button class="btn btn-default" ng-click="multi('archive')">Archive checked</button>
+		<button class="btn btn-default" ng-click="multi('enter_tracking')">Enter tracking numbers</button>
+		<button class="btn btn-default" ng-click="multi('ship')" >Ship checked</button>
+	</div>
+</div>
+
+	
+
+
