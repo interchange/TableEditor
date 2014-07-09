@@ -62,6 +62,15 @@ if [ -z "$DANCER_ENVIRONMENT" ]; then
     fi
 fi
 
+# host
+if [ -z "$DANCER_HOST" ]; then
+    if [ -f "$DANCER_RUNDIR/$DANCER_APP.host" ]; then
+	DANCER_HOST=$(cat "$DANCER_RUNDIR/$DANCER_APP.host")
+    else
+	DANCER_HOST="127.0.0.1"
+    fi
+fi
+
 # port 
 if [ -z "$DANCER_PORT" ]; then
     if [ -f "$DANCER_RUNDIR/$DANCER_APP.port" ]; then
@@ -96,7 +105,7 @@ fi
 
 DANCER_CMD=$(which plackup)
 
-DANCER_CMDOPTS="-E $DANCER_ENVIRONMENT $DANCER_PATH -s Starman --workers=$DANCER_WORKERS --max-requests $DANCER_MAX_REQUEST_PER_CHILD --pid $DANCER_PIDFILE -p $DANCER_PORT -a bin/app.pl -D"
+DANCER_CMDOPTS="-E $DANCER_ENVIRONMENT $DANCER_PATH -s Starman --workers=$DANCER_WORKERS --max-requests $DANCER_MAX_REQUEST_PER_CHILD --pid $DANCER_PIDFILE -o $DANCER_HOST -p $DANCER_PORT -a bin/app.pl -D"
 
 check_running() {
     [ -s $DANCER_PIDFILE ] && kill -0 $(cat $DANCER_PIDFILE) >/dev/null 2>&1
@@ -132,7 +141,7 @@ _start() {
 }
 
 start() {
-    log_daemon_msg "Joining dancefloor $DANCER_PORT with $DANCER_WORKERS dancers" "$DANCER_APP"
+    log_daemon_msg "Joining dancefloor $DANCER_HOST:$DANCER_PORT with $DANCER_WORKERS dancers" "$DANCER_APP"
 
     if check_plack_handler; then
 	log_failure_msg "Plack handler for Starman not available."
@@ -161,7 +170,7 @@ stop() {
 }
 
 restart() {
-    log_daemon_msg "Spin on the dancefloor $DANCER_PORT with $DANCER_WORKERS dancers" "$DANCER_APP"
+    log_daemon_msg "Spin on the dancefloor $DANCER_HOST:$DANCER_PORT with $DANCER_WORKERS dancers" "$DANCER_APP"
 
     if check_compile; then
         log_action_msg "$APP_ERROR"
