@@ -48,7 +48,10 @@ get '/schema' => sub {
 	my $db = config->{plugins}->{DBIC}->{default};
 	if($db){
 		my $db_settings = $SQLite->resultset('Db')->find('default');
-		$schema_info->{db_info} = {$db_settings->get_columns};
+
+        if ($db_settings) {
+            $schema_info->{db_info} = {$db_settings->get_columns};
+        }
 	}
 	
 	# Check for DB connection
