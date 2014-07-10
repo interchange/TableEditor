@@ -1,12 +1,19 @@
 package TableEdit::Auth;
 use Dancer ':syntax';
 use Dancer::Plugin::Auth::Extensible;
+use TableEdit::Session
 
 prefix '/';
 
 get '/login' => sub {
-	return to_json session('logged_in_user')
-        ? {username => session('logged_in_user')} : {};
+	if(session('logged_in_user')){
+		return to_json {
+			username => session('logged_in_user'),
+		};
+	}
+	else {
+		return to_json {};
+	}
 };
 
 post '/login' => sub {
@@ -45,6 +52,11 @@ post '/logout' => sub {
 	# Delete user session
     session->destroy;
 	return 1;
+};
+
+
+get '/sessions/active' => sub {
+	return to_json TableEdit::Session::active_sessions_besides_me;
 };
 
 1;

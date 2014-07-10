@@ -14,6 +14,7 @@ use YAML::Tiny;
 use Scalar::Util 'blessed';
 
 use TableEdit::SchemaInfo;
+use TableEdit::Session;
 
 my $layout = {};
 my $dropdown_treshold = 100;
@@ -33,7 +34,8 @@ prefix '/api';
 any '**' => sub {
     # load schema if necessary
     _setup_schema();
-
+	TableEdit::Session::seen();
+    
     debug "Route: ", request->uri;
 
 	content_type 'application/json';

@@ -42,7 +42,7 @@ var custom_routes = {};
 <script src="/<% base_url %>app.js"></script>
 </head>
 
-<body>
+<body ng-cloak>
 
 
 
@@ -64,13 +64,16 @@ var custom_routes = {};
 				<a href="#/login">Log in</a>
 			</span>
 			<span ng-show="user.username">
-				Logged in as {{user.username}}. <a ng-click="logout()">Logout</a>
+				<div>Logged in as {{user.username}}. <a ng-click="logout()">Logout</a></div>
 			</span>
 		</div>
 			<a href="#/"><span id="site-title">Table Editor</span></a>
 
 		</div>
 	</header>
+		<div class="alert alert-warning" role="alert" ng-show="active.length && user.username">Currently also active: 
+		<strong ng-repeat="au in active">{{au.username}}{{$last ? '' : ', '}} </strong>
+		</div>
 	<div class="container-fluid">
 		<div class="row-fluid">
 

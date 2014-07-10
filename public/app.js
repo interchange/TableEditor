@@ -177,6 +177,10 @@ CrudApp.factory('Menu', function($resource) {
     return $resource('api/menu');
 });
 
+CrudApp.factory('ActiveUsers', function($resource) {
+	return $resource('sessions/active');
+});
+
 
 CrudApp.factory("RelatedItems", function($resource){
 	return $resource('api/:class/:id/:related/items', { class: '@class' });
@@ -693,7 +697,7 @@ var SidebarCtrl = function ($scope, Menu) {
 };
 
 
-var RootCtrl = function ($scope, $rootScope, Auth, Url, $location, Plugins) {
+var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Plugins, ActiveUsers) {
 	$rootScope.logout = function(){
 		Auth.logout.save(
 				{},
@@ -717,6 +721,16 @@ var RootCtrl = function ($scope, $rootScope, Auth, Url, $location, Plugins) {
 			}
 		
 	);
+	
+	// Active users
+	$rootScope.active = ActiveUsers.query();
+	$interval(function(){
+		ActiveUsers.query({},
+			function(data){
+				$rootScope.active = data;
+			});
+		}, 10*1000);
+		
 }
 
 var LoginCtrl = function ($scope, $rootScope, Auth, Url, $location) {
@@ -733,6 +747,7 @@ var LoginCtrl = function ($scope, $rootScope, Auth, Url, $location) {
 					if (data.username){
 						$rootScope.user.role = data.role;
 						$rootScope.user.username = data.username;
+						$rootScope.active = data.active;
 						$scope.error = null;
 						$scope.success = 'Successfully logged in as '+data.username;
 						$location.path(Url.login);
