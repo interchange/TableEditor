@@ -52,6 +52,9 @@ get '/schema' => sub {
         if ($db_settings) {
             $schema_info->{db_info} = {$db_settings->get_columns};
         }
+        else {
+            $schema_info->{db_info} = $db;
+        }
 	}
 	
 	# Check for DB connection
