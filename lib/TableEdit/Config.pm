@@ -180,8 +180,13 @@ sub parse_dbic_settings {
         my @parts = split(':', $db->{dsn});
 
         if (@parts == 3) {
-            if ($parts[2] =~ /^(dbname=)(\w+)$/) {
-                $db->{dbname} = $2;
+            my @options = split(';', $parts[2]);
+
+            for my $opt (@options) {
+                if ($opt =~ /^(dbname=)(\w+)$/) {
+                    $db->{dbname} = $2;
+                    last;
+                }
             }
         }
     }
