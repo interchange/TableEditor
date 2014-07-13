@@ -53,7 +53,7 @@ get '/schema' => sub {
             $schema_info->{db_info} = {$db_settings->get_columns};
         }
         else {
-            $schema_info->{db_info} = $db;
+            $schema_info->{db_info} = parse_dbic_settings($db);
         }
 	}
 	
@@ -170,6 +170,23 @@ sub set_db {
 
         set plugins => {DBIC => $dbic_settings};
 	}
+}
+
+# heuristic for parse DSN
+sub parse_dbic_settings {
+    my $db = shift;
+
+    if ($db->{dsn}) {
+        my @parts = split(':', $db->{dsn});
+
+        if (@parts == 3) {
+            if ($parts[2] =~ /^(dbname=)(\w+)$/) {
+                $db->{dbname} = $2;
+            }
+        }
+    }
+
+    return $db;
 }
 
 # bootstrap config schema object
