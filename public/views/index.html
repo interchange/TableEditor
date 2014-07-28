@@ -71,9 +71,7 @@ var custom_routes = {};
 
 		</div>
 	</header>
-		<div class="alert alert-warning" role="alert" ng-show="active.length && user.username">Currently also active: 
-		<strong ng-repeat="au in active">{{au.username}}{{$last ? '' : ', '}} </strong>
-		</div>
+		
 	<div class="container-fluid">
 		<div class="row-fluid">
 
@@ -101,6 +99,10 @@ var custom_routes = {};
 						<ul class="nav nav-pills nav-stacked">
 							<li ng-repeat="link in menu" data-active-link=""><a  href="{{link.url}}" class="">{{link.name}}</a></li>
 						</ul>
+					</div>
+					
+					<div class="alert alert-warning" role="alert" ng-show="active.length && user.username">Currently also active: 
+						<strong ng-repeat="au in active">{{au.username}}{{$last ? '' : ', '}} </strong>
 					</div>
 
 				</div>
