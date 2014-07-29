@@ -52,6 +52,9 @@ get '/schema' => sub {
         if ($db_settings) {
             $schema_info->{db_info} = {$db_settings->get_columns};
         }
+        else {
+            $schema_info->{db_info} = parse_dbic_settings($db);
+        }
 	}
 	
 	# Check for DB connection
@@ -167,6 +170,28 @@ sub set_db {
 
         set plugins => {DBIC => $dbic_settings};
 	}
+}
+
+# heuristic for parse DSN
+sub parse_dbic_settings {
+    my $db = shift;
+
+    if ($db->{dsn}) {
+        my @parts = split(':', $db->{dsn});
+
+        if (@parts == 3) {
+            my @options = split(';', $parts[2]);
+
+            for my $opt (@options) {
+                if ($opt =~ /^(dbname=)(\w+)$/) {
+                    $db->{dbname} = $2;
+                    last;
+                }
+            }
+        }
+    }
+
+    return $db;
 }
 
 # bootstrap config schema object
