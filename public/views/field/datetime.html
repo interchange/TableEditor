@@ -1,0 +1,17 @@
+<input
+	name="field" 
+	class="form-control datetime"
+	ng-required="field.required" 
+	ng-readonly="field.readonly || (field.primary_key && !create)" 
+	ng-model="item.values[field.name]" 
+	type="text" >
+<span ng-include="'views/field/partials/standard_validation.html'"></span>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$('.matter input.datetime').datetimepicker({ 
+	  dateFormat: 'yy-mm-dd', 
+	  timeFormat: 'HH:mm:ss' 
+	  });
+});
+</script>

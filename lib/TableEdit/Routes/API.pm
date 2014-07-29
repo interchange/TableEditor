@@ -666,8 +666,13 @@ sub add_values {
 
 sub field_type {
 	my $field = shift;
-	my $field_type = $field->{field_type} || 'varchar';
+	
+	# Default or custom set type
+	my $field_type = $field->{field_type} || $field->{data_type};
+	
+	# Check if widget for this type exists or use plain text field
 	$field_type = 'varchar' unless grep( /^$field_type/, field_types() );
+
 	return $field_type;
 }
 
