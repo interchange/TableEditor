@@ -165,18 +165,16 @@ Dir to save uploads to.
 has upload_dir => (
     is => 'ro',
 );
-=head2 upload dir
+=head2 upload extensions
 
-Dir to save uploads to.
+Allowed extensions.
 
 =cut
 
 has upload_extensions => (
     is => 'ro',
 );
-=head2 upload dir
-
-Dir to save uploads to.
+=head2 upload max size
 
 =cut
 

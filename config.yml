@@ -44,3 +44,15 @@ plugins:
         password_check: check_password
   'Ajax':
     content_type: 'application/json'
+
+TableEditor:
+  dropdown_treshold: 50
+  classes:
+    User: 
+      label: Uporabniki
+      fields:
+        last_name:
+          label: 'Family name'
+          readonly: 1
+        first_name:
+          label: 'Name'

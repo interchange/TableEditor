@@ -1,14 +1,27 @@
 package TableEdit::ClassInfo;
 
+use Dancer ':syntax';
 use Moo;
 use MooX::Types::MooseLike::Base qw/InstanceOf/;
 
 use TableEdit::ColumnInfo;
 use TableEdit::RelationshipInfo;
+use Dancer::Plugin::DBIC qw(schema rset);
 
 with 'TableEdit::SchemaInfo::Role::Label';
 with 'TableEdit::SchemaInfo::Role::ListUtils';
 
+my $dropdown_treshold = config->{TableEditor}->{dropdown_treshold} || 50;
+
+sub BUILDARGS {
+   my ( $class, $name ) = @_;   
+
+   return { 
+   	name => $name, 
+   	resultset => schema->resultset(ucfirst($name)),
+   	 };
+ };
+ 
 =head1 ATTRIBUTES
 
 =head2 name
@@ -34,7 +47,7 @@ Whether to sort output of columns and relationships in list context.
 
 has sort => (
     is => 'rw',
-    default => 0,
+    default => 1,
 );
 
 =head2 resultset
@@ -98,6 +111,35 @@ sub column {
     }
 
     return $columns->{$name};
+}
+
+
+sub columns_info { 
+    my ($self, $selected_columns) = @_;
+    my $columns_info = [];
+
+	$selected_columns = [$self->columns] unless $selected_columns;
+
+    for my $column_info (@$selected_columns) {
+
+		# Belongs to or Has one
+		my $foreign_type = $column_info->foreign_type;
+	
+		if ($foreign_type eq 'belongs_to' or $foreign_type eq 'might_have') {
+		    my $rs = $column_info->relationship->resultset;
+	
+		    # determine number of records in foreign table
+		    my $count = $rs->count;
+		    if ($count <= $dropdown_treshold){
+			$column_info->display_type ('dropdown');
+			my @foreign_objects = $rs->all;
+			$column_info->options(dropdown(\@foreign_objects, $column_info->{foreign_column}));
+		    }
+		}
+		push @$columns_info, $column_info->hashref;
+    }
+
+    return $columns_info;
 }
 
 sub _build__columns {
@@ -194,6 +236,11 @@ sub relationship {
     return $relationships->{$name};
 }
 
+sub relationships_info {
+    my ($self) = @_;
+	return [map {$_->hashref} $self->relationships];
+}
+
 sub _build__relationships {
     my $self = shift;
     my $source = $self->source;
@@ -272,6 +319,23 @@ sub count {
     my $self = shift;
 
     return $self->resultset->count;
+}
+
+
+sub label {
+	my $self = shift;
+	my $class = $self->name;
+	my $label = config->{TableEditor}->{classes}->{$class}->{label};
+	return $label if $label;
+	$class =~ s/_/ /g;	
+	$class =~ s/(?<! )([A-Z])/ $1/g; # Add space in front of Capital leters 
+	$class =~ s/^ (?=[A-Z])//; # Strip out extra starting whitespace followed by A-Z
+	return $class;
+}
+
+sub attributes {
+	my $self = shift;
+	return $self->resultset->result_source->resultset_attributes;
 }
 
 1;

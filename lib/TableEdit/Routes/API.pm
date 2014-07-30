@@ -15,9 +15,10 @@ use Scalar::Util 'blessed';
 
 use TableEdit::SchemaInfo;
 use TableEdit::Session;
+use TableEdit::ClassInfo;
 
 my $layout = {};
-my $dropdown_treshold = 100;
+my $dropdown_treshold = config->{TableEditor}->{dropdown_treshold} || 50;
 my $page_size = 10;
 my $appdir = realpath( "$FindBin::Bin/..");
 
@@ -30,6 +31,11 @@ my @field_types;
 my $menu;
 
 prefix '/api';
+
+sub schema_info {
+	$schema_info ||= TableEdit::SchemaInfo->new(schema => schema);
+	return $schema_info;
+}
 
 any '**' => sub {
     # load schema if necessary
@@ -44,13 +50,13 @@ any '**' => sub {
 
 
 get '/:class/:id/:related/list' => require_login sub {
-	my $id = params->{id};
-	my $class = params->{class};
-	my $related = params->{related};
+	my $id = param('id');
+	my $class = param('class');
+	my $related = param('related');
 	my ($current_object, $data);
 	
-	#my $relationship_info = $schema->{info}->relationship($class, $related);
-	my $relationship_info = $schema->{info}->class($class)->relationship($related);
+	#my $relationship_info = schema_info->relationship($class, $related);
+	my $relationship_info = schema_info->class($class)->relationship($related);
 
 	# Object lookup
 	$current_object = schema->resultset($class)->find($id);
@@ -69,10 +75,10 @@ get '/:class/:id/:related/list' => require_login sub {
 
 
 post '/:class/:id/:related/:related_id' => require_login sub {
-	my $id = params->{id};
-	my $class = params->{class};
-	my $related = params->{related};
-	my $related_id = params->{related_id};
+	my $id = param('id');
+	my $class = param('class');
+	my $related = param('related');
+	my $related_id = param('related_id');
 	
 	my $relationship_info = $schema->{$class}->{relation}->{$related};
 	my $relationship_class = $relationship_info->{class_name};
@@ -102,10 +108,10 @@ post '/:class/:id/:related/:related_id' => require_login sub {
 
 
 del '/:class/:id/:related/:related_id' => require_login sub {
-	my $id = params->{id};
-	my $class = params->{class};
-	my $related = params->{related};
-	my $related_id = params->{related_id};
+	my $id = param('id');
+	my $class = param('class');
+	my $related = param('related');
+	my $related_id = param('related_id');
 	my $relationship_info = $schema->{$class}->{relation}->{$related};
 	my $relationship_class = $relationship_info->{class_name};
 	
@@ -133,13 +139,13 @@ del '/:class/:id/:related/:related_id' => require_login sub {
 
 
 get '/:class/:id/:related/items' => require_login sub {
-	my $id = params->{id};
-	my $class = params->{class};
-	my $related = params->{related};
+	my $id = param('id');
+	my $class = param('class');
+	my $related = param('related');
 	my ($current_object, $data);
 	my $get_params = params('query') || {};
 
-	my $relationship_info = $schema->{info}->relationship($class, $related);
+	my $relationship_info = schema_info->relationship($class, $related);
 	my $relationship_class = $relationship_info->class_name;
 
 	# Object lookup
@@ -155,8 +161,8 @@ get '/:class/:id/:related/items' => require_login sub {
 
 
 get '/:class/:related/list' => require_login sub {
-	my $class = params->{class};
-	my $related = params->{related};
+	my $class = param('class');
+	my $related = param('related');
 	my $relationship_info = $schema->{$class}->{relation}->{$related};
 	my $relationship_class = $relationship_info->{class_name};
 	return forward "/api/$relationship_class/list"; 	
@@ -164,9 +170,9 @@ get '/:class/:related/list' => require_login sub {
 
 # Retrieve item for might_have relationship
 get '/:class/:id/:related/might_have' => require_login sub {
-    my $id = params->{id};
-	my $class = params->{class};
-	my $related = params->{related};
+    my $id = param('id');
+	my $class = param('class');
+	my $related = param('related');
 
     # find source for relationship
     my $object = resultset($class)->find($id);
@@ -195,12 +201,13 @@ get '/:class/:id/:related/might_have' => require_login sub {
 
 # Class listing
 get '/:class/list' => require_login sub {
-	my $class = params->{class};
+	my $class = param('class');
+	my $classInfo = TableEdit::ClassInfo->new($class);
 	my $get_params = params('query');
 	my $grid_params;		
 	# Grid
 	$grid_params = grid_template_params($class, $get_params);
-	$grid_params->{'class_label'} = $schema->{$class}->{label};
+	$grid_params->{'class_label'} = $classInfo->label;
 	
 	debug "Grid params for $class: ", $grid_params;
 
@@ -214,7 +221,7 @@ get '/menu' => sub {
 	    {name => $_->label, 
 	     url=> join('/', '#' . $_->name, 'list'),
 	    }}
-	    $schema->{info}->classes,
+	    schema_info->classes,
 	    ]
     }
 
@@ -249,55 +256,47 @@ post '/:class/:field/upload_image' => require_login sub {
 
 get '/:class/:id' => require_login sub {
 	my ($data);
-	my $id = params->{id};
-	my $class = params->{class};
-	my $columns = columns_info($class); 
+	my $id = param('id');
+	my $classInfo = TableEdit::ClassInfo->new(params->{class});
 
-	$data->{fields} = [map {$_->hashref} @$columns];
-	debug "Fields: ", $data->{fields};
+	$data->{fields} = $classInfo->columns_info;
+
 	# Object lookup
-	my $object = schema->resultset(ucfirst($class))->find($id);
-	my $object_data = {$object->get_columns};
+	my $object = $classInfo->resultset->find($id);
 	$data->{title} = model_to_string($object);
 	$data->{id} = $id;
-	$data->{class} = $class;
-	$data->{values} = $object_data;
+	$data->{class} = $classInfo->name;
+	$data->{values} = {$object->get_columns};
 	return to_json($data, {allow_unknown => 1});
 };
 
 
 get '/:class' => require_login sub {
 	my (@languages, $errorMessage);
-	my $class = params->{class};
-	my $columns = [map {$_->hashref} @{columns_info($class, class_form_columns($class))}];
-	my $relationships = [map {$_->hashref} $schema->{info}->relationships($class)];
-	#relationships_info($class);
+	my $classInfo = TableEdit::ClassInfo->new(params->{class});
 
 	return to_json({ 
-		fields => $columns,
-		class => $class,
-		class_label => $schema->{$class}->{label},
-		relations => $relationships,
+		fields => $classInfo->columns_info,
+		class => $classInfo->name,
+		class_label => $classInfo->label,
+		relations => $classInfo->relationships_info,
 	}, {allow_unknown => 1}); 
 };
 
 post '/:class' => require_login sub {
-	my $class = params->{class};
+	my $classInfo = TableEdit::ClassInfo->new(params->{class});
 	my $body = from_json request->body;
 	my $item = $body->{item};
 
-	debug "Updating item for $class: ", $item;
-
-	my $rs = schema->resultset(ucfirst($class));
-	#$rs->update_or_create( $item->{values} );
-
-	return $rs->update_or_create( $item->{values} ); ;
+	debug "Updating item for ".$classInfo->name.": ", $item;
+	
+	return $classInfo->resultset->update_or_create( $item->{values} ); ;
 };
 
 del '/:class' => require_login sub {
-	my $id = params->{id};
-	my $class = params->{class};
-	my $object = schema->resultset(ucfirst($class))->find($id);
+	my $id = param('id');
+	my $classInfo = TableEdit::ClassInfo->new(params->{class});
+	my $object = $classInfo->resultset->find($id);
 
 	if (! $object) {
 	    return status '404';
@@ -320,22 +319,12 @@ sub model_to_string {
 	return $object->to_string if eval{$object->to_string};
 	return "$object" unless eval{$object->result_source};
 	my $class = $object->result_source->{source_name};
+	my $classInfo = TableEdit::ClassInfo->new($class);
 	my ($pk) = $object->result_source->primary_columns;
 	my $id = $object->$pk;
-	return "$id - ".class_label($class);
+	return "$id - ".$classInfo->label;
 }
 
-
-=head2 classes
-
-Returns all usable classes (tables that have primary one column key, CRUD requirement)
-
-=cut
-
-sub classes {
-	$schema_info ||= TableEdit::SchemaInfo->new(schema => schema);
-    return $schema_info->classes_with_single_primary_key;
-}
 
 
 =head2 classes
@@ -346,32 +335,12 @@ Returns all classes that have primary key as one column (requirement)
 
 sub class_source {
 	my $class = shift;
+	my $classInfo = TableEdit::ClassInfo->new($class);
+	my $source = schema->resultset(ucfirst($class))->result_source;
+	my $source2 = $classInfo->resultset->result_source;
 	return schema->resultset(ucfirst($class))->result_source;
 }
 
-
-sub class_label {
-	my $class = shift;
-	my $label = class_source($class)->resultset_attributes->{label};
-	return $label if $label;
-	$class =~ s/_/ /g;	
-	$class =~ s/(?<! )([A-Z])/ $1/g; # Add space in front of Capital leters 
-	$class =~ s/^ (?=[A-Z])//; # Strip out extra starting whitespace followed by A-Z
-	return $class;
-}
-
-
-=head2 class_columns
-
-Returns plain array of all table columns 
-
-=cut
-
-sub class_columns {
-    my $class = shift;
-    my @columns = $schema->{info}->columns($class);
-    return \@columns;
-}
 
 =head2 class_grid_columns
 
@@ -381,12 +350,13 @@ Return array of all columns suitable for grid display.
 
 sub class_grid_columns {
     my $class = shift;
-
-    return class_source($class)->resultset_attributes->{grid_columns} if class_source($class)->resultset_attributes->{grid_columns};
+    my $classInfo = TableEdit::ClassInfo->new($class);
+	
+    return $classInfo->attributes->{grid_columns} if $classInfo->attributes->{grid_columns};
 
     my $columns = [];
 
-    for my $column_info (@{class_columns($class)}){
+    for my $column_info ($classInfo->columns){
 	# Leave out inappropriate columns
 	next if $column_info->data_type eq 'text';
 	next if $column_info->size > 255;
@@ -397,28 +367,6 @@ sub class_grid_columns {
     return $columns;
 }
 
-sub class_form_columns {
-	my $class = shift;	
-	return class_source($class)->resultset_attributes->{form_columns} if class_source($class)->resultset_attributes->{form_columns};	
-	my $columns = [];
-	for my $column (@{class_columns($class)}){
-		#my $column_info = column_info($class, $column);
-		
-		# Leave out inappropriate columns
-		#next if $column_info->{hidden};
-		#next if $column_info->{size} and $column_info->{size} > 255;
-		
-		push @$columns, $column;
-	}
-	return $columns; 
-}
-
-
-=head2 class_columns
-
-Returns array of hashes with metadata for grid of all table columns 
-
-=cut
 
 sub grid_columns_info {
 	my ($class) = @_;
@@ -441,19 +389,12 @@ sub grid_columns_info {
 }
 
 
-=head2 class_columns
-
-Returns array of hashes with metadata for form of all table columns 
-
-=cut
-
 sub columns_static_info {
 	my ($class) = @_;
 	my $result_source = class_source($class);
 	my $columns = $result_source->columns_info; 
 	my $columns_info = {};
 	
-	my $schema_info = $schema->{info};
 
 	for my $relationship($result_source->relationships){
 	    next;
@@ -495,7 +436,7 @@ sub columns_static_info {
 		}
 	}
 	
-	my @selected_columns = $schema_info->columns($class);
+	my @selected_columns = schema_info->columns($class);
 
 	for my $ci (@selected_columns){
 	    next if $ci->is_foreign_key or $ci->hidden;
@@ -506,25 +447,13 @@ sub columns_static_info {
 	return $columns_info;
 }
 
-sub column_info {
-	my ($class, $column) = @_;
-
- #   if (exists $schema->{$class}->{column_info}->{$column}) {
- #       return $schema->{$class}->{column_info}->{$column};
- #   }
- #   else {
-        my $column_info = columns_static_info($class);
-        $schema->{$class}->{column_info}->{$column} = $column_info->{$column};
-        return $column_info->{$column};
- #   }
-}
 
 sub columns_info {
     my ($class, $selected_columns) = @_;
     my $columns_info = [];
 
     if (! $selected_columns) {
-	$selected_columns = [$schema->{info}->columns($class)];
+	$selected_columns = [schema_info->columns($class)];
     }
 
     for my $column_info (@$selected_columns) {
@@ -728,7 +657,7 @@ sub grid_template_params {
 	
 	my $rs = $related_items || schema->resultset(ucfirst($class));
 
-	my $primary_column = $schema->{info}->class($class)->primary_key;
+	my $primary_column = schema_info->class($class)->primary_key;
     
 	my $page = $get_params->{page} || 1;
 	$page_size = $get_params->{page_size} if $get_params->{page_size};
@@ -830,21 +759,14 @@ sub grid_rows {
 sub _setup_schema {
     return $schema if $schema->{active};
 
-    # create SchemaInfo object
-    my $schema_info = TableEdit::SchemaInfo->new(
-        schema => schema,
-        sort => 1,
-	);
-
-    $schema->{info} = $schema_info;
-
-    my @classes = $schema_info->classes;
+    my @classes = schema_info->classes;
 
     for my $class_object (@classes) {
 	my $class = $class_object->name;
+	my $classInfo = TableEdit::ClassInfo->new($class);
         ($schema->{$class}->{primary}) = schema->source($class)->primary_columns;
         $schema->{$class}->{label} = $class_object->label;
-        $schema->{$class}->{columns} = class_columns($class);
+        $schema->{$class}->{columns} = [$classInfo->columns];
         $schema->{$class}->{column_info} = columns_static_info($class);
         $schema->{$class}->{relationships} = relationships_info($class);	
         $schema->{$class}->{attributes} = class_source($class)->resultset_attributes;	
@@ -856,4 +778,6 @@ sub _setup_schema {
 
     $schema->{active} = 1;
 }
+
+
 true;

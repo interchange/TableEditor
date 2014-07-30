@@ -3,7 +3,7 @@ package TableEdit::SchemaInfo;
 use Moo;
 use MooX::Types::MooseLike::Base qw/InstanceOf/;
 
-use TableEdit::ClassInfo;
+require TableEdit::ClassInfo;
 
 =head1 ATTRIBUTES
 
@@ -205,7 +205,7 @@ sub _build__classes {
 
     for my $class (@$candidates) {
         my $rs = $self->schema->resultset($class);
-        $class_hash{$class} = TableEdit::ClassInfo->new(name => $class, resultset => $rs, sort => $self->sort);
+        $class_hash{$class} = TableEdit::ClassInfo->new($class);
     }
 
     return \%class_hash;
