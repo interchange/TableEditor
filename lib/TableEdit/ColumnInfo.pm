@@ -4,6 +4,8 @@ use Moo;
 
 with 'TableEdit::SchemaInfo::Role::Label';
 
+use TableEdit::SchemaInfo;
+
 =head1 ATTRIBUTES
 
 =head2 name
@@ -13,6 +15,11 @@ Column name.
 =cut
 
 has name => (
+    is => 'ro',
+    required => 1,
+);
+
+has class => (
     is => 'ro',
     required => 1,
 );
@@ -60,7 +67,15 @@ has display_type => (
     is => 'rw',
     lazy => 1,
     default => sub {
-        return $_[0]->data_type;
+        my $self = shift;
+		
+		# Default or custom set type
+		my $field_type = $self->field_type || $self->data_type;
+		
+		# Check if widget for this type exists or use plain text field
+		$field_type = 'varchar' unless grep( /^$field_type/, TableEdit::Config::field_types );
+	
+		return $field_type;
     },
     trigger => sub {
 	my ($self, $value) = @_;
@@ -199,14 +214,63 @@ has options => (
     },
 );
 
-has hashref => (
-    is => 'lazy',
-    default => sub {
-        my $self = shift;
 
+sub hashref {
+	my $self = shift;
 	return $self->_as_hashref;
-    },
-);
+};
+
+
+sub is_primary {
+	my $self = shift;
+	my $classPK = $self->class->primary_key;
+	return undef unless $classPK;
+	if(ref($classPK) eq 'ARRAY'){
+		for my $pk (@$classPK){
+			return 1 if $self->name eq $classPK;
+		}
+	}
+	return 1 if $self->name eq $classPK;
+	return undef;
+};
+
+
+sub required {
+	my $self = shift;
+	return 'required' if !$self->default_value and $self->is_nullable == 0;
+	if($self->is_foreign_key){
+		return undef if $self->foreign_type and $self->foreign_type eq 'might_have';
+		return 'required' unless $self->is_nullable and $self->is_nullable != 1;
+	}
+	return undef;
+};
+
+
+sub dropdown_options {
+	my $self = shift;
+	my $result_set = [$self->class->resultset->all];
+	my $column = $self->name;
+	my $items = [];
+	for my $object (@$result_set){
+		my $id = $object->$column;
+		my $name = model_to_string($object);
+		push @$items, {option_label=>$name, value=>$id};
+	}
+	return $items;
+	return $self->_as_hashref;
+};
+
+
+sub model_to_string {
+	my $object = shift;
+	return $object->to_string if eval{$object->to_string};
+	return "$object" unless eval{$object->result_source};
+	my $class = $object->result_source->{source_name};
+	my $classInfo = TableEdit::ClassInfo->new($class);
+	my ($pk) = $object->result_source->primary_columns;
+	my $id = $object->$pk;
+	return "$id - ".$classInfo->label;
+}
 
 sub _as_hashref {
     my $self = shift;

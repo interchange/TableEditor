@@ -16,7 +16,7 @@ sub active_sessions {
 sub active_sessions_besides_me {
 	my @sessions;
 	for my $s (@{ active_sessions() })	{
-		push  @sessions, $s unless $s->{username} eq session('logged_in_user');
+		push  @sessions, $s unless $s->{username} and session('logged_in_user') and $s->{username} eq session('logged_in_user');
 	}
 	return [@sessions];
 }

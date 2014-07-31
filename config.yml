@@ -47,6 +47,8 @@ plugins:
 
 TableEditor:
   dropdown_treshold: 50
+  page_size: 10
+  
   classes:
     User: 
       label: Uporabniki

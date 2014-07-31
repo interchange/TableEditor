@@ -8,18 +8,16 @@ use TableEdit::ColumnInfo;
 use TableEdit::RelationshipInfo;
 use Dancer::Plugin::DBIC qw(schema rset);
 
-with 'TableEdit::SchemaInfo::Role::Label';
 with 'TableEdit::SchemaInfo::Role::ListUtils';
 
 my $dropdown_treshold = config->{TableEditor}->{dropdown_treshold} || 50;
 
 sub BUILDARGS {
-   my ( $class, $name ) = @_;   
-
-   return { 
-   	name => $name, 
-   	resultset => schema->resultset(ucfirst($name)),
-   	 };
+	my ( $class, $name ) = @_;   
+	return { 
+   		name => $name, 
+   		resultset => schema->resultset(ucfirst($name)),
+   	};
  };
  
 =head1 ATTRIBUTES
@@ -65,7 +63,7 @@ has resultset => (
     required => 1,
     isa => InstanceOf ['DBIx::Class::ResultSet'],
     handles => {
-	source => 'result_source',
+		source => 'result_source',
     },
 );
 
@@ -132,8 +130,8 @@ sub columns_info {
 		    my $count = $rs->count;
 		    if ($count <= $dropdown_treshold){
 			$column_info->display_type ('dropdown');
-			my @foreign_objects = $rs->all;
-			$column_info->options(dropdown(\@foreign_objects, $column_info->{foreign_column}));
+			my @foreign_rows = $rs->all;
+			$column_info->options($column_info->dropdown_options); #(\@foreign_rows, $column_info->{foreign_column})
 		    }
 		}
 		push @$columns_info, $column_info->hashref;
@@ -176,6 +174,7 @@ sub _build__columns {
         $column_hash{$name} = TableEdit::ColumnInfo->new(
             name => $name,
             position => $column_pos{$name},
+            class => $self,
             %$info);
     }
 
@@ -191,14 +190,13 @@ Returns primary key(s) for this class.
 sub primary_key {
     my $self = shift;
     my @pk;
-
     @pk = $self->source->primary_columns;
 
     if (@pk > 1) {
-	return \@pk;
+		return \@pk;
     }
     else {
-	return $pk[0];
+		return $pk[0];
     }
 }
 
@@ -315,27 +313,79 @@ Returns number of records for this class.
 
 =cut
 
-sub count {
+has count => (
+    is => 'lazy',
+	default => sub {
+	    my $self = shift;
+	    return $self->resultset->count;
+	}
+);
+
+has label => (
+    is => 'lazy',
+    default => sub {
+        my $self = shift;
+		my $class = $self->name;
+		my $label = config->{TableEditor}->{classes}->{$class}->{label};
+		return $label if $label;
+		$class =~ s/_/ /g;	
+		$class =~ s/(?<! )([A-Z])/ $1/g; # Add space in front of Capital leters 
+		$class =~ s/^ (?=[A-Z])//; # Strip out extra starting whitespace followed by A-Z
+		return $class;
+    },
+);
+
+has attributes => (
+    is => 'lazy',
+	default => sub  {
+		my $self = shift;
+		return $self->resultset->result_source->resultset_attributes;
+	}
+);
+
+=head2 class_grid_columns
+
+Return array of all columns suitable for grid display.
+
+=cut
+
+sub class_grid_columns {
     my $self = shift;
+	
+    return $self->attributes->{grid_columns} if $self->attributes->{grid_columns};
 
-    return $self->resultset->count;
+    my $columns = [];
+
+    for my $column_info ($self->columns){
+		# Leave out inappropriate columns
+		next if $column_info->data_type and $column_info->data_type eq 'text';
+		next if $column_info->size and $column_info->size > 255;
+	
+		push @$columns, $column_info;
+    }
+
+    return $columns;
 }
 
 
-sub label {
-	my $self = shift;
-	my $class = $self->name;
-	my $label = config->{TableEditor}->{classes}->{$class}->{label};
-	return $label if $label;
-	$class =~ s/_/ /g;	
-	$class =~ s/(?<! )([A-Z])/ $1/g; # Add space in front of Capital leters 
-	$class =~ s/^ (?=[A-Z])//; # Strip out extra starting whitespace followed by A-Z
-	return $class;
-}
+sub grid_columns_info {
+	my ($self) = @_;
+	my $default_columns = [];
+	my $columns = $self->class_grid_columns;
+	for my $col (@$columns){
+	    my $col_info = $col->hashref;
+		my %col_copy = %{$col_info};
 
-sub attributes {
-	my $self = shift;
-	return $self->resultset->result_source->resultset_attributes;
+		# Cleanup for grid
+		$col_copy{required} = 0 ;
+		$col_copy{readonly} = 0 ;
+		$col_copy{primary_key} = 0 ;
+
+		push @$default_columns, \%col_copy; 		
+	}
+
+	
+	return $default_columns; 
 }
 
 1;

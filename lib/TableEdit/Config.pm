@@ -12,6 +12,7 @@ use TableEdit::DriverInfo;
 
 my $appdir = realpath( "$FindBin::Bin/..");
 my $SQLite = _bootstrap_config_schema();
+my @field_types;
 set views => "$appdir/public/views";
 
 hook 'before' => sub {
@@ -217,6 +218,24 @@ sub _bootstrap_config_schema {
     }
 
     return $schema;
+}
+
+
+sub field_types {
+	my $dir = $appdir.'/public/views/field';
+	return @field_types if @field_types;
+    opendir(DIR, $dir) or die $!;
+
+    while (my $file = readdir(DIR)) {
+        # Use a regular expression to ignore files beginning with a period
+        next if ($file =~ m/^\./);
+        # remove .html
+        $file =~ s/\.html//;
+        $file =~ s/\.htm//;
+		push @field_types, $file;
+    }
+    closedir(DIR);
+    return @field_types;
 }
 
 1;
