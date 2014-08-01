@@ -52,9 +52,18 @@ TableEditor:
   classes:
     User: 
       label: Uporabniki
+      grid_columns: [users_id, username]
+      grid_sort: username
+      form_columns: [users_id, username, email]
       fields:
         last_name:
           label: 'Family name'
           readonly: 1
         first_name:
           label: 'Name'
+    Order:
+      fields:
+        payment_method: 
+          hidden: 1
+        payment_status: 
+          readonly: 1

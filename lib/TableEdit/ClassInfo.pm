@@ -19,6 +19,7 @@ sub BUILDARGS {
    		resultset => schema->resultset(ucfirst($name)),
    	};
  };
+
  
 =head1 ATTRIBUTES
 
@@ -111,8 +112,8 @@ sub column {
     return $columns->{$name};
 }
 
-
-sub columns_info { 
+has columns_info => (is => 'lazy');
+sub _build_columns_info { 
     my ($self, $selected_columns) = @_;
     my $columns_info = [];
 
@@ -313,67 +314,82 @@ Returns number of records for this class.
 
 =cut
 
-has count => (
-    is => 'lazy',
-	default => sub {
-	    my $self = shift;
-	    return $self->resultset->count;
-	}
-);
+sub count {
+    my $self = shift;
+    return $self->resultset->count;
+}
 
-has label => (
-    is => 'lazy',
-    default => sub {
-        my $self = shift;
-		my $class = $self->name;
-		my $label = config->{TableEditor}->{classes}->{$class}->{label};
-		return $label if $label;
-		$class =~ s/_/ /g;	
-		$class =~ s/(?<! )([A-Z])/ $1/g; # Add space in front of Capital leters 
-		$class =~ s/^ (?=[A-Z])//; # Strip out extra starting whitespace followed by A-Z
-		return $class;
-    },
-);
+=head2 label
 
-has attributes => (
-    is => 'lazy',
-	default => sub  {
-		my $self = shift;
-		return $self->resultset->result_source->resultset_attributes;
-	}
-);
-
-=head2 class_grid_columns
-
-Return array of all columns suitable for grid display.
+Returns nice string representation of class
 
 =cut
 
-sub class_grid_columns {
+has label => (is => 'lazy');
+sub _build_label {
     my $self = shift;
-	
-    return $self->attributes->{grid_columns} if $self->attributes->{grid_columns};
+	my $class = $self->name;
+	my $label = config->{TableEditor}->{classes}->{$class}->{label};
+	return $label if $label;
+	$class =~ s/_/ /g;	
+	$class =~ s/(?<! )([A-Z])/ $1/g; # Add space in front of Capital leters 
+	$class =~ s/^ (?=[A-Z])//; # Strip out extra starting whitespace followed by A-Z
+	return $class;
+}
 
-    my $columns = [];
+=head2 attributes
+
+Return attribute value
+
+=cut
+
+sub attributes  {
+		my ($self, @path) = @_;
+		my $value;
+		my $node = config->{TableEditor}->{classes}->{$self->name};
+		for my $p (@path){
+			$node = $node->{$p};
+			return $node unless defined $node;
+		}
+		return $node;
+}
+
+
+=head2 grid_columns
+
+Return array of all column names suitable for grid display.
+
+=cut
+
+has grid_columns => (is => 'lazy');
+sub _build_grid_columns {
+	my $self = shift;
+    my $columns = $self->attributes('grid_columns');
+    return $columns if defined $columns;
 
     for my $column_info ($self->columns){
 		# Leave out inappropriate columns
 		next if $column_info->data_type and $column_info->data_type eq 'text';
 		next if $column_info->size and $column_info->size > 255;
 	
-		push @$columns, $column_info;
+		push @$columns, $column_info->name;
     }
 
     return $columns;
 }
 
+=head2 grid_columns_info
 
-sub grid_columns_info {
+Return array of all columns suitable for grid display with attributes.
+
+=cut
+has grid_columns_info => (is => 'lazy');
+sub _build_grid_columns_info {
 	my ($self) = @_;
-	my $default_columns = [];
-	my $columns = $self->class_grid_columns;
+	my $grid_columns = [];
+	my $columns = $self->grid_columns;
 	for my $col (@$columns){
-	    my $col_info = $col->hashref;
+	    my $col_info = $self->column($col)->hashref;
 		my %col_copy = %{$col_info};
 
 		# Cleanup for grid
@@ -381,11 +397,68 @@ sub grid_columns_info {
 		$col_copy{readonly} = 0 ;
 		$col_copy{primary_key} = 0 ;
 
-		push @$default_columns, \%col_copy; 		
+		push @$grid_columns, \%col_copy; 		
 	}
 
 	
-	return $default_columns; 
+	return $grid_columns; 
+}
+
+=head2 form_columns
+
+Returns array of column names appropriate for form
+
+=cut
+
+has form_columns => (is => 'lazy');
+sub _build_form_columns {
+	my ($self) = @_;
+	my $columns = $self->attributes('form_columns');
+    return $columns if defined $columns;
+
+    for my $column_info ($self->columns){
+		# Leave out inappropriate columns
+		next if $column_info->hidden;
+	
+		push @$columns, $column_info->name;
+    }
+
+    return $columns;
+}
+
+=head2 form_columns_info
+
+Returns array of column objects appropriate for form
+
+=cut
+
+has form_columns_info => (is => 'lazy');
+sub _build_form_columns_info {
+	my ($self) = @_;
+	my $form_columns = [];
+	my $columns = $self->form_columns;
+	for my $col (@$columns){
+	    my $col_info = $self->column($col)->hashref;
+		my %col_copy = %{$col_info};
+
+		# Cleanup
+		#$col_copy{required} = 0 ;
+		
+		push @$form_columns, \%col_copy; 		
+	}
+	
+	return $form_columns; 
+}
+
+=head2 grid_sort
+
+Return column for default sort
+
+=cut
+has grid_sort => (is => 'lazy');
+sub _bulid_grid_sort {
+	my ($self) = @_;
+	return $self->attributes('grid_sort');
 }
 
 1;

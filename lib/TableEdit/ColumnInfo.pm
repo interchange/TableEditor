@@ -1,6 +1,8 @@
 package TableEdit::ColumnInfo;
 
+use Dancer ':syntax';
 use Moo;
+with 'MooX::Singleton';
 
 with 'TableEdit::SchemaInfo::Role::Label';
 
@@ -155,10 +157,21 @@ Whether column is hidden or not.
 
 =cut
 
-has hidden => (
-    is => 'ro',
-    default => 0,
-);
+sub hidden {
+	my $self = shift;
+	return $self->attributes('hidden');
+}
+
+=head2 Read-only
+
+Whether column is hidden or not.
+
+=cut
+
+sub readonly {
+	my $self = shift;
+	return $self->attributes('readonly');
+}
 
 =head2 relationship
 
@@ -197,30 +210,19 @@ has upload_max_size => (
     is => 'ro',
 );
 
-=head2 options
-
-Options to select values from for this column.
+=head2 hashref
 
 =cut
-
-has options => (
-    is => 'rw',
-    trigger => sub {
-	my ($self, $value) = @_;
-
-	if (ref($self->{hashref}) eq 'HASH') {
-	    $self->{hashref}->{options} = $value;
-	}
-    },
-);
-
-
 sub hashref {
 	my $self = shift;
 	return $self->_as_hashref;
 };
 
+=head2 is_primary
 
+Returns 1 if field is primary key
+
+=cut
 sub is_primary {
 	my $self = shift;
 	my $classPK = $self->class->primary_key;
@@ -234,7 +236,11 @@ sub is_primary {
 	return undef;
 };
 
+=head2 required
 
+Returns 'required' if field is required
+
+=cut
 sub required {
 	my $self = shift;
 	return 'required' if !$self->default_value and $self->is_nullable == 0;
@@ -245,6 +251,11 @@ sub required {
 	return undef;
 };
 
+=head2 dropdown_options
+
+Options to select values from for this column.
+
+=cut
 
 sub dropdown_options {
 	my $self = shift;
@@ -257,10 +268,11 @@ sub dropdown_options {
 		push @$items, {option_label=>$name, value=>$id};
 	}
 	return $items;
-	return $self->_as_hashref;
 };
 
+=head2 attributes
 
+=cut
 sub model_to_string {
 	my $object = shift;
 	return $object->to_string if eval{$object->to_string};
@@ -272,27 +284,44 @@ sub model_to_string {
 	return "$id - ".$classInfo->label;
 }
 
+=head2 attributes
+
+=cut
 sub _as_hashref {
     my $self = shift;
 
     my %hash = (
-	data_type => $self->data_type,
-	display_type => $self->display_type,
-	foreign_column => $self->foreign_column,
-    foreign_type => $self->foreign_type,
-	hidden => $self->hidden,
-	is_foreign_key => $self->is_foreign_key,
-	is_nullable => $self->is_nullable,
-	label => $self->label,
-	name => $self->name,
-	options => $self->options,
-	size => $self->size,
-	upload_max_size => $self->upload_max_size,
-	upload_extensions => $self->upload_extensions ? [map {lc($_)} @{$self->upload_extensions}] : undef,
-	upload_dir => $self->upload_dir,
+		data_type => $self->data_type,
+		display_type => $self->display_type,
+		foreign_column => $self->foreign_column,
+	    foreign_type => $self->foreign_type,
+		is_foreign_key => $self->is_foreign_key,
+		is_nullable => $self->is_nullable,
+		readonly => $self->readonly,
+		label => $self->label,
+		name => $self->name,
+		size => $self->size,
+		upload_max_size => $self->upload_max_size,
+		upload_extensions => $self->upload_extensions ? [map {lc($_)} @{$self->upload_extensions}] : undef,
+		upload_dir => $self->upload_dir,
     );
 
     return \%hash;
 }
+
+=head2 attributes
+
+=cut
+sub attributes  {
+		my ($self, @path) = @_;
+		my $value;
+		my $node = config->{TableEditor}->{classes}->{$self->class->name}->{fields}->{$self->name};
+		for my $p (@path){
+			$node = $node->{$p};
+			return $node unless defined $node;
+		}
+		return $node;
+}
+
 
 1;

@@ -15,7 +15,6 @@ use Scalar::Util 'blessed';
 
 use TableEdit::SchemaInfo;
 use TableEdit::Session;
-use TableEdit::ClassInfo;
 
 # Global variables
 my $appdir = realpath( "$FindBin::Bin/..");
@@ -42,7 +41,7 @@ any '**' => sub {
 
 get '/:class/:id/:related/list' => require_login sub {
 	my $id = param('id');
-	my $class_info = TableEdit::ClassInfo->new(param('class'));
+	my $class_info = $schema_info->class(param('class'));
 	my $related = param('related');
 	my ($row, $data);
 
@@ -67,12 +66,12 @@ get '/:class/:id/:related/list' => require_login sub {
 
 post '/:class/:id/:related/:related_id' => require_login sub {
 	my $id = param('id');
-	my $class_info = TableEdit::ClassInfo->new(param('class'));
+	my $class_info = $schema_info->class(param('class'));
 	my $related = param('related');
 	my $related_id = param('related_id');
 	
 	my $relationship_info = $class_info->relationship($related);
-	my $relationship_class_info = TableEdit::ClassInfo->new($relationship_info->class_name);
+	my $relationship_class_info = $schema_info->class($relationship_info->class_name);
 	my $related_row = $relationship_class_info->resultset->find($related_id);
 	
 	my $row = $class_info->resultset->find($id);
@@ -98,11 +97,11 @@ post '/:class/:id/:related/:related_id' => require_login sub {
 
 del '/:class/:id/:related/:related_id' => require_login sub {
 	my $id = param('id');
-	my $class_info = TableEdit::ClassInfo->new(param('class'));
+	my $class_info = $schema_info->class(param('class'));
 	my $related = param('related');
 	my $related_id = param('related_id');
 	my $relationship_info = $class_info->relationship($related);
-	my $relationship_class_info = TableEdit::ClassInfo->new($relationship_info->class_name);
+	my $relationship_class_info = $schema_info->class($relationship_info->class_name);
 	
 	my $row = $class_info->resultset->find($id);
 	my $related_row = $relationship_class_info->resultset->find($related_id);
@@ -129,13 +128,13 @@ del '/:class/:id/:related/:related_id' => require_login sub {
 
 get '/:class/:id/:related/items' => require_login sub {
 	my $id = param('id');
-	my $class_info = TableEdit::ClassInfo->new(param('class'));
+	my $class_info = $schema_info->class(param('class'));
 	my $related = param('related');
 	my ($row, $data);
 	my $get_params = params('query') || {};
 
 	my $relationship_info = $class_info->relationship($related);
-	my $relationship_class_info = TableEdit::ClassInfo->new($relationship_info->class_name);
+	my $relationship_class_info = $schema_info->class($relationship_info->class_name);
 
 	# row lookup
 	$row = $class_info->resultset->find($id);
@@ -149,7 +148,7 @@ get '/:class/:id/:related/items' => require_login sub {
 
 
 get '/:class/:related/list' => require_login sub {
-	my $class_info = TableEdit::ClassInfo->new(param('class'));
+	my $class_info = $schema_info->class(param('class'));
 	my $related = param('related');
 	my $relationship_info = $class_info->relationship($related);
 	my $relationship_class = $relationship_info->class_name;
@@ -159,7 +158,7 @@ get '/:class/:related/list' => require_login sub {
 
 # Class listing
 get '/:class/list' => require_login sub {
-	my $class_info = TableEdit::ClassInfo->new(param('class'));
+	my $class_info = $schema_info->class(param('class'));
 	my $grid_params = grid_template_params($class_info);
 	
 	return to_json($grid_params, {allow_unknown => 1});
@@ -178,12 +177,12 @@ get '/menu' => sub {
 
 post '/:class/:field/upload_image' => require_login sub {
 	my $class = param('class');
-	my $class_info = TableEdit::ClassInfo->new(param('class'));
+	my $class_info = $schema_info->class(param('class'));
 	my $field = param('field');
 	my $file = upload('file');
 	
 	# Upload dir
-	my $path = $class_info->source->{_columns}->{$field}->{upload_dir}; 
+	my $path = $class_info->attributes('upload_dir'); 
 	$path ||= "images/upload/$class/$field/";
 	
 	# Upload image
@@ -204,7 +203,7 @@ post '/:class/:field/upload_image' => require_login sub {
 get '/:class/:id' => require_login sub {
 	my ($data);
 	my $id = param('id');
-	my $class_info = TableEdit::ClassInfo->new(param('class'));
+	my $class_info = $schema_info->class(param('class'));
 
 	$data->{fields} = $class_info->columns_info;
 
@@ -219,10 +218,10 @@ get '/:class/:id' => require_login sub {
 
 
 get '/:class' => require_login sub {
-	my $class_info = TableEdit::ClassInfo->new(param('class'));
+	my $class_info = $schema_info->class(param('class'));
 
 	return to_json({ 
-		fields => $class_info->columns_info,
+		fields => $class_info->form_columns_info,
 		class => $class_info->name,
 		class_label => $class_info->label,
 		relations => $class_info->relationships_info,
@@ -231,7 +230,7 @@ get '/:class' => require_login sub {
 
 
 post '/:class' => require_login sub {
-	my $class_info = TableEdit::ClassInfo->new(param('class'));
+	my $class_info = $schema_info->class(param('class'));
 	my $body = from_json request->body;
 	my $item = $body->{item};
 
@@ -243,7 +242,7 @@ post '/:class' => require_login sub {
 
 del '/:class' => require_login sub {
 	my $id = param('id');
-	my $class_info = TableEdit::ClassInfo->new(param('class'));
+	my $class_info = $schema_info->class(param('class'));
 	my $row = $class_info->resultset->find($id);
 
     return status '404' unless $row;
@@ -265,12 +264,17 @@ sub row_to_string {
 	return $row->to_string if eval{$row->to_string};
 	return "$row" unless eval{$row->result_source};
 	my $class = $row->result_source->{source_name};
-	my $class_info = TableEdit::ClassInfo->new($class);
+	my $class_info = $schema_info->class($class);
 	my $pk = $class_info->primary_key;
 	my $id = $row->$pk;
 	return "$id - ".$class_info->label;
 }
 
+=head2 add_values
+
+Adds values to column objects
+
+=cut
 
 sub add_values {
 	my ($columns_info, $values) = @_;
@@ -279,6 +283,12 @@ sub add_values {
 	}
 }
 
+
+=head2 grid_template_params
+
+Returns data for grid view
+
+=cut
 
 sub grid_template_params {
 	my ($class_info, $related_items) = @_;
@@ -313,6 +323,9 @@ sub grid_template_params {
 		$primary_column, 
 	);
 	
+	$class_info->label;
+	$class_info->label;
+	
 	$grid_params->{class} = $class_info->name;
 	$grid_params->{class_label} = $class_info->label;
 	$grid_params->{page} = $page;
@@ -324,15 +337,27 @@ sub grid_template_params {
 }
 
 
+=head2 grid_sort
+
+Returns sql order by parameter.
+
+=cut
+
 sub grid_sort {
 	my ($class_info, $get_params) = @_;
 	# Selected or Predefined sort
-	my $sort = $get_params->{sort} || $class_info->attributes->{grid_sort};
+	my $sort = $get_params->{sort} || $class_info->attributes('grid_sort');
 	# Direction	
 	$sort .= $get_params->{descending} ? ' DESC' : '' if $sort;
 	return $sort;
 }
 
+
+=head2 grid_where
+
+Sets sql conditions.
+
+=cut
 
 sub grid_where {
 	my ($columns, $where, $params, $alias) = @_;
