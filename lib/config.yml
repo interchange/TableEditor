@@ -1,0 +1,35 @@
+TableEditor:
+  dropdown_treshold: 50
+  page_size: 10
+  
+  classes:
+    User: 
+      label: Employees
+      grid_columns: [users_id, username]
+      grid_sort: username
+      form_columns: [users_id, username, email]
+      to_string: |    
+        my $id = $row->id;
+        my $username = $row->username; 
+        return "$username ($id)";
+      columns:
+        last_name:
+          label: 'Family name'
+          readonly: 1
+        first_name:
+          label: 'Name'
+        email:
+          column_type: 'html'
+    Order:
+      columns:
+        payment_method: 
+          hidden: 1
+        payment_status: 
+          readonly: 1
+    Product:
+      columns:
+        uri:
+          column_type: 'image_upload'
+          upload_max_size: 10000
+          upload_extensions: [jpg, jpeg, gif, PNG]
+          upload_dir: 'product_images/'

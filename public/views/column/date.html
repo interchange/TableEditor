@@ -1,0 +1,16 @@
+<input
+	name="column" 
+	class="form-control date"
+	ng-required="column.required" 
+	ng-readonly="column.readonly || (column.primary_key && !create)" 
+	ng-model="item.values[column.name]" 
+	type="text" >
+<span ng-include="'views/column/partials/standard_validation.html'"></span>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	  $('.matter input.date').datetimepicker({ 
+		  dateFormat: 'yy-mm-dd', 
+		  });
+});
+</script>

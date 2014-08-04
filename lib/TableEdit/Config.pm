@@ -10,10 +10,14 @@ use Cwd qw/realpath/;
 use TableEdit::ConfigSchema;
 use TableEdit::DriverInfo;
 
+
 my $appdir = realpath( "$FindBin::Bin/..");
 my $SQLite = _bootstrap_config_schema();
-my @field_types;
+my @column_types;
 set views => "$appdir/public/views";
+
+# Load TE settings
+Dancer::Config::load_settings_from_yaml($appdir.'/lib/config.yml');
 
 hook 'before' => sub {
 	# Set schema settings
@@ -221,9 +225,9 @@ sub _bootstrap_config_schema {
 }
 
 
-sub field_types {
-	my $dir = $appdir.'/public/views/field';
-	return @field_types if @field_types;
+sub column_types {
+	my $dir = $appdir.'/public/views/column';
+	return @column_types if @column_types;
     opendir(DIR, $dir) or die $!;
 
     while (my $file = readdir(DIR)) {
@@ -232,10 +236,10 @@ sub field_types {
         # remove .html
         $file =~ s/\.html//;
         $file =~ s/\.htm//;
-		push @field_types, $file;
+		push @column_types, $file;
     }
     closedir(DIR);
-    return @field_types;
+    return @column_types;
 }
 
 1;

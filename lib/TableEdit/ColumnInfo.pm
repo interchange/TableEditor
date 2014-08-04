@@ -6,8 +6,6 @@ with 'MooX::Singleton';
 
 with 'TableEdit::SchemaInfo::Role::Label';
 
-use TableEdit::SchemaInfo;
-
 =head1 ATTRIBUTES
 
 =head2 name
@@ -26,6 +24,7 @@ has class => (
     required => 1,
 );
 
+
 =head2 position
 
 Position of the column in the class, starts with 1.
@@ -33,8 +32,11 @@ Position of the column in the class, starts with 1.
 =cut
 
 has position => (
-    is => 'ro',
-    required => 1,
+    is => 'lazy',
+    default => sub {
+        my $self = shift;
+    	return $self->attr('position'); 
+    },
 );
 
 =head2 data_type
@@ -48,15 +50,18 @@ has data_type => (
     required => 1,
 );
 
-=head2 field_type
+=head2 column_type
 
-Column field type.
+Column column type.
 
 =cut
 
-has field_type => (
-    is => 'ro',
-    required => 0,
+has column_type => (
+    is => 'lazy',
+    default => sub {
+        my $self = shift;
+    	return $self->attr('column_type'); 
+    },
 );
 
 =head2 display_type
@@ -72,19 +77,19 @@ has display_type => (
         my $self = shift;
 		
 		# Default or custom set type
-		my $field_type = $self->field_type || $self->data_type;
+		my $column_type = $self->column_type || $self->data_type;
 		
 		# Check if widget for this type exists or use plain text field
-		$field_type = 'varchar' unless grep( /^$field_type/, TableEdit::Config::field_types );
+		$column_type = 'varchar' unless grep( /^$column_type/, TableEdit::Config::column_types );
 	
-		return $field_type;
+		return $column_type;
     },
     trigger => sub {
-	my ($self, $value) = @_;
-
-	if (ref($self->{hashref}) eq 'HASH') {
-	    $self->{hashref}->{display_type} = $value;
-	}
+		my ($self, $value) = @_;
+	
+		if (ref($self->{hashref}) eq 'HASH') {
+		    $self->{hashref}->{display_type} = $value;
+		}
     },
 );
 
@@ -118,6 +123,17 @@ Type of foreign key.
 
 has foreign_type => (
     is => 'ro',
+    default => '',
+);
+
+=head2 dropdown_options
+
+Options to select values from for this column.
+
+=cut
+
+has dropdown_options => (
+    is => 'rw',
     default => '',
 );
 
@@ -159,7 +175,7 @@ Whether column is hidden or not.
 
 sub hidden {
 	my $self = shift;
-	return $self->attributes('hidden');
+	return $self->attr('hidden');
 }
 
 =head2 Read-only
@@ -170,7 +186,7 @@ Whether column is hidden or not.
 
 sub readonly {
 	my $self = shift;
-	return $self->attributes('readonly');
+	return $self->attr('readonly');
 }
 
 =head2 relationship
@@ -191,7 +207,11 @@ Dir to save uploads to.
 =cut
 
 has upload_dir => (
-    is => 'ro',
+    is => 'lazy',
+    default => sub {
+    	my $self = shift; 
+    	return $self->attr('upload_dir') || "images/upload/".$self->class->name."/".$self->name."/";
+    }
 );
 =head2 upload extensions
 
@@ -200,14 +220,23 @@ Allowed extensions.
 =cut
 
 has upload_extensions => (
-    is => 'ro',
+    is => 'lazy',
+    default => sub {
+    	my $self = shift; 
+    	return [map {lc($_)} @{$self->attr('upload_extensions')}] if $self->attr('upload_extensions');
+    	return undef;
+    }
 );
 =head2 upload max size
 
 =cut
 
 has upload_max_size => (
-    is => 'ro',
+    is => 'lazy',
+    default => sub {
+    	my $self = shift; 
+    	return $self->attr('upload_max_size');
+    }
 );
 
 =head2 hashref
@@ -220,7 +249,7 @@ sub hashref {
 
 =head2 is_primary
 
-Returns 1 if field is primary key
+Returns 1 if column is primary key
 
 =cut
 sub is_primary {
@@ -238,7 +267,7 @@ sub is_primary {
 
 =head2 required
 
-Returns 'required' if field is required
+Returns 'required' if column is required
 
 =cut
 sub required {
@@ -251,71 +280,39 @@ sub required {
 	return undef;
 };
 
-=head2 dropdown_options
 
-Options to select values from for this column.
-
-=cut
-
-sub dropdown_options {
-	my $self = shift;
-	my $result_set = [$self->class->resultset->all];
-	my $column = $self->name;
-	my $items = [];
-	for my $object (@$result_set){
-		my $id = $object->$column;
-		my $name = model_to_string($object);
-		push @$items, {option_label=>$name, value=>$id};
-	}
-	return $items;
-};
-
-=head2 attributes
-
-=cut
-sub model_to_string {
-	my $object = shift;
-	return $object->to_string if eval{$object->to_string};
-	return "$object" unless eval{$object->result_source};
-	my $class = $object->result_source->{source_name};
-	my $classInfo = TableEdit::ClassInfo->new($class);
-	my ($pk) = $object->result_source->primary_columns;
-	my $id = $object->$pk;
-	return "$id - ".$classInfo->label;
-}
-
-=head2 attributes
+=head2 _as_hashref
 
 =cut
 sub _as_hashref {
     my $self = shift;
 
-    my %hash = (
-		data_type => $self->data_type,
-		display_type => $self->display_type,
-		foreign_column => $self->foreign_column,
-	    foreign_type => $self->foreign_type,
-		is_foreign_key => $self->is_foreign_key,
-		is_nullable => $self->is_nullable,
-		readonly => $self->readonly,
-		label => $self->label,
-		name => $self->name,
-		size => $self->size,
-		upload_max_size => $self->upload_max_size,
-		upload_extensions => $self->upload_extensions ? [map {lc($_)} @{$self->upload_extensions}] : undef,
-		upload_dir => $self->upload_dir,
-    );
+    my $hash = {};
+	$hash->{data_type} = $self->data_type;
+	$hash->{display_type} = $self->display_type;
+	$hash->{foreign_column} = $self->foreign_column if $self->foreign_column;
+    $hash->{foreign_type} = $self->foreign_type if $self->foreign_type;
+	$hash->{is_foreign_key} = $self->is_foreign_key if $self->is_foreign_key;
+	$hash->{is_nullable} = $self->is_nullable if $self->is_nullable;
+	$hash->{readonly} = $self->readonly if $self->readonly;
+	$hash->{label} = $self->label if $self->label;
+	$hash->{name} = $self->name if $self->name;
+	$hash->{size} = $self->size if defined $self->size;
+	$hash->{upload_max_size} = $self->upload_max_size if defined $self->upload_max_size;
+	$hash->{upload_extensions} = $self->upload_extensions if $self->upload_extensions;
+	$hash->{upload_dir} = $self->upload_dir if $self->upload_dir;
+	$hash->{options} = $self->dropdown_options if $self->dropdown_options;
 
-    return \%hash;
+    return $hash;
 }
 
-=head2 attributes
+=head2 attr
 
 =cut
-sub attributes  {
+sub attr  {
 		my ($self, @path) = @_;
 		my $value;
-		my $node = config->{TableEditor}->{classes}->{$self->class->name}->{fields}->{$self->name};
+		my $node = config->{TableEditor}->{classes}->{$self->class->name}->{columns}->{$self->name};
 		for my $p (@path){
 			$node = $node->{$p};
 			return $node unless defined $node;

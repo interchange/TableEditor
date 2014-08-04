@@ -12,6 +12,7 @@ use FindBin;
 use Cwd qw/realpath/;
 use YAML::Tiny;
 use Scalar::Util 'blessed';
+use File::Path qw(make_path remove_tree);
 
 use TableEdit::SchemaInfo;
 use TableEdit::Session;
@@ -43,10 +44,11 @@ get '/:class/:id/:related/list' => require_login sub {
 	my $id = param('id');
 	my $class_info = $schema_info->class(param('class'));
 	my $related = param('related');
-	my ($row, $data);
+	my $data;
 
 	# Row lookup
-	$row = $class_info->resultset->find($id);
+	my $row = $class_info->resultset->find($id);
+	my $rowInfo = $schema_info->row($row);
 	
 	# Related list
 	my $relationship_info = $class_info->relationship($related);
@@ -58,7 +60,7 @@ get '/:class/:id/:related/list' => require_login sub {
 	$data->{'related_class'} = $relationship_info->class_name;
 	$data->{'related_class_label'} = $relationship_info->label;
 	$data->{'related_type'} = $relationship_info->type;
-	$data->{'title'} = row_to_string($row);
+	$data->{'title'} = $rowInfo->to_string;
 	
 	return to_json $data;
 };
@@ -175,22 +177,22 @@ get '/menu' => sub {
 };
 
 
-post '/:class/:field/upload_image' => require_login sub {
+post '/:class/:column/upload_image' => require_login sub {
 	my $class = param('class');
-	my $class_info = $schema_info->class(param('class'));
-	my $field = param('field');
+	my $class_info = $schema_info->class($class);
+	my $column = param('column');
+	my $column_info = $class_info->column($column);
 	my $file = upload('file');
 	
 	# Upload dir
-	my $path = $class_info->attributes('upload_dir'); 
-	$path ||= "images/upload/$class/$field/";
+	my $path = $column_info->upload_dir; 
 	
 	# Upload image
     if($file){
 		my $fileName = $file->{filename};
 		
 		my $dir = "$appdir/public/$path";
-		mkdir $dir unless (-e $dir);       
+		make_path $dir unless (-e $dir);       
 		
 		if($file->copy_to($dir.$fileName)){			
 			return "/$path$fileName";
@@ -205,11 +207,14 @@ get '/:class/:id' => require_login sub {
 	my $id = param('id');
 	my $class_info = $schema_info->class(param('class'));
 
-	$data->{fields} = $class_info->columns_info;
+	$data->{columns} = $class_info->columns_info;
 
 	# row lookup
 	my $row = $class_info->resultset->find($id);
-	$data->{title} = row_to_string($row);
+	return status '404' unless $row;
+	 
+	my $rowInfo = $schema_info->row($row);
+	$data->{title} = $rowInfo->to_string;
 	$data->{id} = $id;
 	$data->{class} = $class_info->name;
 	$data->{values} = {$row->get_columns};
@@ -221,7 +226,7 @@ get '/:class' => require_login sub {
 	my $class_info = $schema_info->class(param('class'));
 
 	return to_json({ 
-		fields => $class_info->form_columns_info,
+		columns => $class_info->form_columns_info,
 		class => $class_info->name,
 		class_label => $class_info->label,
 		relations => $class_info->relationships_info,
@@ -253,23 +258,6 @@ del '/:class' => require_login sub {
 
 =head1 Fuctions
 
-=head2 row_to_string
-
-Returns string representation of row object
-
-=cut
-
-sub row_to_string {
-	my $row = shift;
-	return $row->to_string if eval{$row->to_string};
-	return "$row" unless eval{$row->result_source};
-	my $class = $row->result_source->{source_name};
-	my $class_info = $schema_info->class($class);
-	my $pk = $class_info->primary_key;
-	my $id = $row->$pk;
-	return "$id - ".$class_info->label;
-}
-
 =head2 add_values
 
 Adds values to column objects
@@ -296,10 +284,10 @@ sub grid_template_params {
 	my $grid_params;
 	my $where = {};	
 	# Grid
-	$grid_params->{field_list} = $class_info->grid_columns_info; 
+	$grid_params->{column_list} = $class_info->grid_columns_info; 
 	my $where_params = from_json $get_params->{q} if $get_params->{q};
-	grid_where($grid_params->{field_list}, $where, $where_params);
-	add_values($grid_params->{field_list}, $where_params);
+	grid_where($grid_params->{column_list}, $where, $where_params);
+	add_values($grid_params->{column_list}, $where_params);
 	
 	my $rs = $related_items || $class_info->resultset;
 
@@ -319,7 +307,7 @@ sub grid_template_params {
 
 	$grid_params->{rows} = grid_rows(
 		[$rows->all], 
-		$grid_params->{field_list} , 
+		$grid_params->{column_list} , 
 		$primary_column, 
 	);
 	
@@ -346,7 +334,7 @@ Returns sql order by parameter.
 sub grid_sort {
 	my ($class_info, $get_params) = @_;
 	# Selected or Predefined sort
-	my $sort = $get_params->{sort} || $class_info->attributes('grid_sort');
+	my $sort = $get_params->{sort} || $class_info->attr('grid_sort');
 	# Direction	
 	$sort .= $get_params->{descending} ? ' DESC' : '' if $sort;
 	return $sort;
@@ -362,11 +350,11 @@ Sets sql conditions.
 sub grid_where {
 	my ($columns, $where, $params, $alias) = @_;
 	$alias ||= 'me';
-	for my $field (@$columns) {
+	for my $column (@$columns) {
 		# Search
-		my $name = $field->{name};
+		my $name = $column->{name};
 		if( defined $params->{$name} and $params->{$name} ne '' ){
-			if ($field->{data_type} and ($field->{data_type} eq 'text' or $field->{data_type} eq 'varchar')){
+			if ($column->{data_type} and ($column->{data_type} eq 'text' or $column->{data_type} eq 'varchar')){
 				$where->{"LOWER($alias.$name)"} = {'LIKE' => "%".lc($params->{$name})."%"};
 			}
 			else { 
@@ -390,6 +378,7 @@ sub grid_rows {
 
 	for my $row (@$rows){
 		die 'No primary column' unless $primary_column;
+		my $rowInfo = $schema_info->row($row);
 		
 		# unravel row
 		my $row_inflated = {$row->get_inflated_columns};
@@ -397,16 +386,16 @@ sub grid_rows {
 		my $row_data = [];
 
 		for my $column (@$columns_info){
+			
 			my $column_name = $column->{foreign} ? "$column->{foreign}" : "$column->{name}";
 			my $value = $row_inflated->{$column_name};
-			$value = row_to_string($value) if blessed($value);
 			push @$row_data, {value => $value};
 		}
 
 		push @table_rows, {
             row => $row_data,
             id => $id,
-            name => row_to_string($row),
+            name => $rowInfo->to_string,
             columns => $row_inflated,
         };
 	}

@@ -1,10 +1,10 @@
-<div ng-if="!data.fields" class="loading">
+<div ng-if="!data.columns" class="loading">
 	<div>
 		<span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Loading...
 	</div>
 </div>
 
-<div ng-if="data.fields">
+<div ng-if="data.columns">
 	<!-- Page heading -->
 	<div class="page-head" ng-init="view='form'" checkUser>
 		<!-- Page heading -->
@@ -43,13 +43,13 @@
 							<div class="messages"></div>
 	
 							<!-- Text input-->
-							<div ng-repeat="field in data.fields">
-								<div ng-if="field.hidden != 1 && (!(field.is_auto_increment || (field.readonly && !field.primary_key) && create))">
+							<div ng-repeat="column in data.columns">
+								<div ng-if="column.hidden != 1 && (!(column.is_auto_increment || (column.readonly && !column.primary_key) && create))">
 									<div class="form-group form-field">
-										<label class="control-label ">{{ field.label }}</label>
+										<label class="control-label ">{{ column.label }}</label>
 										<ng-form name="validationScope">
-										<div class="controls control-group" ng-class="{'error': validationScope.field.$invalid}">
-											<div ng-include="'views/field/'+field.display_type+'.html'"></div>
+										<div class="controls control-group" ng-class="{'error': validationScope.column.$invalid}">
+											<div ng-include="'views/column/'+column.display_type+'.html'"></div>
 										</div>
 										</ng-form>
 									</div>

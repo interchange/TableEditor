@@ -526,7 +526,7 @@ var CreateRelatedCtrl = function ($scope, $routeParams, ClassItem, Item) {
 	$scope.item = {};
 	// related = $routeParams.class;
 	$scope.item.values = {};
-	$scope.item.values[$routeParams.field] = $routeParams.value;
+	$scope.item.values[$routeParams.column] = $routeParams.value;
 
 	$scope.data = ClassItem.get({class: $routeParams.related,});
 	$scope.create = 1;
@@ -577,33 +577,33 @@ var EditCtrl = function ($scope, $rootScope, $routeParams, Item, ClassItem, Url,
 
 	$scope.save = Item.update;
 	
-	var field;
+	var column;
 	$scope.onFileSelect = function($files) {
 	    //$files: an array of files selected, each file has name, size, and type.
 	    for (var i = 0; i < $files.length; i++) {
 	      var file = $files[i];
-	      field = this.field.name;
+	      column = this.column.name;
 	      
 	      // File size limit
-	      if ( this.field.upload_max_size && file.size > this.field.upload_max_size){
-	    	  error;
+	      if ( this.column.upload_max_size && file.size > this.column.upload_max_size){
+	    	  error; //TODO throw error
 	      }
 	      // File type limit
 	      var re = /(?:\.([^.]+))?$/;
 	      var ext = re.exec(file.name)[1];
-	      if ( !ext || this.field.upload_extensions.indexOf(ext.toLowerCase()) == -1 ){
-	    	  error;
+	      if ( !ext || (this.column.upload_extensions && this.column.upload_extensions.indexOf(ext.toLowerCase()) == -1) ){
+	    	  error; //TODO throw error
 	      }
 	      
 	      $scope.upload = $upload.upload({
-	        url: '/api/'+this.item.class+'/'+field+'/upload_image',
+	        url: '/api/'+this.item.class+'/'+column+'/upload_image',
 	        data: {myObj: $scope.myModelObj},
 	        file: file, // or list of files: $files for html5 only
 	      }).progress(function(evt) {
 	        console.log('percent: ' + parseInt(100.0 * evt.loaded / evt.total));
 	      }).success(function(data, status, headers, config) {
 	        // file is uploaded successfully
-	    	$scope.item.values[field] = data;
+	    	$scope.item.values[column] = data;
 	    	1;
 	      });
 	      //.error(...)

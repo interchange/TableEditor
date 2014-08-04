@@ -1,0 +1,28 @@
+<span ng-if="view != 'grid' ">
+<!-- This is grid version -->
+	<select 
+		name="column" 
+		class="form-control" 
+		id="media_format" 
+		ng-model="item.values[column.name]" 
+		ng-required="column.required" 
+		ng-readonly="column.readonly || (column.primary_key && !create)" 
+		ng-disabled="column.readonly || (column.primary_key && !create)" 
+		ng-options="option.value as option.option_label for option in column.options">
+		<option></option>
+	</select>
+	<span ng-include="'views/column/partials/standard_validation.html'"></span>
+</span>
+
+<span ng-if="view == 'grid' ">
+<!-- This is grid version -->
+	<select 
+		name="column" 
+		class="form-control" 
+		id="media_format" 
+		ng-model="item.values[column.name]" 
+		ng-options="option.value as option.option_label for option in column.options">
+		<option></option>
+	</select>
+	<span ng-include="'views/column/partials/standard_validation.html'"></span>
+</span>

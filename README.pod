@@ -48,12 +48,13 @@ It is easy to change the Bootstrap theme to get a different look for Table Edit.
 =head1 USE
 
 With basic configuration done you can start using Table Edit. You will probably want to fine tune it a bit though.
+Table editor specific configuration is located in lib/config.yml.
 
 =head1 FINE TUNE
 
-Make sure you set all additional info below # DO NOT MODIFY THIS OR ANYTHING ABOVE! line in L<DBIx::Class> model.
+For this example we will use following model and config file.
 
-For this example we will use following model.
+=head2 Model
 
 	use utf8;
 	package TableEdit::Schema::Result::User;
@@ -72,6 +73,8 @@ For this example we will use following model.
 	  { data_type => "varchar", is_nullable => 0, size => 45 },
 	  "email",
 	  { data_type => "varchar", is_nullable => 1, size => 90 },
+	  "description",
+	  { data_type => "text", is_nullable => 1 },
 	  "birthday",
 	  { data_type => "timestamp with time zone", is_nullable => 1 },
 	  "internal_code",
@@ -90,7 +93,7 @@ For this example we will use following model.
 	__PACKAGE__->belongs_to(
 	  "company",
 	  "TableEdit::Schema::Result::Company",
-	  { id => "podjetje_id" },
+	  { id => "company_id" },
 	  { is_deferrable => 1, on_delete => "CASCADE", on_update => "CASCADE" },
 	);
 	
@@ -106,56 +109,94 @@ For this example we will use following model.
 	# Created by DBIx::Class::Schema::Loader v0.07033
 	# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:g5NE5itWUoKXqfEKXj/8Rg
 	
-	__PACKAGE__->resultset_attributes({ 	
-		label => 'Employees',
-		grid_columns => ['id', 'username', 'email'],
-		form_columns => ['id', 'username', 'email', 'birthday', 'internal_code'],
-		many_to_many => {
-			items => {class => 'TableEdit::Schema::Result::Item', where => {inactive => 'false'}},  
-		},	
-	});
-	
-	__PACKAGE__->columns_info->{created_date}->{readonly} = 1;
-	__PACKAGE__->columns_info->{internal_code}->{hidden} = 1;
-	__PACKAGE__->columns_info->{email}->{field_type} = 'text';
-	
 	# You can replace this text with custom code or comments, and it will be preserved on regeneration
 	1;
+
+=head2 Config file
 		
+	TableEditor:
+	  dropdown_treshold: 50
+	  page_size: 10
+	  
+	  classes:
+	    User: 
+	      label: Employees
+	      grid_columns: [users_id, username]
+	      grid_sort: username
+	      form_columns: [users_id, username, email]
+	      to_string: | 
+			 my $company = $self->company || "";
+			 return "$self->username ($self->id) $company";
+	      columns:
+		     last_name:
+			  label: 'Family name'			
+			first_name:
+			  label: 'Name'
+			created_date:
+			  readonly: 1
+			  column_type = 'date'
+			internal_code:
+			  hidden: 1
+			description:
+			  column_type = 'html'
+	    Order:
+	      columns:
+		payment_method: 
+		  hidden: 1
+		payment_status: 
+		  readonly: 1
 
-=head2 Column label
+=head2 Global properties
 
-You can override column label by specifying it  
+=head3 Dropdown treshold
 
-	__PACKAGE__->columns_info->{fname}->{label} = 'Name';
+You can set number of rows that are still ok for dropdown. Tables with more than that will show items ID istead of dropdown by default.
 
-=head2 Object / Row string representation
+	dropdown_treshold: 50
+	
+=head3 Page size
+
+Number of items per page by default
+	
+	page_size: 10
+
+=head2 Class properties
+
+Under classes you can specify class properties.
+
+=head3 Label
+
+Custom table lable. Default is generated from table name.
+
+	label: Employees
+
+=head3 Row in string representation
 
 Row often has to be represented as string (titles, drop-down selectors, ...) so it is a good idea to 
 define a custom, human readable stringification method. For example users username, his id in parentheses 
-and company if he / she has one. It could be just username or something much complicated.
+and company if he / she has one. It could be just username or something much complicated. 
 
-	use overload fallback => 1, '""' => \&to_string; 
+variable $row is passed to script and it represents a row as DBIx::Class::Row object.
+Snippet should return string.
 
-	sub to_string {
-		my $self = shift;	
-		my $company = $self->company || "";
-		return "$self->username ($self->id) $company";
-	}
+	to_string: | 
+		 my $company = $row->company || "";
+		 return "$row->username ($row->id) $company";
 
-=head2 Hidden columns
+=head3 Grid / form visible columns
 
-Some columns are used only internally and you never want to see them in TableEdit. You can hide them.
+Often you don't care about all columns when you browse though rows or there are simply to many. You can specify a list of columns that will appear on grid or form. You have to be careful not to omit required columns and similar on form view.
 
-	__PACKAGE__->columns_info->{internal_code}->{hidden} = 1;
+	grid_columns: [users_id, username]
+	form_columns: [users_id, username, email]
+	
+=head3 Grid sort
 
-=head2 Readonly columns
+By default list is not sorted. You can specify a default column. 
+	
+	grid_sort: username
 
-You can set a column to be readonly
-
-	__PACKAGE__->columns_info->{created_date}->{readonly} = 1;
-
-=head2 Many to many
+=head3 Many to many
 
 "Has many" and "belongs_to" is automatically detected. However, many to many DBIx::Class information 
 doesn't provide enough information, so you have to specify it manually.
@@ -166,52 +207,46 @@ Only set resultset_attributes once, or it will be overwritten!
 			items => {class => 'TableEdit::Schema::Result::Item', where => {inactive => 'false'}},  
 		},		
 	});
+
+
+=head2 Column properties
+
+
+=head3 Label
+
+You can override column label by specifying it  
+
+	label: 'Family name'
+
+=head3 Hidden columns
+
+Some columns are used only internally and you never want to see them in TableEdit. You can hide them.
+
+	hidden: 1
+
+=head3 Readonly columns
+
+You can set a column to be readonly in form view. 
+
+	readonly = 1;
+
+=head3 column data type
+
+Columns have basic column types based on data types in db. You can override them to use different form element.
+Available widgets are: boolean, date, datetime, dropdown, html, image_upload, integer, text, varchar
+
+	column_type = 'html';
+
+These column types are used on detail view and on list search. 	
 	
-=head2 Grid / form visible columns
-
-Often you don't care about all columns when you browse though rows or there are simply to many. 
-You can specify a list of columns that will appear on grid or form. 
-You have to be careful not to omit required columns and similar on form view.
-
-	__PACKAGE__->resultset_attributes({ 	
-		grid_columns => ['id', 'username', 'email'],
-		form_columns => ['id', 'username', 'email', 'birthday', 'internal_code'],
-	});
-	
-=head2 Model name / label
-
-You can set user friendly name of the table.
-
-	__PACKAGE__->resultset_attributes({ 	
-		label => 'Employees',
-	});
-	
-=head2 Field data type
-
-Fields have basic field types based on data types in db. You can override them to use different form element.
-
-	__PACKAGE__->columns_info->{email}->{field_type} = 'text';
-	__PACKAGE__->columns_info->{description}->{field_type} = 'html';
-	
-You can also set them to use your custom widget. You create a HTML file with the matching name in F<public/views/field> directory.
-
-For example F<public/views/field/email_widget.html>:
-	
-	__PACKAGE__->columns_info->{email}->{field_type} = 'email_widget';
-	
-These field types are used on detail view and on list search. 	
-	
-=head3 Built-in types
-
-TE has some common types built in. Type 'html' is wysiwyg editor in text area. You can find other in F<public/views/field>.
-
 =head4 Image upload
 
-Example of image field conf:
-__PACKAGE__->columns_info->{avatar}->{field_type} = 'image_upload';
-__PACKAGE__->columns_info->{avatar}->{upload_dir} = 'lib_item_img/'; # default is "images/upload/$class/$field/"
-__PACKAGE__->columns_info->{avatar}->{upload_max_size} = 1000000; # in bytes, default is unlimited
-__PACKAGE__->columns_info->{avatar}->{upload_extensions} = ['jpg', 'jpeg', 'gif', 'PNG']; # case insensitive
+Example of image column conf:
+
+	column_type: 'image_upload';
+	upload_dir: 'lib_item_img/'; # default is "images/upload/$class/$column/"
+	upload_max_size: 1000000; # in bytes, default is unlimited
+	upload_extensions: ['jpg', 'jpeg', 'gif', 'PNG']; # case insensitive
  
 =head1 PLUGINS
  
@@ -290,7 +325,7 @@ Example usage:
 
 		return to_json({ 
 			custom_information => 'this is custom!',
-			fields => $columns,
+			columns => $columns,
 			class => $class,
 			class_label => $schema_info->{$class}->{label},
 			relations => $relationships,

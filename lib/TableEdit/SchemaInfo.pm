@@ -6,6 +6,7 @@ with 'MooX::Singleton';
 use MooX::Types::MooseLike::Base qw/InstanceOf/;
 
 require TableEdit::ClassInfo;
+require TableEdit::RowInfo;
 
 
 my $schema = {};
@@ -163,6 +164,20 @@ sub class {
     }
 }
 
+=head2 row $row
+
+Returns L<TableEdit::RowInfo> object for $row.
+
+=cut
+
+sub row {
+    my ($self, $row) = @_;
+	return TableEdit::RowInfo->new(
+		row => $row, 
+		class => $self->class($row->result_source->source_name),
+	);
+}
+
 
 sub _build__classes {
     my $self = shift;
@@ -172,7 +187,7 @@ sub _build__classes {
 
     for my $class (@$candidates) {
         my $rs = $self->schema->resultset($class);
-        $class_hash{$class} = TableEdit::ClassInfo->new($class);
+        $class_hash{$class} = TableEdit::ClassInfo->new(name => $class, schema => $self);
     }
 
     return \%class_hash;

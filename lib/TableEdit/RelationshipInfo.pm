@@ -57,6 +57,18 @@ has class_name => (
     required => 1,
 );
 
+=head2 class
+
+Class where this relationship points to.
+
+=cut
+
+has class => (
+    is => 'ro',
+    required => 1,
+    isa => InstanceOf ['TableEdit::ClassInfo'],
+);
+
 =head2 cond
 
 Relationship condition.

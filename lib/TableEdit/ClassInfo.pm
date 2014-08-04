@@ -4,19 +4,21 @@ use Dancer ':syntax';
 use Moo;
 use MooX::Types::MooseLike::Base qw/InstanceOf/;
 
-use TableEdit::ColumnInfo;
-use TableEdit::RelationshipInfo;
-use Dancer::Plugin::DBIC qw(schema rset);
+require TableEdit::ColumnInfo;
+require TableEdit::RelationshipInfo;
+require Dancer::Plugin::DBIC;
 
 with 'TableEdit::SchemaInfo::Role::ListUtils';
 
 my $dropdown_treshold = config->{TableEditor}->{dropdown_treshold} || 50;
 
 sub BUILDARGS {
-	my ( $class, $name ) = @_;   
+	my $class = shift;
+	my %args = @_;   
 	return { 
-   		name => $name, 
-   		resultset => schema->resultset(ucfirst($name)),
+   		name => $args{name}, 
+   		schema => $args{schema}, 
+   		resultset => Dancer::Plugin::DBIC::schema->resultset(ucfirst($args{name})),
    	};
  };
 
@@ -32,6 +34,13 @@ Name of class.
 has name => (
     is => 'ro',
     required => 1,
+);
+
+
+has schema => (
+    is => 'ro',
+    required => 1,
+    isa => InstanceOf ['TableEdit::SchemaInfo'],
 );
 
 =head2 label
@@ -116,9 +125,9 @@ has columns_info => (is => 'lazy');
 sub _build_columns_info { 
     my ($self, $selected_columns) = @_;
     my $columns_info = [];
-
+	
 	$selected_columns = [$self->columns] unless $selected_columns;
-
+	
     for my $column_info (@$selected_columns) {
 
 		# Belongs to or Has one
@@ -130,9 +139,17 @@ sub _build_columns_info {
 		    # determine number of records in foreign table
 		    my $count = $rs->count;
 		    if ($count <= $dropdown_treshold){
-			$column_info->display_type ('dropdown');
-			my @foreign_rows = $rs->all;
-			$column_info->options($column_info->dropdown_options); #(\@foreign_rows, $column_info->{foreign_column})
+				$column_info->display_type ('dropdown');
+				my @foreign_rows = $rs->all;
+				my $items = [];
+				for my $row (@foreign_rows){
+					my $rowInfo = TableEdit::RowInfo->new(row => $row, class => $column_info->relationship->{class});
+					my $pk = $self->primary_key;
+					my $id = $row->$pk;
+					my $name = $rowInfo->to_string;
+					push @$items, {option_label=>$name, value=>$id};
+				}
+				$column_info->dropdown_options($items); #(\@foreign_rows, $column_info->{foreign_column})
 		    }
 		}
 		push @$columns_info, $column_info->hashref;
@@ -301,6 +318,7 @@ sub _build__relationships {
             foreign_column => $foreign_column,
             origin_class => $self,
             class_name => $class_name,
+            class => $self->schema->class($class_name),
             resultset => $resultset,
         );
     }
@@ -343,7 +361,7 @@ Return attribute value
 
 =cut
 
-sub attributes  {
+sub attr  {
 		my ($self, @path) = @_;
 		my $value;
 		my $node = config->{TableEditor}->{classes}->{$self->name};
@@ -364,7 +382,7 @@ Return array of all column names suitable for grid display.
 has grid_columns => (is => 'lazy');
 sub _build_grid_columns {
 	my $self = shift;
-    my $columns = $self->attributes('grid_columns');
+    my $columns = $self->attr('grid_columns');
     return $columns if defined $columns;
 
     for my $column_info ($self->columns){
@@ -413,7 +431,7 @@ Returns array of column names appropriate for form
 has form_columns => (is => 'lazy');
 sub _build_form_columns {
 	my ($self) = @_;
-	my $columns = $self->attributes('form_columns');
+	my $columns = $self->attr('form_columns');
     return $columns if defined $columns;
 
     for my $column_info ($self->columns){
@@ -458,7 +476,7 @@ Return column for default sort
 has grid_sort => (is => 'lazy');
 sub _bulid_grid_sort {
 	my ($self) = @_;
-	return $self->attributes('grid_sort');
+	return $self->attr('grid_sort');
 }
 
 1;

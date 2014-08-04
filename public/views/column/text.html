@@ -1,0 +1,27 @@
+<span ng-if="view != 'grid' ">
+	<textarea 
+		name="column"
+		class="form-control" 
+		rows="10" 
+		cols="30" 
+		ng-model="item.values[column.name]" 
+		ng-required="column.required"
+		ng-readonly="column.readonly || (column.primary_key && !create)" 
+		maxlength="{{column.size}}"
+		>
+	</textarea>
+	<span ng-include="'views/column/partials/standard_validation.html'"></span>
+</span>
+
+<span ng-if="view == 'grid' ">
+<!-- This is grid version -->
+<input 
+	name="column"
+	class="form-control"
+	ng-required="column.required" 
+	ng-readonly="column.readonly || (column.primary_key && !create)" 
+	ng-model="item.values[column.name]" 
+	maxlength="{{column.size}}"
+	type="text" >
+
+</span>
