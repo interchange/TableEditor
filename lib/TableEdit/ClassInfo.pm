@@ -144,7 +144,7 @@ sub _build_columns_info {
 				my $items = [];
 				for my $row (@foreign_rows){
 					my $rowInfo = TableEdit::RowInfo->new(row => $row, class => $column_info->relationship->{class});
-					my $pk = $self->primary_key;
+					my $pk = $column_info->relationship->{class}->primary_key;
 					my $id = $row->$pk;
 					my $name = $rowInfo->to_string;
 					push @$items, {option_label=>$name, value=>$id};
