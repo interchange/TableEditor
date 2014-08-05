@@ -3,17 +3,17 @@
 /* App Module */
 
 var default_routes = {
-		'/login': { templateUrl: 'views/login.html', controller: 'LoginCtrl', public: true },
-		'/status': { templateUrl: 'views/status.html', controller: 'StatusCtrl', public: true },
-		'/:class/list': { templateUrl: 'views/list.html', controller: 'ListCtrl' },
-		'/:class/new': { templateUrl: 'views/form.html', controller: 'CreateCtrl' },
-		'/:class/edit/:id': { templateUrl: 'views/form.html', controller: 'EditCtrl' },
-		'/:class/:id/new/:related': { templateUrl: 'views/form.html', controller: 'CreateRelatedCtrl' },
-		'/:class/:id/:related/belongs_to': { templateUrl: 'views/related.html', controller: 'BelongsToCtrl' },
-		'/:class/:id/:related/has_many': { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' },
-		'/:class/:id/:related/might_have': { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' },
-		'/:class/:id/:related/many_to_many': { templateUrl: 'views/many_to_many.html', controller: 'RelatedListCtrl' },
-		};
+	'/login': { templateUrl: 'views/login.html', controller: 'LoginCtrl', public: true },
+	'/status': { templateUrl: 'views/status.html', controller: 'StatusCtrl', public: true },
+	'/:class/list': { templateUrl: 'views/list.html', controller: 'ListCtrl' },
+	'/:class/new': { templateUrl: 'views/form.html', controller: 'CreateCtrl' },
+	'/:class/edit/:id': { templateUrl: 'views/form.html', controller: 'EditCtrl' },
+	'/:class/:id/new/:related': { templateUrl: 'views/form.html', controller: 'CreateRelatedCtrl' },
+	'/:class/:id/:related/belongs_to': { templateUrl: 'views/related.html', controller: 'BelongsToCtrl' },
+	'/:class/:id/:related/has_many': { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' },
+	'/:class/:id/:related/might_have': { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' },
+	'/:class/:id/:related/many_to_many': { templateUrl: 'views/many_to_many.html', controller: 'RelatedListCtrl' },
+};
 
 
 CrudApp.directive('checkUser', function ($rootScope, $location, $route, Url, Auth) {
@@ -77,6 +77,23 @@ CrudApp.directive('activeLink', function($location) {
 
 
 //Factories
+CrudApp.factory('AuthInterceptor',['$q','$location',function($q,$location){
+    return {
+        response: function(response){
+            if (response.status === 401) {
+                console.log("Response 401");
+            }
+            return response || $q.when(response);
+        },
+        responseError: function(rejection) {
+            if (rejection.status === 401) {
+                console.log("Response Error 401",rejection);
+                $location.path('/login').search('returnTo', $location.path());
+            }
+            return $q.reject(rejection);
+        }
+    }
+}]);
 
 CrudApp.factory('Auth', function($resource){
 	return {
@@ -222,14 +239,17 @@ CrudApp.config(function($routeProvider) {
 	$routeProvider.otherwise({redirectTo: '/status'});
 });
 
-
+CrudApp.config(['$httpProvider',function($httpProvider) {
+    //Http Intercpetor to check auth failures for xhr requests
+    $httpProvider.interceptors.push('AuthInterceptor');
+}]);
 //Controllers
 
 
 
 var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, RelatedList,  RelatedItem, RelatedItems, Item, Url) {
 	$scope.relation = $routeParams.related;
-
+	$scope.error = {};
 
 	$scope.item_info = RelatedList.get({
 		class: $routeParams.class,
@@ -240,7 +260,7 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 		},
 		// Error
 		function() {
-			alert('Could not retrieve data!');
+			$scope.error.msg = 'Error retrieving '+$routeParams.related+' for '+$routeParams.class+' with id '+ $routeParams.id;
 		}
 	);
 	$scope.item = {};
@@ -248,15 +268,15 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 
 
 	$scope.class = ClassItem.get({
-		class: $routeParams.class,
-	},
-	// Success
-	function(data) {
-	},
-	// Error
-	function() {
-		alert('Could not retrieve data!');
-	}
+			class: $routeParams.class,
+		},
+		// Success
+		function(data) {
+		},
+		// Error
+		function() {
+			$scope.error.msg = 'Error retrieving '+$routeParams.class+' info';
+		}
 	);
 
 	$scope.related_item = {};
@@ -334,7 +354,7 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 		},
 		// Error
 		function() {
-			alert('Could not retrieve data!');
+			$scope.error.msg = 'Error retrieving '+$routeParams.related+' for '+$routeParams.class+' with id '+ $routeParams.id;
 		}
 		);
 	};
@@ -444,7 +464,7 @@ var RelatedClassCtrl = function ($scope, $routeParams, RelatedItem, RelatedClass
 		},
 		// Error
 		function() {
-			alert('Could not retrieve data!');
+			$scope.error.msg = 'Error retrieving '+$routeParams.related+' for '+$routeParams.class+ ' information.';
 		}
 		);
 	};
@@ -476,7 +496,7 @@ var StatusCtrl = function ($scope, Schema, SchemaCreate, DBConfig) {
 				},
 				// Error
 				function() {
-					alert('Could not retrieve data!');
+					$scope.error.msg = 'Error retrieving status data';
 				}
 				);
 			} 
@@ -513,7 +533,7 @@ var CreateCtrl = function ($scope, $routeParams, ClassItem, Item) {
 			},
 			// Error
 			function() {
-				alert('Could not retrieve data!');
+				$scope.error.msg = 'Error retrieving '+$routeParams.class+' information';
 			}
 	);
 	$scope.create = 1;
@@ -551,6 +571,7 @@ var EditRelatedCtrl = function ($scope, $routeParams, ClassItem, Item, Related) 
 		// Error
 		function() {
 			alert('Could not retrieve data!');
+			$scope.error.msg = 'Error retrieving '+$routeParams.class+' with id '+$routeParams.id;
 		}
 	);
 
@@ -558,22 +579,33 @@ var EditRelatedCtrl = function ($scope, $routeParams, ClassItem, Item, Related) 
 };
 
 var EditCtrl = function ($scope, $rootScope, $routeParams, Item, ClassItem, Url, $upload) {
+	$scope.error = {};
 	$scope.item = Item.read.get({
-		class: $routeParams.class, 
-		id: $routeParams.id}
+			class: $routeParams.class, 
+			id: $routeParams.id
+		},		
+		// Success
+		function(data) {
+		},
+		// Error
+		function(data) {
+			$scope.error.msg = 'Error retrieving '+$routeParams.class+' with id '+$routeParams.id;
+		}
 	);
 	$scope.data = ClassItem.get({class: $routeParams.class},
-			// Success
-			function(data) {
-				// Pagination
-				var page_scope = 5;			
-		
-			
-				
-				angular.forEach(data.relations, function(value, key){		
-					value.foreign_id = eval("$scope.item.values." + value.self_column);
-				});
-		});
+		// Success
+		function(data) {
+			// Pagination
+			var page_scope = 5;			
+			angular.forEach(data.relations, function(value, key){		
+				value.foreign_id = eval("$scope.item.values." + value.self_column);
+			});
+		},
+		// Error
+		function(data) {
+			$scope.error.msg = 'Error retrieving '+$routeParams.class+' infrormation.';
+		}
+	);
 
 	$scope.save = Item.update;
 	
@@ -624,6 +656,7 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 	$scope.sort_desc = false;
 	$scope.current_page = 1;
 	$scope.actions = 'class_list';
+	$scope.error = {};
 
 	$scope.sort = function (ord) {
 		if ($scope.sort_column == ord) { $scope.sort_desc = !$scope.sort_desc; }
@@ -683,7 +716,7 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 		},
 		// Error
 		function(data) {
-			alert('Error retrieving '+$routeParams.class);
+			$scope.error.msg = 'Error retrieving '+$routeParams.class+' items.';
 		}
 		);
 	};

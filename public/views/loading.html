@@ -1,0 +1,8 @@
+<div class="loading-box"">
+	<div  ng-if="error.msg" class="alert alert-danger" role="alert">
+		<span>{{error.msg}}</span>
+	</div>
+	<div ng-if="!error.msg" class="alert alert-info">
+		<span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Loading...
+	</div>
+</div>

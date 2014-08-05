@@ -1,16 +1,12 @@
-<div ng-if="!data.columns" class="loading">
-	<div>
-		<span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Loading...
-	</div>
-</div>
+<div ng-if="(!create && (!data.columns || !item.class)) || (create && !data.columns)" ng-include="'views/loading.html'" class="loading-box"></div>
 
-<div ng-if="data.columns">
+<div ng-if="!(!create && (!data.columns || !item.class)) || (create && !data.columns)">
 	<!-- Page heading -->
 	<div class="page-head" ng-init="view='form'" checkUser>
 		<!-- Page heading -->
 		<h1 ng-if="create" class="title">New {{ data.class_label }}</h1>
 		<h1 ng-if="!create" class="title">
-			<span class="grey super-title">{{ data.class_label }}</span> {{ item.title }}
+			<a href="#{{data.class}}/list" class="grey super-title">{{ data.class_label }}</a> {{ item.title }}
 		</h1>
 		<!-- Breadcrumb -->
 	

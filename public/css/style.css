@@ -160,12 +160,12 @@ list-style: none;
 	to   { -webkit-transform: scale( 1 ) rotate( 360deg ); }
 }
 
-.loading {
+.loading-box {
 	text-align: center;
 	vertical-align: middle;
-	padding: 50%;
+	padding: 50% 10px;
 }
 
-.loading > div {
-	width: 100px;
+.loading-box > div {
+	display: inline;
 }

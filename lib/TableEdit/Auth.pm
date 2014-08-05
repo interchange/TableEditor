@@ -12,6 +12,7 @@ get '/login' => sub {
 		};
 	}
 	else {
+		send_error("Not logged in", 401);
 		return to_json {};
 	}
 };
@@ -56,6 +57,7 @@ post '/logout' => sub {
 
 
 get '/sessions/active' => sub {
+	return to_json {} unless session('logged_in_user');
 	return to_json TableEdit::Session::active_sessions_besides_me;
 };
 

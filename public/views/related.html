@@ -2,7 +2,7 @@
 <!-- Page heading -->
 <div class="page-head">
 	<!-- Page heading -->
-	<h1 ng-if="item_info.title" class="title"><span class="grey super-title">{{ item_info.class }}</span> {{ item_info.title }}</h1>
+	<h1 ng-if="item_info.title" class="title"><a href="#{{item_info.class}}/list" class="grey super-title">{{ item_info.class_label }}</a> {{ item_info.title }}</h1>
 	<div class="clearfix"></div>
 
 </div>
@@ -16,12 +16,8 @@
 				<a class="sub-menu-link" href="#/{{item_info.class}}/{{item_info.id}}/{{link.name}}/{{link.type}}">{{link.label}}</a>
 			</li>
 		</ul>
-
-	<div ng-if="!item_info.class" class="loading">
-		<div>
-			<span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Loading...
-		</div>
-	</div>
+	<div ng-if="!item_info.class" ng-include="'views/loading.html'"></div>
+	
 
 	<div ng-show="item_info.class">
 		<a ng-click="create()" class="pull-right"><i class="glyphicon glyphicon-plus"></i> New {{item_info.related_class_label}}</a>

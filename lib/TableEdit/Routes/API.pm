@@ -57,6 +57,7 @@ get '/:class/:id/:related/list' => require_login sub {
 	return '{}' unless ( defined $row );	
 	$data->{'id'} = $id;
 	$data->{'class'} = $class_info->name;
+	$data->{'class_label'} = $class_info->label;
 	$data->{'related_class'} = $relationship_info->class_name;
 	$data->{'related_class_label'} = $relationship_info->label;
 	$data->{'related_type'} = $relationship_info->type;
