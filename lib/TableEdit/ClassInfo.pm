@@ -10,8 +10,6 @@ require Dancer::Plugin::DBIC;
 
 with 'TableEdit::SchemaInfo::Role::ListUtils';
 
-my $dropdown_treshold = config->{TableEditor}->{dropdown_treshold} || 50;
-
 sub BUILDARGS {
 	my $class = shift;
 	my %args = @_;   
@@ -138,7 +136,7 @@ sub _build_columns_info {
 	
 		    # determine number of records in foreign table
 		    my $count = $rs->count;
-		    if ($count <= $dropdown_treshold){
+		    if ($count <= $self->schema->dropdown_treshold){
 				$column_info->display_type ('dropdown');
 				my @foreign_rows = $rs->all;
 				my $items = [];

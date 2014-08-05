@@ -2,7 +2,6 @@ package TableEdit::ColumnInfo;
 
 use Dancer ':syntax';
 use Moo;
-with 'MooX::Singleton';
 
 with 'TableEdit::SchemaInfo::Role::Label';
 
@@ -173,10 +172,13 @@ Whether column is hidden or not.
 
 =cut
 
-sub hidden {
-	my $self = shift;
-	return $self->attr('hidden');
-}
+has hidden => (
+	is => 'lazy',
+    default => sub {
+		my $self = shift;
+		return $self->attr('hidden');
+	}
+);
 
 =head2 Read-only
 
@@ -184,10 +186,13 @@ Whether column is hidden or not.
 
 =cut
 
-sub readonly {
-	my $self = shift;
-	return $self->attr('readonly');
-}
+has readonly => (
+	is => 'lazy',
+    default => sub {
+		my $self = shift;
+		return $self->attr('readonly');
+	}
+);
 
 =head2 relationship
 
@@ -242,28 +247,51 @@ has upload_max_size => (
 =head2 hashref
 
 =cut
-sub hashref {
-	my $self = shift;
-	return $self->_as_hashref;
-};
+has hashref => (
+    is => 'lazy',
+    default => sub {
+		my $self = shift;
+		
+		my $hash = {};
+		$hash->{data_type} = $self->data_type;
+		$hash->{display_type} = $self->display_type;
+		$hash->{foreign_column} = $self->foreign_column if $self->foreign_column;
+	    $hash->{foreign_type} = $self->foreign_type if $self->foreign_type;
+		$hash->{is_foreign_key} = $self->is_foreign_key if $self->is_foreign_key;
+		$hash->{is_nullable} = $self->is_nullable if $self->is_nullable;
+		$hash->{readonly} = $self->readonly if $self->readonly;
+		$hash->{label} = $self->label if $self->label;
+		$hash->{name} = $self->name if $self->name;
+		$hash->{size} = $self->size if defined $self->size;
+		$hash->{upload_max_size} = $self->upload_max_size if defined $self->upload_max_size;
+		$hash->{upload_extensions} = $self->upload_extensions if $self->upload_extensions;
+		$hash->{upload_dir} = $self->upload_dir if $self->upload_dir;
+		$hash->{options} = $self->dropdown_options if $self->dropdown_options;
+	
+	    return $hash;
+	}
+);
 
 =head2 is_primary
 
 Returns 1 if column is primary key
 
 =cut
-sub is_primary {
-	my $self = shift;
-	my $classPK = $self->class->primary_key;
-	return undef unless $classPK;
-	if(ref($classPK) eq 'ARRAY'){
-		for my $pk (@$classPK){
-			return 1 if $self->name eq $classPK;
+has is_primary => (
+    is => 'lazy',
+    default => sub {	
+		my $self = shift;
+		my $classPK = $self->class->primary_key;
+		return undef unless $classPK;
+		if(ref($classPK) eq 'ARRAY'){
+			for my $pk (@$classPK){
+				return 1 if $self->name eq $classPK;
+			}
 		}
+		return 1 if $self->name eq $classPK;
+		return undef;
 	}
-	return 1 if $self->name eq $classPK;
-	return undef;
-};
+);
 
 =head2 required
 
@@ -280,31 +308,6 @@ sub required {
 	return undef;
 };
 
-
-=head2 _as_hashref
-
-=cut
-sub _as_hashref {
-    my $self = shift;
-
-    my $hash = {};
-	$hash->{data_type} = $self->data_type;
-	$hash->{display_type} = $self->display_type;
-	$hash->{foreign_column} = $self->foreign_column if $self->foreign_column;
-    $hash->{foreign_type} = $self->foreign_type if $self->foreign_type;
-	$hash->{is_foreign_key} = $self->is_foreign_key if $self->is_foreign_key;
-	$hash->{is_nullable} = $self->is_nullable if $self->is_nullable;
-	$hash->{readonly} = $self->readonly if $self->readonly;
-	$hash->{label} = $self->label if $self->label;
-	$hash->{name} = $self->name if $self->name;
-	$hash->{size} = $self->size if defined $self->size;
-	$hash->{upload_max_size} = $self->upload_max_size if defined $self->upload_max_size;
-	$hash->{upload_extensions} = $self->upload_extensions if $self->upload_extensions;
-	$hash->{upload_dir} = $self->upload_dir if $self->upload_dir;
-	$hash->{options} = $self->dropdown_options if $self->dropdown_options;
-
-    return $hash;
-}
 
 =head2 attr
 

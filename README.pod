@@ -159,7 +159,13 @@ You can set number of rows that are still ok for dropdown. Tables with more than
 Number of items per page by default
 	
 	page_size: 10
+	
+=head3 Classes in menu
 
+Order and selection of classes that show up in menu. Default are all classes with single primary key in alphabetical order.
+	
+	menu_classes: [user, product]
+	
 =head2 Class properties
 
 Under classes you can specify class properties.

@@ -19,7 +19,6 @@ use TableEdit::Session;
 
 # Global variables
 my $appdir = realpath( "$FindBin::Bin/..");
-my $menu;
 my $schema_info;
 
 prefix '/api';
@@ -168,13 +167,8 @@ get '/:class/list' => require_login sub {
 };
 
 
-get '/menu' => sub {
-    if (! $menu) {
-        $menu = [
-        	map {{name => $_->label, url=> join('/', '#' . $_->name, 'list'),}}	$schema_info->classes,
-	    ]
-    }
-    return to_json $menu;
+get '/menu' => sub {    
+    return to_json $schema_info->menu;
 };
 
 

@@ -10,7 +10,6 @@ require TableEdit::RowInfo;
 
 
 my $schema = {};
-sub dropdown_treshold { return config->{TableEditor}->{dropdown_treshold} || 50 };
 
 
 =head1 ATTRIBUTES
@@ -193,5 +192,52 @@ sub _build__classes {
     return \%class_hash;
 }
 
+has dropdown_treshold => (
+	is => 'lazy',
+	default => sub { 
+		my $self = shift;
+		return $self->attr('dropdown_treshold') || 50 
+	}
+);
+
+has menu => (
+	is => 'lazy',
+	default => sub { 
+		my $self = shift;
+		my $sort;
+
+		my $classes = $self->attr('menu_classes');
+		unless($classes){
+			$classes = $self->classes_with_single_primary_key;
+			$sort = 1;
+		}
+
+		my $menu;
+		for my $class (@$classes){
+			my $classInfo = $self->class($class);
+			$menu->{$classInfo->label} = {name => $classInfo->label, url=> join('/', '#' . $classInfo->name, 'list'),};
+		}
+		$menu = [map $menu->{$_}, sort keys %$menu] if $sort;
+
+		return $menu;
+    }	
+);
+
+=head2 attributes
+
+Return attribute value
+
+=cut
+
+sub attr  {
+		my ($self, @path) = @_;
+		my $value;
+		my $node = config->{TableEditor};
+		for my $p (@path){
+			$node = $node->{$p};
+			return $node unless defined $node;
+		}
+		return $node;
+}
 
 1;
