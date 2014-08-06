@@ -1,7 +1,7 @@
 TableEditor:
   dropdown_treshold: 50
   page_size: 10
-  menu_classes: [Address, Cart, User, Media]
+#  menu_classes: [Address, Cart, User, Media]
   
   classes:
     User: 

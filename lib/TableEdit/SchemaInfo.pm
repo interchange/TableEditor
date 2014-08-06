@@ -232,7 +232,8 @@ Return attribute value
 sub attr  {
 		my ($self, @path) = @_;
 		my $value;
-		my $node = config->{TableEditor};
+		unshift @path, 'TableEditor';
+		my $node = config;
 		for my $p (@path){
 			$node = $node->{$p};
 			return $node unless defined $node;

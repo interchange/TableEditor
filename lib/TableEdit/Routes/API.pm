@@ -135,12 +135,12 @@ get '/:class/:id/:related/items' => require_login sub {
 	my ($row, $data);
 	my $get_params = params('query') || {};
 
-	my $relationship_info = $class_info->relationship($related);
-	my $relationship_class_info = $schema_info->class($relationship_info->class_name);
-
 	# row lookup
 	$row = $class_info->resultset->find($id);
 	my $related_items = $row->$related;
+
+	my $relationship_info = $class_info->relationship($related);
+	my $relationship_class_info = $schema_info->class($relationship_info->class_name);
 	
 	# Related bind
 	$data = grid_template_params($relationship_class_info, $related_items);

@@ -10,9 +10,9 @@ var default_routes = {
 	'/:class/edit/:id': { templateUrl: 'views/form.html', controller: 'EditCtrl' },
 	'/:class/:id/new/:related': { templateUrl: 'views/form.html', controller: 'CreateRelatedCtrl' },
 	'/:class/:id/:related/belongs_to': { templateUrl: 'views/related.html', controller: 'BelongsToCtrl' },
-	'/:class/:id/:related/has_many': { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' },
+	'/:class/:id/:related/has_many': { templateUrl: 'views/many.html', controller: 'RelatedListCtrl' },
 	'/:class/:id/:related/might_have': { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' },
-	'/:class/:id/:related/many_to_many': { templateUrl: 'views/many_to_many.html', controller: 'RelatedListCtrl' },
+	'/:class/:id/:related/many_to_many': { templateUrl: 'views/many.html', controller: 'RelatedListCtrl' },
 };
 
 
@@ -397,6 +397,7 @@ var RelatedClassCtrl = function ($scope, $routeParams, RelatedItem, RelatedClass
 	$scope.data = {};
 	$scope.sort_desc = false;
 	$scope.current_page = 1;
+	$scope.page_size;
 
 	$scope.sort = function (ord) {
 		if ($scope.sort_column == ord) { $scope.sort_desc = !$scope.sort_desc; }
@@ -427,7 +428,7 @@ var RelatedClassCtrl = function ($scope, $routeParams, RelatedItem, RelatedClass
 		},
 		// Success
 		function(data) {
-			$scope.reset_items();
+			$scope.reset();			
 		},
 		// Error
 		function() {
@@ -446,7 +447,7 @@ var RelatedClassCtrl = function ($scope, $routeParams, RelatedItem, RelatedClass
 			sort: $scope.sort_column, 
 			descending: $scope.sort_desc ? 1 : 0,
 					page: $scope.current_page,
-					page_size: $scope.data.page_size,
+					//page_size: $scope.data.page_size,
 		},
 		// Success
 		function(data) {
@@ -471,10 +472,7 @@ var RelatedClassCtrl = function ($scope, $routeParams, RelatedItem, RelatedClass
 
 	$scope.reset();
 };
-var RelatedItemsCtrl = function ($scope, $routeParams, $location, $rootScope, RelatedItem, RelatedItems, ClassItem, Item) {
-	
-	
-};
+
 
 
 var StatusCtrl = function ($scope, Schema, SchemaCreate, DBConfig) {

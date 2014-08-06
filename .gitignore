@@ -40,6 +40,7 @@ Thumbs.db
 sessions
 nytprof
 lib/TableEdit/Schema
+lib/Interchange6
 environments/*.yml
 /nbproject/private/
 nbproject/

@@ -215,6 +215,7 @@ has upload_dir => (
     is => 'lazy',
     default => sub {
     	my $self = shift; 
+    	return undef unless $self->display_type eq 'image_upload';
     	return $self->attr('upload_dir') || "images/upload/".$self->class->name."/".$self->name."/";
     }
 );
@@ -247,9 +248,7 @@ has upload_max_size => (
 =head2 hashref
 
 =cut
-has hashref => (
-    is => 'lazy',
-    default => sub {
+sub hashref {
 		my $self = shift;
 		
 		my $hash = {};
@@ -269,8 +268,8 @@ has hashref => (
 		$hash->{options} = $self->dropdown_options if $self->dropdown_options;
 	
 	    return $hash;
-	}
-);
+}
+
 
 =head2 is_primary
 
@@ -315,7 +314,8 @@ sub required {
 sub attr  {
 		my ($self, @path) = @_;
 		my $value;
-		my $node = config->{TableEditor}->{classes}->{$self->class->name}->{columns}->{$self->name};
+		unshift @path, 'TableEditor', 'classes', $self->class->name, 'columns', $self->name;
+		my $node = config;
 		for my $p (@path){
 			$node = $node->{$p};
 			return $node unless defined $node;

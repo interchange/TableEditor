@@ -77,7 +77,6 @@ Relationship condition.
 
 has cond => (
     is => 'ro',
-    required => 1,
 );
 
 =head2 self_column
@@ -86,7 +85,6 @@ has cond => (
 
 has self_column => (
     is => 'ro',
-    required => 1,
 );
 
 =head2 foreign_column
@@ -95,7 +93,6 @@ has self_column => (
 
 has foreign_column => (
     is => 'ro',
-    required => 1,
 );
 
 =head2 origin_class
@@ -129,10 +126,9 @@ L<DBIx::Class::ResultSet> object for this relationship.
 
 has resultset => (
     is => 'ro',
-    required => 1,
     isa => InstanceOf ['DBIx::Class::ResultSet'],
     handles => {
-	source => 'result_source',
+		source => 'result_source',
     },
 );
 

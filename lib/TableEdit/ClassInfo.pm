@@ -7,6 +7,7 @@ use MooX::Types::MooseLike::Base qw/InstanceOf/;
 require TableEdit::ColumnInfo;
 require TableEdit::RelationshipInfo;
 require Dancer::Plugin::DBIC;
+require Class::Inspector;
 
 with 'TableEdit::SchemaInfo::Role::ListUtils';
 
@@ -168,7 +169,12 @@ sub _build__columns {
 
     while (my ($rel_name, $rel_info) = each %$rels) {
         # build hash by source column
-        $rel_hash{$rel_info->self_column} = $rel_info;
+        if(
+        	$rel_info->type ne 'many_to_many' and 
+        	$rel_info->type ne 'has_many'
+        ){
+	        $rel_hash{$rel_info->self_column} = $rel_info;
+        } 
     }
 
     # column positions
@@ -261,6 +267,7 @@ sub _build__relationships {
     my $columns = {};
     my %rel_hash;
 
+	# Has many, might have, belongs to
     for my $rel_name ($source->relationships){
         my $rel_info = $source->relationship_info($rel_name);
 
@@ -321,6 +328,31 @@ sub _build__relationships {
         );
     }
 
+	# Add many to many relationships
+	my $search_str = '__PACKAGE__->many_to_many(';
+	my $filename = Class::Inspector->resolved_filename( $source->result_class );
+	open (my $fh, "<", $filename) or die "cannot open < $filename: $!";
+	while (my $row = <$fh>) {
+		chomp $row;
+		my $index = index $row, $search_str;
+		next if $index == -1;
+		my $rel_info = substr $row, $index + length($search_str), index($row, ')') - $index - length($search_str) ;
+		my ($rel_name, $rel, $f_rel) = eval("($rel_info)");
+		  
+	    my $rel_source_name = $source->relationship_info($rel)->{source};
+	    my $rel_source = $source->schema->resultset($rel_source_name)->result_source;
+	  	my $class_name = $rel_source->relationship_info($f_rel)->{source};
+        $class_name =~ s/\w+:://g;		  		  
+		
+		$rel_hash{$rel_name} = TableEdit::RelationshipInfo->new(
+            name => $rel_name,
+            type => 'many_to_many',
+            origin_class => $self,
+            class_name => $class_name,
+            class => $self->schema->class($class_name),
+        );
+	}
+
     return \%rel_hash;
 }
 
@@ -362,7 +394,8 @@ Return attribute value
 sub attr  {
 		my ($self, @path) = @_;
 		my $value;
-		my $node = config->{TableEditor}->{classes}->{$self->name};
+		unshift @path, 'TableEditor', 'classes', $self->name;
+		my $node = config;
 		for my $p (@path){
 			$node = $node->{$p};
 			return $node unless defined $node;

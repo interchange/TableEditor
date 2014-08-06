@@ -202,18 +202,6 @@ By default list is not sorted. You can specify a default column.
 	
 	grid_sort: username
 
-=head3 Many to many
-
-"Has many" and "belongs_to" is automatically detected. However, many to many DBIx::Class information 
-doesn't provide enough information, so you have to specify it manually.
-Only set resultset_attributes once, or it will be overwritten! 
-
-	__PACKAGE__->resultset_attributes({ 
-		many_to_many => {
-			items => {class => 'TableEdit::Schema::Result::Item', where => {inactive => 'false'}},  
-		},		
-	});
-
 
 =head2 Column properties
 
