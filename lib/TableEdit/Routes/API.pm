@@ -51,15 +51,16 @@ get '/:class/:id/:related/list' => require_login sub {
 	
 	# Related list
 	my $relationship_info = $class_info->relationship($related);
-	my $related_items = $row->$related;
 	
 	return '{}' unless ( defined $row );	
 	$data->{'id'} = $id;
 	$data->{'class'} = $class_info->name;
 	$data->{'class_label'} = $class_info->label;
 	$data->{'related_class'} = $relationship_info->class_name;
-	$data->{'related_class_label'} = $relationship_info->label;
+	$data->{'related_class_label'} = $relationship_info->class->label;
+	$data->{'relationship_label'} = $relationship_info->label;
 	$data->{'related_type'} = $relationship_info->type;
+	$data->{'related_column'} = $relationship_info->foreign_column;
 	$data->{'title'} = $rowInfo->to_string;
 	
 	return to_json $data;
@@ -73,10 +74,11 @@ post '/:class/:id/:related/:related_id' => require_login sub {
 	my $related_id = param('related_id');
 	
 	my $relationship_info = $class_info->relationship($related);
-	my $relationship_class_info = $schema_info->class($relationship_info->class_name);
-	my $related_row = $relationship_class_info->resultset->find($related_id);
+	#my $relationship_class_info = $schema_info->class($relationship_info->class_name);
+	my $related_row = $relationship_info->resultset->find($related_id);
 	
 	my $row = $class_info->resultset->find($id);
+	
 	
 	# Has many
 	if($relationship_info->cond){
@@ -90,10 +92,15 @@ post '/:class/:id/:related/:related_id' => require_login sub {
 	}
 	# Many to Many
 	else {
+		# Check if already related
+		my $inter_class = $relationship_info->intermediate_name;
+		my $exists = $row->$inter_class->find({$relationship_info->class->primary_key => $id});
+		return to_json {'exists' => 1} if $exists;
+		
 		my $add_method = "add_to_$related"; 
 		$row->$add_method($related_row);	
 	}
-	return 1;
+	return to_json {'added' => 1};
 };
 
 

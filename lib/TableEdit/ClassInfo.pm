@@ -343,6 +343,7 @@ sub _build__relationships {
 	    my $rel_source = $source->schema->resultset($rel_source_name)->result_source;
 	  	my $class_name = $rel_source->relationship_info($f_rel)->{source};
         $class_name =~ s/\w+:://g;		  		  
+        $rel_source_name =~ s/\w+:://g;		  		  
 		
 		$rel_hash{$rel_name} = TableEdit::RelationshipInfo->new(
             name => $rel_name,
@@ -350,6 +351,9 @@ sub _build__relationships {
             origin_class => $self,
             class_name => $class_name,
             class => $self->schema->class($class_name),
+            intermediate_name => $rel,
+            intermediate_class_name => $rel_source_name,
+            intermediate_class => $self->schema->class($rel_source_name),
         );
 	}
 

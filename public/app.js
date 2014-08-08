@@ -209,6 +209,7 @@ CrudApp.factory("RelatedItem", function($resource){
 			{
 				add: {
 					method: 'POST',
+					isArray: false,
 				},
 				remove: {
 					method: 'DELETE',
@@ -315,7 +316,7 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 
 	$scope.create = function () {
 		Url.edit = $location.path();
-		$location.path('/'+$scope.item_info.class+'/'+$scope.item_info.id+'/new/'+$scope.item_info.related_class);		
+		$location.path('/'+$scope.item_info.class+'/'+$scope.item_info.id+'/new/'+$routeParams.related);		
 	};
 
 
@@ -379,6 +380,7 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 		$scope.search();
 
 	};
+	$scope.$on('relatedListReset', function(){ $scope.reset(); });
 	
 	$scope.reset();
 	
@@ -389,7 +391,7 @@ var BelongsToCtrl = function ($scope, $routeParams, RelatedItem, RelatedClass, $
 //	$location.path('/'+$routeParams.related+'/edit/'+$routeParams.id);	
 };
 
-var RelatedClassCtrl = function ($scope, $routeParams, RelatedItem, RelatedClass, RelatedType) {
+var RelatedClassCtrl = function ($scope, $rootScope, $routeParams, RelatedItem, RelatedClass, RelatedType) {
 	$scope.related_type = RelatedType;
 	$scope.sort_column = '';
 	$scope.item = {};
@@ -428,10 +430,11 @@ var RelatedClassCtrl = function ($scope, $routeParams, RelatedItem, RelatedClass
 		},
 		// Success
 		function(data) {
-			$scope.reset();			
+			if(data.exists) alert('Item already added!');
+			if(data.added) $rootScope.$broadcast('relatedListReset');			
 		},
 		// Error
-		function() {
+		function(data) {
 			alert('Could not add item!');
 		}
 		);
@@ -526,8 +529,7 @@ var CreateCtrl = function ($scope, $routeParams, ClassItem, Item) {
 			{	class: $routeParams.class,   	},
 			// Success
 			function(data) {
-				// Pagination
-				;
+				$scope.title = "New" + data.class_label;
 			},
 			// Error
 			function() {
@@ -540,13 +542,45 @@ var CreateCtrl = function ($scope, $routeParams, ClassItem, Item) {
 };
 
 
-var CreateRelatedCtrl = function ($scope, $routeParams, ClassItem, Item) {
+var CreateRelatedCtrl = function ($scope, $routeParams, ClassItem, RelatedList, Item) {
 	$scope.item = {};
+	$scope.error = {};
 	// related = $routeParams.class;
-	$scope.item.values = {};
-	$scope.item.values[$routeParams.column] = $routeParams.value;
+	
+	$scope.item_info = RelatedList.get({
+		class: $routeParams.class,
+		id: $routeParams.id,
+		related: $routeParams.related},
+		// Success
+		function(data) {
+			$scope.title = "New " + data.related_class_label + " for " + data.title;
+			$scope.item.values = {};
+			$scope.item.values[data.related_column] = data.id;
+			$scope.data = ClassItem.get({
+					class: data.related_class,
+				},
+				// Success
+				function(classData) {
+					// Hide foreign key field
+					angular.forEach($scope.data.columns, function(value, key){							
+						if(value.name == data.related_column){
+							$scope.data.columns[key].hidden = 1
+						}
+					});
+				},
+				// Error
+				function(classData) {
+					$scope.error.msg = 'Error retrieving '+$scope.item_info.related_class;
+				}
+			);
+		},
+		// Error
+		function() {
+			$scope.error.msg = 'Error retrieving '+$routeParams.related+' for '+$routeParams.class+' with id '+ $routeParams.id;
+		}
+	);
+	
 
-	$scope.data = ClassItem.get({class: $routeParams.related,});
 	$scope.create = 1;
 
 	$scope.save = Item.update;
@@ -673,7 +707,7 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 		$scope.items = [];
 		$scope.search();
 	};
-
+	$scope.$on('listReset', function(){ $scope.reset()});
 
 	$scope.del = Item.delete;
 

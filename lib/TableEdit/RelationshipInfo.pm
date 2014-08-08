@@ -69,6 +69,37 @@ has class => (
     isa => InstanceOf ['TableEdit::ClassInfo'],
 );
 
+=head2 class_name
+
+Name of intermediate relationship that connects two tables in many_to_many relationship.
+
+=cut
+
+has intermediate_name => (
+    is => 'ro',
+);
+
+=head2 class_name
+
+Name of intermediate class that connects two tables in many_to_many relationship.
+
+=cut
+
+has intermediate_class_name => (
+    is => 'ro',
+);
+
+=head2 class
+
+Intermediate class that connects two tables in many_to_many relationship.
+
+=cut
+
+has intermediate_class => (
+    is => 'ro',
+    isa => InstanceOf ['TableEdit::ClassInfo'],
+);
+
 =head2 cond
 
 Relationship condition.
@@ -129,6 +160,10 @@ has resultset => (
     isa => InstanceOf ['DBIx::Class::ResultSet'],
     handles => {
 		source => 'result_source',
+    },
+    default => sub{
+    	my $self = shift; 
+    	return $self->class->resultset
     },
 );
 

@@ -1,14 +1,14 @@
 TableEditor:
   dropdown_treshold: 50
   page_size: 10
-#  menu_classes: [Address, Cart, User, Media]
+  menu_classes: [Setting, Navigation, Product, Order, User, Role, Address, Attribute  ]
   
   classes:
     User: 
-      label: Employees
+      label: Employee
       grid_columns: [users_id, username]
       grid_sort: username
-      form_columns: [users_id, username, email]
+      form_columns: [users_id, username, last_name, email]
       to_string: |    
         my $id = $row->id;
         my $username = $row->username; 
@@ -34,3 +34,15 @@ TableEditor:
           upload_max_size: 10000
           upload_extensions: [jpg, jpeg, gif, PNG]
           upload_dir: 'product_images/'
+        description:
+          column_type: 'html'
+    Navigation:
+      to_string: return $row->name." (".$row->scope.")"
+      grid_columns: [ name, uri,   type,  scope]
+      columns:
+        description:
+          column_type: 'html'
+             
+    Role:
+      to_string: return $row->label
+        
