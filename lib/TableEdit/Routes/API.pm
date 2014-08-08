@@ -74,7 +74,6 @@ post '/:class/:id/:related/:related_id' => require_login sub {
 	my $related_id = param('related_id');
 	
 	my $relationship_info = $class_info->relationship($related);
-	#my $relationship_class_info = $schema_info->class($relationship_info->class_name);
 	my $related_row = $relationship_info->resultset->find($related_id);
 	
 	my $row = $class_info->resultset->find($id);

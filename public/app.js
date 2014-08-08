@@ -11,7 +11,7 @@ var default_routes = {
 	'/:class/:id/new/:related': { templateUrl: 'views/form.html', controller: 'CreateRelatedCtrl' },
 	'/:class/:id/:related/belongs_to': { templateUrl: 'views/related.html', controller: 'BelongsToCtrl' },
 	'/:class/:id/:related/has_many': { templateUrl: 'views/many.html', controller: 'RelatedListCtrl' },
-	'/:class/:id/:related/might_have': { templateUrl: 'views/related.html', controller: 'RelatedListCtrl' },
+	'/:class/:id/:related/might_have': { templateUrl: 'views/loading.html', controller: 'MightHaveCtrl' },
 	'/:class/:id/:related/many_to_many': { templateUrl: 'views/many.html', controller: 'RelatedListCtrl' },
 };
 
@@ -388,7 +388,36 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 
 var BelongsToCtrl = function ($scope, $routeParams, RelatedItem, RelatedClass, $location, ClassItem) {
 	$scope.data = ClassItem.get({class: $routeParams.related});
-//	$location.path('/'+$routeParams.related+'/edit/'+$routeParams.id);	
+};
+
+var MightHaveCtrl = function ($scope, $routeParams, $location, Item, RelatedList) {
+	$scope.error = {};
+	
+	$scope.item_info = RelatedList.get({
+		class: $routeParams.class,
+		id: $routeParams.id,
+		related: $routeParams.related},
+		// Success
+		function(data) {
+			$scope.item = Item.read.get({
+				class: data.related_class, 
+				id: data.id
+				},		
+				// Success
+				function(data) {
+					$location.path('/'+data.class+'/edit/'+data.id);
+				},
+				// Error
+				function() {
+					$location.path('/'+$routeParams.class+'/'+$routeParams.id+'/new/'+$routeParams.related);
+				}
+			);
+		},
+		// Error
+		function(data) {
+			$scope.error.msg = 'Error retrieving '+$routeParams.class+' with id '+ $routeParams.id;
+		}
+	);
 };
 
 var RelatedClassCtrl = function ($scope, $rootScope, $routeParams, RelatedItem, RelatedClass, RelatedType) {
@@ -586,29 +615,6 @@ var CreateRelatedCtrl = function ($scope, $routeParams, ClassItem, RelatedList, 
 	$scope.save = Item.update;
 };
 
-var EditRelatedCtrl = function ($scope, $routeParams, ClassItem, Item, Related) {
-	$scope.item = {};
-
-	$scope.data = ClassItem.get({class: $routeParams.related});
-
-    $scope.item = Related.get({
-		class: $routeParams.class,
-		id: $routeParams.id,
-		related: $routeParams.related,
-        relationship: 'might_have',
-    },
-		// Success
-		function(data) {
-		},
-		// Error
-		function() {
-			alert('Could not retrieve data!');
-			$scope.error.msg = 'Error retrieving '+$routeParams.class+' with id '+$routeParams.id;
-		}
-	);
-
-	$scope.save = Item.update;
-};
 
 var EditCtrl = function ($scope, $rootScope, $routeParams, Item, ClassItem, Url, $upload) {
 	$scope.error = {};
@@ -630,7 +636,8 @@ var EditCtrl = function ($scope, $rootScope, $routeParams, Item, ClassItem, Url,
 			// Pagination
 			var page_scope = 5;			
 			angular.forEach(data.relations, function(value, key){		
-				value.foreign_id = eval("$scope.item.values." + value.self_column);
+				value.foreign_id = $scope.item.values[value.self_column];
+				value.id = $scope.item.id;
 			});
 		},
 		// Error
