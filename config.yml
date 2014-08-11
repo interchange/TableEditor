@@ -2,12 +2,11 @@
 # env-related settings should go to environments/$env.yml
 # all the settings in this file will be loaded at Dancer's startup.
 
-# Your application's name
-appname: "TableEdit"
 charset: "UTF-8"
-session: YAML
+session: Storable
 session_expires: 8 hours
 
+### In case application is not on the root of domain
 #base_url: "admin/"
 
 # Template engine for front page
@@ -23,6 +22,9 @@ engines:
         convert_blessed: '1'
 
 plugins:
+  Ajax:
+    content_type: 'application/json'
+
 # Sample configuration for authentication with Dancer::Plugin::Auth::Extensible
   Auth::Extensible:
     disable_roles: 0
@@ -33,15 +35,21 @@ plugins:
     no_default_pages: 1
     no_api_change_warning: 1
     realms:
-      users:
-        provider: 'DBIC'
-        db_connection_name: 'default'
-        users_resultset: User
-        roles_relationship: roles
-        role_column: name
-        username_column: username
-        password_column: password
-        password_check: check_password
-  'Ajax':
-    content_type: 'application/json'
+      config:
+        provider: Config
+        users:
+          - user: admin
+            pass: pass
+            
+### Sample configuration with users in DB               
+#      users:
+#        provider: 'DBIC'
+#        db_connection_name: 'default'
+#        users_resultset: User
+#        roles_relationship: roles
+#        role_column: name
+#        username_column: username
+#        password_column: password
+#        password_check: check_password
+  
 

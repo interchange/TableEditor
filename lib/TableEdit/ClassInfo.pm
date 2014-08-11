@@ -111,13 +111,20 @@ Returns L<TableEdit::ColumnInfo> object for column name.
 
 sub column {
     my ($self, $name) = @_;
-    my $columns = $self->_columns;
+    my $columns = $self->columns;
 
-    if (! exists $columns->{$name}) {
-        die "No such column $name.";
+    if (exists $columns->{$name}) {
+    	return $columns->{$name};
     }
+    elsif ( $self->relationship($name) ) {
+    	return $self->relationship($name);
+    }
+	else {
+        die "No such columns or has_many relationship named $name.";
+	}
 
-    return $columns->{$name};
+
+
 }
 
 has columns_info => (is => 'lazy');

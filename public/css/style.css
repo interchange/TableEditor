@@ -1,25 +1,37 @@
 header {
-	background: whitesmoke;
+	background: #428bca;
+	color: white;
+	font-family: proxima-nova, "Helvetica Neue", Helvetica, Arial, sans-serif;
 	margin-bottom: 20px;
-	padding: 20px;
+	height: 50px;
+	padding: 0px 20px;
 }
 
-body {
-	margin: 10px 20px 50px 20px;
+header a, header a:hover {
+	color: white;
 }
 
-.container {
-	width: initial;
-	margin-left: 20px;
-	margin-right: 20px;
+#container {
+	padding: 0px;
 }
 
 #main h1 {
-	margin: 20px 0;
+	margin: 0px 0px 20px 0px;
 }
 
+
 #site-title {
-	font-size: 50px;
+	font-size: 34px;
+	color: white;
+	text-shadow: 0px 0px 11px rgba(0, 0, 0, 0.80);
+}
+
+#site-title:hover {
+	text-decoration: none;
+}
+
+#login-box {
+	padding: 15px 15px;
 }
 
 .grey {
@@ -41,13 +53,9 @@ cursor: pointer;
 }
 
 
-.active.sort {
-	text-decoration: underline;
-}
-
 .pagination li.active a {
-	background-color: grey;
-	border-color: grey;
+	background-color: dimgrey;
+	border-color: dimgrey;
 	color: white;
 }
 
@@ -110,9 +118,16 @@ list-style: none;
 	width: initial;
 }
 
-.table thead {
-	background: whitesmoke;
+.table thead .labels {
+	background: dimgrey;
+	border: dimgrey;
+	color: white;
 }
+
+.table thead .labels a {
+	color: white;
+}
+
 
 .table tbody {
 	background: white;
@@ -135,6 +150,10 @@ list-style: none;
 }
 
 .padded { padding: 10px; }
+
+.left-menu {
+	min-width: 130px;
+}
 
 .left-menu li > a {
 	padding: 2px 10px;

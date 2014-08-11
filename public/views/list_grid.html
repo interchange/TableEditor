@@ -1,49 +1,49 @@
-<div class="well well-small" ng-init="view='grid'">
+<form class="form-search grid" style="margin: 0px">
+	<div class="panel panel-default" ng-init="view='grid'">
+			<table class="table table-striped table-responsive" ng-model="data.query">
+				<thead>
+					<tr class="labels">
+						<th class="field" ng-repeat="column in data.column_list">
+							<a ng-class="{active: column.name==sort_column}" ng-click="sort(column.name)" class="column-label sort">{{column.label}}
+								<i ng-class="{'glyphicon glyphicon-sort-by-attributes-alt': column.name==sort_column && sort_desc, 'glyphicon glyphicon-sort-by-attributes': column.name==sort_column && !sort_desc}"></i>
+							</a> 
+						</th>
+						<th><select class="form-control" ng-change="reset()" ng-model="data.page_size" style="width: auto;">
+								<option>2</option>
+								<option>10</option>
+								<option>20</option>
+								<option>50</option>
+								<option>100</option>
+								<option>200</option>
+								<option>500</option>
+						</select></th>
+					</tr>
+					<tr>
+						<th class="column-search" ng-repeat="column in data.column_list">
+							<div class="nullable" ng-include="'views/column/'+column.display_type+'.html'"></div>
+						</th>
+						<th><button class="btn btn-default" ng-click="reset()">Filter</button></th>
+					</tr>
+				</thead>
+				<tbody>
+	
+					<tr class="object-table-row" ng-repeat="row in data.rows" id="row-{{row.id}}">
+						<td ng-repeat="column in row.row"><span class="object-table-value">{{ column.value }}</span>
+							</td>
+						<td class="actions" ng-include="'views/grid/actions/' + actions + '.html';"></td>
+					</tr>
+				</tbody>
+	
+			</table>
+			<div class="panel-body" ng-if="data.count == 0">No results</div>
+		<div class="panel-footer">
+			<div style="text-align: center;">{{data.count}} items found. Page {{ data.page }} / {{ data.pages }}</div>
+		</div>
+	</div>
+</form>
 
-	<form class="form-search grid" style="margin: 0px">
-		<table class="table table-striped table-responsive" ng-model="data.query">
-			<thead>
-				<tr>
-					<th class="field" ng-repeat="column in data.column_list">
-						<a ng-class="{active: column.name==sort_column}" ng-click="sort(column.name)" class="column-label sort">{{column.label}}</a>
-						<i ng-class="{'icon-chevron-down': column.name==sort_column && sort_desc, 'icon-chevron-up': column.name==sort_column && !sort_desc}" ></i>
-					</th>
-					<th>
-						<select class="form-control" ng-change="reset()" ng-model="data.page_size" style="width: auto;">
-							<option>2</option>
-							<option>10</option>
-							<option>20</option>
-							<option>50</option>
-							<option>100</option>
-							<option>200</option>
-							<option>500</option>
-						</select>
-					</th>
-				</tr>
-				<tr>
-					<th class="column-search" ng-repeat="column in data.column_list">
-						<div class="nullable" ng-include="'views/column/'+column.display_type+'.html'"></div>
-					</th>
-					<th><button class="btn btn-default" ng-click="reset()">Filter</button></th>
-				</tr>
-			</thead>
-			<tbody>
-
-				<tr class="object-table-row" ng-repeat="row in data.rows" id="row-{{row.id}}">
-					<td ng-repeat="column in row.row"><p class="object-table-value">{{ column.value }}<p></td>
-					<td class="actions" ng-include="'views/grid/actions/' + actions + '.html';"></td>
-				</tr>
-			</tbody>
-			
-		</table>
-		<div ng-if="data.count == 0">No results</div>
-	</form>
-
-<div style="text-align: center;">{{data.count}} items found. Page {{ data.page }} / {{ data.pages }}</div>
-</div>
-
-<div ng-if="data.pages > 1" >
-	<ul class="pagination">
+<div ng-if="data.pages > 1">
+	<ul class="pagination" style="margin-top: 0px">
 		<li ng-if="data.page > 1"><a ng-click="go_to_page(data.page - 1)">«</a></li>
 		<li ng-class="{active: page==data.page}" ng-repeat="page in page_list"><a ng-click="go_to_page( page )">{{ page }}</a></li>
 		<li ng-if="data.page < data.pages"><a ng-click="go_to_page( data.page + 1)">»</a></li>

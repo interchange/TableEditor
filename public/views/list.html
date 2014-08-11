@@ -1,9 +1,9 @@
 <div ng-if="!data.column_list" ng-include="'views/loading.html'"></div>
 
 <div ng-if="data.column_list">
+	<div class="pull-right">
+		<a ng-click="create()" href="#/{{data.class}}/new" class=""><i class="glyphicon glyphicon-plus"></i>New {{data.class_label}}</a>
+	</div>
 	<h1>{{data.class_label}} - List of items</h1>
-		<p style="text-align: right"><a ng-click="create()" href="#/{{data.class}}/new" class=""><i class="glyphicon glyphicon-plus"></i>New {{data.class_label}}</a></p>
-		<div class="panel">
-			<div id="list-grid" ng-include="'views/list_grid.html'" ></div>
-		</div>
+	<div id="list-grid" ng-include="'views/list_grid.html'"></div>
 </div>

@@ -26,12 +26,9 @@
 		<h2>Related {{item_info.related_class_label}}</h2>
 		<div id="list-grid" ng-include='"views/list_grid.html"' ng-controller='RelatedListCtrl' ng-init="actions='many_items_list';"></div>
 
-		<div class="pull-right">
-			<a ng-click="showRelatedClass = ! showRelatedClass" ><i class="glyphicon glyphicon-plus"></i> Add existing {{data.class_label}}</a>
-			<a ng-click="create()" ><i class="glyphicon glyphicon-plus"></i> Add new {{data.class_label}}</a>
-		</div>
 	</div>
 	<div class="row-fluid" ng-show="showRelatedClass">
+		<hr />
 		<h2>Add {{item_info.related_class_label}} to {{ item_info.title }}</h2>
 
 		<div id="list-grid" ng-include='"views/list_grid.html"' ng-controller='RelatedClassCtrl' ng-init="actions='many_list';"></div>

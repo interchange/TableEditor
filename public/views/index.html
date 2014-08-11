@@ -45,64 +45,56 @@ var custom_routes = {};
 
 	<!-- Main content starts -->
 	<header>
-		<div class="container">
 		<div class="pull-right">
-			<div>
-				<form class="navbar-form navbar-left form-search" >
-					<div class="form-group">
-						<input type="text" class="form-control" name="q" placeholder="Search...">
-					</div>
-					<button type="submit" class="btn btn-default">
-						<span class="glyphicon glyphicon-search"></span>
-					</button>
-				</form>
-			</div>
+			<div id="login-box">
 				<span ng-show="!user.username">
-				<a href="#/login">Log in</a>
-			</span>
-			<span ng-show="user.username">
-				<div>Logged in as {{user.username}}. <a ng-click="logout()">Logout</a></div>
-			</span>
+					<a href="#/login">Log in</a>
+				</span>
+				<span ng-show="user.username">
+					<div>Logged in as {{user.username}}. <a ng-click="logout()">Logout</a></div>
+				</span>
+			</div>
 		</div>
-			<a href="#/"><span id="site-title">Table Editor</span></a>
-
-		</div>
+		<a href="#/" id="site-title">Table Editor</a>
 	</header>
 		
-	<div class="container-fluid">
+	<div id="container" class="container-fluid">
 		<div class="row-fluid">
 
 			<!-- Sidebar -->
-			<div class="left-menu col-xs-2" ng-controller="SidebarCtrl" style="min-width: 130px;">
+			<div class="left-menu col-xs-2" role="navigation" ng-controller="SidebarCtrl" style="min-width: 130px;">
 			
-
-				<div class="sidebar-inner">
-
+               <div class="input-group custom-search-form" style="margin-bottom: 20px">
+                   <input type="text" class="form-control" placeholder="Search...">
+                   <span class="input-group-btn">
+                   <button class="btn btn-default" type="button">
+                       <i class="fa fa-search"></i>
+                   </button>
+               </span>
+               </div>
+                     <!-- /input-group -->
+           
 					<!--- Sidebar navigation -->
-					<!-- If the main navigation has sub navigation, then add the class "has_submenu" to "li" of main navigation. -->
 					<div class="panel panel-default">
 						<div class="panel-heading">
-				        <h3 class="panel-title">Configuration</h3>
-				      </div>
-						<ul class="nav nav-pills nav-stacked">
-							<li><a href="#/status">Status</a></li>
-						</ul>
-			      </div>
-							<!-- Use the class nred, ngreen, nblue, nlightblue, nviolet or norange to add background color. You need to use this in <li> tag. -->
-					<div class="panel panel-default">
-						<div class="panel-heading">
-				        <h3 class="panel-title">Tables</h3>
+				        <h3 class="panel-title"><i class="fa fa-table fa-fw"></i> Tables</h3>
 			        </div>
 						<ul class="nav nav-pills nav-stacked">
 							<li ng-repeat="link in menu" data-active-link=""><a  href="{{link.url}}" class="">{{link.name}}</a></li>
 						</ul>
 					</div>
-					
+					<div class="panel panel-default">
+						<div class="panel-heading">
+				        <h3 class="panel-title"><i class="fa fa-wrench fa-fw"></i> Configuration</h3>
+				      </div>
+						<ul class="nav nav-pills nav-stacked">
+							<li><a href="#/status">Status</a></li>
+						</ul>
+			      </div>
+			      
 					<div class="alert alert-warning" role="alert" ng-show="active.length && user.username">Currently also active: 
 						<strong ng-repeat="au in active">{{au.username}}{{$last ? '' : ', '}} </strong>
 					</div>
-
-				</div>
 
 			</div>
 
