@@ -286,7 +286,7 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 	$scope.data = {};
 	$scope.sort_desc = false;
 	$scope.current_page = 1;
-	$scope.data.page_size = 10;
+	$scope.data.page_size;
 
 
 
@@ -337,7 +337,7 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 			sort: $scope.sort_column, 
 			descending: $scope.sort_desc ? 1 : 0,
 					page: $scope.current_page,
-					page_size: $scope.data.page_size,
+					page_size: $scope.data.page_size ? $scope.data.page_size: null,
 		},
 		// Success
 		function(data) {
@@ -689,7 +689,7 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 	// $scope.data = Class.get({class: $routeParams.class});
 	$scope.sort_column = '';
 	$scope.data = {};
-	$scope.data.page_size = 10;
+	$scope.data.page_size;
 	$scope.item = {};
 	$scope.item.values = {};
 	$scope.sort_desc = false;

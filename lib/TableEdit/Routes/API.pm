@@ -294,8 +294,9 @@ sub grid_template_params {
 
 	my $primary_column = $class_info->primary_key;
     
-	my $page = $get_params->{page} || 1;
-	my $page_size = $get_params->{page_size} || config->{TableEditor}->{page_size};
+	my $page = $get_params->{page} || 1; 
+	$class_info->page_size($get_params->{page_size}) unless $get_params->{page_size} eq 'undefined';
+	my $page_size = $class_info->page_size;
 	
 	my $rows = $rs->search(
 	$where,

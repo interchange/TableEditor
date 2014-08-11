@@ -378,6 +378,20 @@ sub count {
     return $self->resultset->count;
 }
 
+=head2 Page size
+
+Returns number of records for this class.
+
+=cut
+
+
+has page_size => (
+	is => 'rw',
+	default => sub{
+		return config->{TableEditor}->{page_size};
+	}
+);
+
 =head2 label
 
 Returns nice string representation of class
