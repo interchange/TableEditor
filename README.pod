@@ -10,6 +10,7 @@ Dancer - Table Edit
  
 Table Edit lets you edit database data. It uses L<DBIx::Class> models for database metadata. 
 
+![alt tag](https://raw.githubusercontent.com/interchange/TableEditor/master/screenshots/list.png)
  
 =head1 CONFIGURATION
  
@@ -146,6 +147,8 @@ For this example we will use following model and config file.
 		payment_status: 
 		  readonly: 1
 
+![alt tag](https://raw.githubusercontent.com/interchange/TableEditor/master/screenshots/TE%20configuration.png)
+
 =head2 Global properties
 
 =head3 Dropdown treshold
@@ -162,7 +165,7 @@ Number of items per page by default
 	
 =head3 Classes in menu
 
-Order and selection of classes that show up in menu. Default are all classes with single primary key in alphabetical order.
+Order and selection of classes that show up in menu. Default are all classes in alphabetical order.
 	
 	menu_classes: [user, product]
 	
@@ -205,6 +208,7 @@ By default list is not sorted. You can specify a default column.
 
 =head2 Column properties
 
+![alt tag](https://raw.githubusercontent.com/interchange/TableEditor/master/screenshots/date picker and html editor.png)
 
 =head3 Label
 
