@@ -10,7 +10,7 @@ Dancer - Table Edit
  
 Table Edit lets you edit database data. It uses L<DBIx::Class> models for database metadata. 
 
-![alt tag](https://raw.githubusercontent.com/interchange/TableEditor/master/screenshots/list.png)
+=for html <div><img src="https://raw.githubusercontent.com/interchange/TableEditor/master/screenshots/list.png"></div>
  
 =head1 CONFIGURATION
  
@@ -147,7 +147,7 @@ For this example we will use following model and config file.
 		payment_status: 
 		  readonly: 1
 
-![alt tag](https://raw.githubusercontent.com/interchange/TableEditor/master/screenshots/TE%20configuration.png)
+=for html <div><img src="https://raw.githubusercontent.com/interchange/TableEditor/master/screenshots/TE%20configuration.png"></div>
 
 =head2 Global properties
 
@@ -208,7 +208,7 @@ By default list is not sorted. You can specify a default column.
 
 =head2 Column properties
 
-![alt tag](https://raw.githubusercontent.com/interchange/TableEditor/master/screenshots/date picker and html editor.png)
+=for html <div><img src="https://raw.githubusercontent.com/interchange/TableEditor/master/screenshots/date picker and html editor.png"></div>
 
 =head3 Label
 
