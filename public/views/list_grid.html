@@ -10,7 +10,7 @@
 						</th>
 						<th>
 							<select class="form-control" ng-change="reset()" ng-model="data.page_size" style="width: auto;">
-								<option ng-selected="size == data.page_size" ng-repeat="size in page_sizes">{{size}}</option>
+								<option ng-selected="size == data.page_size" ng-repeat="size in data.page_sizes">{{size}}</option>
 							</select>
 						</th>
 					</tr>

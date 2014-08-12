@@ -250,6 +250,14 @@ CrudApp.config(['$httpProvider',function($httpProvider) {
 
 var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, RelatedList,  RelatedItem, RelatedItems, Item, Url) {
 	$scope.relation = $routeParams.related;
+	$scope.related_item = {};
+	$scope.related_item.values = {};
+	$scope.sort_column = '';
+	$scope.data = {};
+	$scope.sort_desc = false;
+	$scope.current_page = 1;
+	$scope.data.page_size;
+	$scope.data.page_sizes = [3,7,9, 10, 20];
 	$scope.error = {};
 
 	$scope.item_info = RelatedList.get({
@@ -279,19 +287,6 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 			$scope.error.msg = 'Error retrieving '+$routeParams.class+' info';
 		}
 	);
-
-	$scope.related_item = {};
-	$scope.related_item.values = {};
-	$scope.sort_column = '';
-	$scope.data = {};
-	$scope.sort_desc = false;
-	$scope.current_page = 1;
-	$scope.data.page_size;
-
-
-
-
-	
 
 	$scope.remove = function(){
 		var row_id = this.row.id
@@ -344,6 +339,7 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 			// Pagination
 			var page_scope = 5;
 			var current_page = $scope.data.page = parseInt($scope.data.page);
+			$scope.data.page_sizes = data.page_sizes;
 			var pages = $scope.data.pages = parseInt($scope.data.pages);
 			var from_page = (current_page - page_scope > 0) ? (current_page - page_scope) : 1;
 			var to_page = (current_page + page_scope < pages) ? (current_page + page_scope) : pages;
@@ -430,6 +426,7 @@ var RelatedClassCtrl = function ($scope, $rootScope, $routeParams, RelatedItem, 
 	$scope.sort_desc = false;
 	$scope.current_page = 1;
 	$scope.page_size;
+	$scope.data.page_sizes;
 
 	$scope.sort = function (ord) {
 		if ($scope.sort_column == ord) { $scope.sort_desc = !$scope.sort_desc; }
@@ -479,13 +476,14 @@ var RelatedClassCtrl = function ($scope, $rootScope, $routeParams, RelatedItem, 
 			q: JSON.stringify($scope.item.values),
 			sort: $scope.sort_column, 
 			descending: $scope.sort_desc ? 1 : 0,
-					page: $scope.current_page,
-					//page_size: $scope.data.page_size,
+			page: $scope.current_page,
+			page_size: $scope.data.page_size ? $scope.data.page_size : '',
 		},
 		// Success
 		function(data) {
 			// Pagination
 			var page_scope = 5;
+			$scope.data.page_sizes = data.page_sizes;
 			var current_page = $scope.data.page = parseInt($scope.data.page);
 			var pages = $scope.data.pages = parseInt($scope.data.pages);
 			var from_page = (current_page - page_scope > 0) ? (current_page - page_scope) : 1;
@@ -691,7 +689,7 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 	$scope.data = {};
 	$scope.data.sort_column = '';
 	$scope.data.page_size;
-	$scope.page_sizes = [3,7,9, 10, 20];
+	$scope.data.page_sizes;
 	$scope.item = {};
 	$scope.item.values = {};
 	$scope.sort_desc = false;
@@ -741,6 +739,7 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 			var page_scope = 5;
 			var current_page = $scope.data.page = parseInt($scope.data.page);
 			$scope.data.page_size = data.page_size;
+			$scope.data.page_sizes = data.page_sizes;
 			var pages = $scope.data.pages = parseInt($scope.data.pages) ? parseInt($scope.data.pages) : 1;
 			var from_page = (current_page - page_scope > 0) ? (current_page - page_scope) : 1;
 			var to_page = (current_page + page_scope < pages) ? (current_page + page_scope) : pages;
