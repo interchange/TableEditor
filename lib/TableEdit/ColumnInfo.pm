@@ -280,14 +280,14 @@ has is_primary => (
     is => 'lazy',
     default => sub {	
 		my $self = shift;
-		my $classPK = $self->class->primary_key;
-		return undef unless $classPK;
-		if(ref($classPK) eq 'ARRAY'){
-			for my $pk (@$classPK){
-				return 1 if $self->name eq $classPK;
+		my $primary_key = $self->class->primary_key;
+		return undef unless $primary_key;
+		if(ref($primary_key) eq 'ARRAY'){
+			for my $pk (@$primary_key){
+				return 1 if $self->name eq $primary_key;
 			}
 		}
-		return 1 if $self->name eq $classPK;
+		return 1 if $self->name eq $primary_key;
 		return undef;
 	}
 );

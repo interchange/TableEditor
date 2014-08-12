@@ -150,12 +150,12 @@ sub _build_columns_info {
 				my $items = [];
 				for my $row (@foreign_rows){
 					my $rowInfo = TableEdit::RowInfo->new(row => $row, class => $column_info->relationship->{class});
-					my $pk = $column_info->relationship->{class}->primary_key;
-					my $id = $row->$pk;
+					my $primary_key = $column_info->relationship->{class}->primary_key;
+					my $id = $rowInfo->primary_key_string;
 					my $name = $rowInfo->to_string;
 					push @$items, {option_label=>$name, value=>$id};
 				}
-				$column_info->dropdown_options($items); #(\@foreign_rows, $column_info->{foreign_column})
+				$column_info->dropdown_options($items);
 		    }
 		}
 		push @$columns_info, $column_info->hashref;
@@ -218,15 +218,9 @@ Returns primary key(s) for this class.
 
 sub primary_key {
     my $self = shift;
-    my @pk;
-    @pk = $self->source->primary_columns;
-
-    if (@pk > 1) {
-		return \@pk;
-    }
-    else {
-		return $pk[0];
-    }
+    my @primary_key;
+    @primary_key = $self->source->primary_columns;
+	return \@primary_key;    
 }
 
 =head2 relationships
@@ -560,6 +554,23 @@ has grid_sort => (is => 'lazy');
 sub _bulid_grid_sort {
 	my ($self) = @_;
 	return $self->attr('grid_sort');
+}
+
+
+sub find_with_delimiter {
+	my ($self, $value) = @_;
+	my $primary_key = $self->primary_key;
+	my $primary_key_value;
+	my $delimiter = $self->schema->primary_key_delimiter;
+	my @values = split $delimiter, $value;
+	my $i = 0;	
+	for my $value (@values){
+		$primary_key_value->{$primary_key->[$i]} = $value;
+		$i++;
+	}
+	#return $primary_key_value;
+	return $self->resultset->find($primary_key_value);
+	
 }
 
 1;

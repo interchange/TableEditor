@@ -6,6 +6,7 @@ header {
 	height: 50px;
 	padding: 0px 20px;
 	box-shadow: 0px 0px 11px rgba(0, 0, 0, 0.40);
+	text-shadow: 0px 0px 11px rgba(0, 0, 0, 0.60);
 }
 
 header a, header a:hover {
@@ -24,7 +25,6 @@ header a, header a:hover {
 #site-title {
 	font-size: 34px;
 	color: white;
-	text-shadow: 0px 0px 11px rgba(0, 0, 0, 0.80);
 }
 
 #site-title:hover {

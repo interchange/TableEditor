@@ -136,16 +136,16 @@ in alphabetical order.
 
 sub classes_with_single_primary_key {
     my ($self) = @_;
-    my (@pk_classes);
+    my (@primary_key_classes);
     my $schema = $self->schema;
 
     my $candidates = [sort values %{$schema->{class_mappings}}];
 
     for my $class (@$candidates) {
-        push @pk_classes, $class if $schema->source($class)->primary_columns == 1;
+        push @primary_key_classes, $class if $schema->source($class)->primary_columns == 1;
     }
 
-    return \@pk_classes;
+    return \@primary_key_classes;
 }
 
 =head2 class $name
@@ -205,22 +205,30 @@ has menu => (
 	default => sub { 
 		my $self = shift;
 		my $sort;
-
 		my $classes = $self->attr('menu_classes');
 		unless($classes){
-			$classes = $self->classes_with_single_primary_key;
+			my @classes = $self->classes();
+			$classes = \@classes if @classes; 
 			$sort = 1;
 		}
 
 		my $menu;
-		for my $class (@$classes){
-			my $classInfo = $self->class($class);
+		for my $classInfo (@$classes){
+			#my $classInfo = $self->class($class);
 			$menu->{$classInfo->label} = {name => $classInfo->label, url=> join('/', '#' . $classInfo->name, 'list'),};
 		}
 		$menu = [map $menu->{$_}, sort keys %$menu] if $sort;
 
 		return $menu;
     }	
+);
+
+has primary_key_delimiter  => (
+	is => 'lazy',
+	default => sub { 
+		my $self = shift;
+		return $self->attr('primary_key_delimiter') || ","; 	
+	}
 );
 
 =head2 attributes

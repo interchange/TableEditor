@@ -691,6 +691,7 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 	$scope.data = {};
 	$scope.data.sort_column = '';
 	$scope.data.page_size;
+	$scope.page_sizes = [3,7,9, 10, 20];
 	$scope.item = {};
 	$scope.item.values = {};
 	$scope.sort_desc = false;
@@ -720,12 +721,6 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 	$scope.del = Item.delete;
 
 
-	$scope.edit = function () {
-		var id = this.row.id;
-		Url.edit = $location.path();
-		$location.path('/'+$routeParams.class+'/edit/'+id);		
-	};
-
 	$scope.create = function () {
 		Url.edit = $location.path();
 	};
@@ -745,6 +740,7 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 			// Pagination
 			var page_scope = 5;
 			var current_page = $scope.data.page = parseInt($scope.data.page);
+			$scope.data.page_size = data.page_size;
 			var pages = $scope.data.pages = parseInt($scope.data.pages) ? parseInt($scope.data.pages) : 1;
 			var from_page = (current_page - page_scope > 0) ? (current_page - page_scope) : 1;
 			var to_page = (current_page + page_scope < pages) ? (current_page + page_scope) : pages;

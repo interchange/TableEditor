@@ -50,8 +50,8 @@ sub to_string {
 
 	my $class = $self->row->result_source->{source_name};
 	my $classInfo = TableEdit::ClassInfo->new(name => $class, schema => $self->class->schema);
-	my ($pk) = $self->row->result_source->primary_columns;
-	my $id = $self->row->$pk;
+	my $primary_key = $classInfo->primary_key;
+	my $id = $self->primary_key_string;
 	return "$id - ".$classInfo->label;
 }
 
@@ -68,6 +68,27 @@ sub attr  {
 			return $node unless defined $node;
 		}
 		return $node;
+}
+
+sub primary_key_value {
+	my $self = shift;
+	my $primary_key = $self->class->primary_key;
+	my $primary_key_value;
+	for my $key (@$primary_key){
+		$primary_key_value->{$key} = $self->row->$key;
+	}
+	return $primary_key_value;
+}
+
+sub primary_key_string {
+	my $self = shift;
+	my $delimiter = $self->class->schema->primary_key_delimiter;
+	my $primary_key = $self->class->primary_key;
+	my @primary_key_value;
+	for my $key (@$primary_key){
+		push @primary_key_value, $self->row->$key;
+	}
+	return join($delimiter, @primary_key_value);
 }
 
 1;

@@ -1,6 +1,8 @@
 TableEditor:
   dropdown_treshold: 50
   page_size: 10
+  primary_key_delimiter: ","
+  page_sizes: [1,2,10, 500, 1000]
 #  menu_classes: [Setting, Navigation, Product, Order, Orderline, User, Role, Address, Attribute  ]
   
   classes:

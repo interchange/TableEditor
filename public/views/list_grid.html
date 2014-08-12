@@ -8,15 +8,11 @@
 								<i ng-class="{'glyphicon glyphicon-sort-by-attributes-alt': column.name==data.sort_column && sort_desc, 'glyphicon glyphicon-sort-by-attributes': column.name==data.sort_column && !sort_desc}"></i>
 							</a> 
 						</th>
-						<th><select class="form-control" ng-change="reset()" ng-model="data.page_size" style="width: auto;">
-								<option>2</option>
-								<option>10</option>
-								<option>20</option>
-								<option>50</option>
-								<option>100</option>
-								<option>200</option>
-								<option>500</option>
-						</select></th>
+						<th>
+							<select class="form-control" ng-change="reset()" ng-model="data.page_size" style="width: auto;">
+								<option ng-selected="size == data.page_size" ng-repeat="size in page_sizes">{{size}}</option>
+							</select>
+						</th>
 					</tr>
 					<tr>
 						<th class="column-search" ng-repeat="column in data.column_list">

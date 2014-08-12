@@ -46,7 +46,7 @@ get '/:class/:id/:related/list' => require_login sub {
 	my $data;
 
 	# Row lookup
-	my $row = $class_info->resultset->find($id);
+	my $row = $class_info->find_with_delimiter(param('id'));
 	my $rowInfo = $schema_info->row($row);
 	
 	# Related list
@@ -76,7 +76,7 @@ post '/:class/:id/:related/:related_id' => require_login sub {
 	my $relationship_info = $class_info->relationship($related);
 	my $related_row = $relationship_info->resultset->find($related_id);
 	
-	my $row = $class_info->resultset->find($id);
+	my $row = $class_info->find_with_delimiter(param('id'));
 	
 	
 	# Has many
@@ -92,8 +92,9 @@ post '/:class/:id/:related/:related_id' => require_login sub {
 	# Many to Many
 	else {
 		# Check if already related
-		my $inter_class = $relationship_info->intermediate_name;
-		my $exists = $row->$inter_class->find({$relationship_info->class->primary_key => $id});
+		my $inter_name = $relationship_info->intermediate_name;
+		my $related_row_info = $schema_info->row($related_row);
+		my $exists = $row->$inter_name->find($related_row_info->primary_key_value);
 		return to_json {'exists' => 1} if $exists;
 		
 		my $add_method = "add_to_$related"; 
@@ -111,7 +112,7 @@ del '/:class/:id/:related/:related_id' => require_login sub {
 	my $relationship_info = $class_info->relationship($related);
 	my $relationship_class_info = $schema_info->class($relationship_info->class_name);
 	
-	my $row = $class_info->resultset->find($id);
+	my $row = $class_info->find_with_delimiter(param('id'));
 	my $related_row = $relationship_class_info->resultset->find($related_id);
 	
 	# Has many
@@ -211,7 +212,7 @@ get '/:class/:id' => require_login sub {
 	$data->{columns} = $class_info->columns_info;
 
 	# row lookup
-	my $row = $class_info->resultset->find($id);
+	my $row = $class_info->find_with_delimiter(param('id'));
 	return status '404' unless $row;
 	 
 	my $rowInfo = $schema_info->row($row);
@@ -249,7 +250,7 @@ post '/:class' => require_login sub {
 del '/:class' => require_login sub {
 	my $id = param('id');
 	my $class_info = $schema_info->class(param('class'));
-	my $row = $class_info->resultset->find($id);
+	my $row = $class_info->find_with_delimiter(param('id'));
 
     return status '404' unless $row;
 
@@ -292,7 +293,7 @@ sub grid_template_params {
 	
 	my $rs = $related_items || $class_info->resultset;
 
-	my $primary_column = $class_info->primary_key;
+	my $primary_key = $class_info->primary_key;
     
 	my $page = $get_params->{page} || 1; 
 	$class_info->page_size($get_params->{page_size}) if $get_params->{page_size};
@@ -310,7 +311,7 @@ sub grid_template_params {
 	$grid_params->{rows} = grid_rows(
 		[$rows->all], 
 		$grid_params->{column_list} , 
-		$primary_column, 
+		$primary_key, 
 	);
 	
 	$class_info->label;
@@ -338,8 +339,7 @@ Returns sql order by parameter.
 sub grid_sort {
 	my ($class_info, $get_params) = @_;
 	# Direction	
-	$class_info->sort_direction('DESC') if $get_params->{descending};
-	#$get_params->{sort} .= $get_params->{descending} ? ' DESC' : '' if $get_params->{sort};
+	$get_params->{descending} ? $class_info->sort_direction('DESC') : $class_info->sort_direction('');
 	# Selected or Predefined sort
 	$class_info->sort_column($get_params->{sort}) if $get_params->{sort};
 	return $class_info->sort_column . " " . $class_info->sort_direction if $class_info->sort_column;	
@@ -377,17 +377,16 @@ Returns a list of database records suitable for the grid display.
 =cut
 
 sub grid_rows {
-	my ($rows, $columns_info, $primary_column, $args) = @_;
+	my ($rows, $columns_info, $primary_key, $args) = @_;
 
 	my @table_rows;
-
+	
 	for my $row (@$rows){
-		die 'No primary column' unless $primary_column;
+		die 'No primary column' unless $primary_key;
 		my $rowInfo = $schema_info->row($row);
 		
 		# unravel row
-		my $row_inflated = {$row->get_inflated_columns};
-		my $id = $row->$primary_column;
+		my $row_inflated = {$row->get_columns}; #inflated_
 		my $row_data = [];
 
 		for my $column (@$columns_info){
@@ -399,7 +398,7 @@ sub grid_rows {
 
 		push @table_rows, {
             row => $row_data,
-            id => $id,
+            id => $rowInfo->primary_key_string,
             name => $rowInfo->to_string,
             columns => $row_inflated,
         };
