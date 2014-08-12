@@ -295,7 +295,7 @@ sub grid_template_params {
 	my $primary_column = $class_info->primary_key;
     
 	my $page = $get_params->{page} || 1; 
-	$class_info->page_size($get_params->{page_size}) unless $get_params->{page_size} eq 'undefined';
+	$class_info->page_size($get_params->{page_size}) if $get_params->{page_size};
 	my $page_size = $class_info->page_size;
 	
 	my $rows = $rs->search(
@@ -322,6 +322,8 @@ sub grid_template_params {
 	$grid_params->{pages} = ceil($count / $page_size);
 	$grid_params->{count} = $count;
 	$grid_params->{page_size} = $page_size;
+	$grid_params->{sort_column} = $class_info->sort_column;
+	$grid_params->{sort_direction} = $class_info->sort_direction;
 	
 	return $grid_params;
 }
@@ -335,11 +337,12 @@ Returns sql order by parameter.
 
 sub grid_sort {
 	my ($class_info, $get_params) = @_;
-	# Selected or Predefined sort
-	my $sort = $get_params->{sort} || $class_info->attr('grid_sort');
 	# Direction	
-	$sort .= $get_params->{descending} ? ' DESC' : '' if $sort;
-	return $sort;
+	$class_info->sort_direction('DESC') if $get_params->{descending};
+	#$get_params->{sort} .= $get_params->{descending} ? ' DESC' : '' if $get_params->{sort};
+	# Selected or Predefined sort
+	$class_info->sort_column($get_params->{sort}) if $get_params->{sort};
+	return $class_info->sort_column . " " . $class_info->sort_direction if $class_info->sort_column;	
 }
 
 

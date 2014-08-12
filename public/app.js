@@ -334,10 +334,10 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 			id: $routeParams.id,
 			related: $routeParams.related,
 			q: query,
-			sort: $scope.sort_column, 
+			sort: $scope.sort_column ? $scope.sort_column : '', 
 			descending: $scope.sort_desc ? 1 : 0,
-					page: $scope.current_page,
-					page_size: $scope.data.page_size ? $scope.data.page_size: null,
+			page: $scope.current_page,
+			page_size: $scope.data.page_size ? $scope.data.page_size : '',
 		},
 		// Success
 		function(data) {
@@ -347,7 +347,8 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 			var pages = $scope.data.pages = parseInt($scope.data.pages);
 			var from_page = (current_page - page_scope > 0) ? (current_page - page_scope) : 1;
 			var to_page = (current_page + page_scope < pages) ? (current_page + page_scope) : pages;
-
+			$scope.sort_column = data.sort_column;
+			
 			$scope.page_list = []; 
 			for (var i = from_page; i <= to_page; i++) {
 				$scope.page_list.push(i);
@@ -687,8 +688,8 @@ var EditCtrl = function ($scope, $rootScope, $routeParams, Item, ClassItem, Url,
 
 var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, ClassItem, Item, Url) {
 	// $scope.data = Class.get({class: $routeParams.class});
-	$scope.sort_column = '';
 	$scope.data = {};
+	$scope.data.sort_column = '';
 	$scope.data.page_size;
 	$scope.item = {};
 	$scope.item.values = {};
@@ -698,9 +699,9 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 	$scope.error = {};
 
 	$scope.sort = function (ord) {
-		if ($scope.sort_column == ord) { $scope.sort_desc = !$scope.sort_desc; }
+		if ($scope.data.sort_column == ord) { $scope.sort_desc = !$scope.sort_desc; }
 		else { $scope.sort_desc = false; }
-		$scope.sort_column = ord;
+		$scope.data.sort_column = ord;
 		$scope.reset();
 	};
 
@@ -734,10 +735,10 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 		$scope.data = Class.get({
 			class: $routeParams.class,
 			q: JSON.stringify($scope.item.values),
-			sort: $scope.sort_column, 
+			sort: $scope.data.sort_column ? $scope.data.sort_column : '', 
 			descending: $scope.sort_desc ? 1 : 0,
-					page: $scope.current_page,
-					page_size: $scope.data.page_size,
+			page: $scope.current_page,
+			page_size: $scope.data.page_size ? $scope.data.page_size : '',
 		},
 		// Success
 		function(data) {
@@ -747,6 +748,7 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 			var pages = $scope.data.pages = parseInt($scope.data.pages) ? parseInt($scope.data.pages) : 1;
 			var from_page = (current_page - page_scope > 0) ? (current_page - page_scope) : 1;
 			var to_page = (current_page + page_scope < pages) ? (current_page + page_scope) : pages;
+			$scope.data.sort_column = data.sort_column;
 
 			$scope.page_list = []; 
 			for (var i = from_page; i <= to_page; i++) {

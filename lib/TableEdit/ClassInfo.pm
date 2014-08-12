@@ -380,7 +380,7 @@ sub count {
 
 =head2 Page size
 
-Returns number of records for this class.
+Returns number of items per page.
 
 =cut
 
@@ -390,6 +390,33 @@ has page_size => (
 	default => sub{
 		return config->{TableEditor}->{page_size};
 	}
+);
+
+=head2 Sort column
+
+Returns name of column to sort by.
+
+=cut
+
+
+has sort_column => (
+	is => 'rw',
+	default => sub{
+		my $self = shift;
+		return $self->attr('grid_sort');
+	}
+);
+
+=head2 Sort direction
+
+Returns '' as ascending or DESC as descending direction to sort by.
+
+=cut
+
+
+has sort_direction => (
+	is => 'rw',
+	default => '',
 );
 
 =head2 label
