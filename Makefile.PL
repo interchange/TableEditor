@@ -29,6 +29,7 @@ WriteMakefile(
         'DBIx::Class::Schema::Loader' => 0,
         'Moo' => 0,
         'MooX::Types::MooseLike' => 0,
+        'MooX::Singleton' => 0,
         'Plack::Handler::Starman' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
