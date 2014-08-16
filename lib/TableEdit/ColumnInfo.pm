@@ -79,7 +79,7 @@ has display_type => (
 		my $column_type = $self->column_type || $self->data_type;
 		
 		# Check if widget for this type exists or use plain text field
-		$column_type = 'varchar' unless grep( /^$column_type/, TableEdit::Config::column_types );
+		$column_type = 'varchar' unless grep( /^$column_type/, TableEdit::Config::column_types() );
 	
 		return $column_type;
     },
