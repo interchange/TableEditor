@@ -51,6 +51,19 @@ It is easy to change the Bootstrap theme to get a different look for Table Edit.
 With basic configuration done you can start using Table Edit. You will probably want to fine tune it a bit though.
 Table editor specific configuration is located in lib/config.yml.
 
+=head2 CRUD
+
+TE lets you perform all basic operations with records in table.
+
+=for html <div><img src="https://raw.githubusercontent.com/interchange/TableEditor/master/screenshots/form.png"></div>
+
+=head2 Relationships
+
+Support for belongs_to, has_many and many_to_many relations for easy adding, removing and assigning records.
+
+=for html <div><img src="https://raw.githubusercontent.com/interchange/TableEditor/master/screenshots/add many.png"></div>
+=for html <div><img src="https://raw.githubusercontent.com/interchange/TableEditor/master/screenshots/belongs to and many in item menu.png"></div>
+
 =head1 FINE TUNE
 
 For this example we will use following model and config file.
