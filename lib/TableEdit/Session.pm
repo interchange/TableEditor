@@ -6,9 +6,9 @@ my $active_sessions = {};
 my $timeout = config->{active_user_timeout} || 100;
 
 sub active_sessions {
-	my $treshold = time - $timeout;
+	my $threshold = time - $timeout;
 	for my $s (keys %$active_sessions)	{
-		delete $active_sessions->{$s} if $active_sessions->{$s}->{'last_seen'} < $treshold;
+		delete $active_sessions->{$s} if $active_sessions->{$s}->{'last_seen'} < $threshold;
 	}
 	return [values %$active_sessions];
 }

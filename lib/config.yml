@@ -1,11 +1,21 @@
 TableEditor:
-  dropdown_treshold: 50
+  dropdown_threshold: 50
   page_size: 10
   primary_key_delimiter: ","
   page_sizes: [1,2,10, 500, 1000]
 #  menu_classes: [Setting, Navigation, Product, Order, Orderline, User, Role, Address, Attribute  ]
   
   classes:
+    DeptEmp:
+      label: Department employee    
+    DeptManager:
+      label: Department manager    
+    Employee:
+      to_string: |    
+        my $id = $row->emp_no;
+        my $first = $row->first_name; 
+        my $last = $row->last_name; 
+        return "$first $last ($id)";
     User: 
       label: Employee
       grid_columns: [users_id, username]
@@ -46,8 +56,7 @@ TableEditor:
       grid_columns: [ name, uri,   type,  scope]
       columns:
         description:
-          column_type: 'html'
-             
+          column_type: 'html'             
     Role:
       to_string: return $row->label
         

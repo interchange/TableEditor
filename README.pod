@@ -116,7 +116,7 @@ For this example we will use following model and config file.
 =head2 Config file
 		
 	TableEditor:
-	  dropdown_treshold: 50
+	  dropdown_threshold: 50
 	  page_size: 10
 	  
 	  classes:
@@ -151,11 +151,11 @@ For this example we will use following model and config file.
 
 =head2 Global properties
 
-=head3 Dropdown treshold
+=head3 Dropdown threshold
 
 You can set number of rows that are still ok for dropdown. Tables with more than that will show items ID istead of dropdown by default.
 
-	dropdown_treshold: 50
+	dropdown_threshold: 50
 	
 =head3 Page size
 
@@ -233,10 +233,18 @@ You can set a column to be readonly in form view.
 Columns have basic column types based on data types in db. You can override them to use different form element.
 Available widgets are: boolean, date, datetime, dropdown, html, image_upload, integer, text, varchar
 
-	column_type = 'html';
+	column_type = 'text';
 
 These column types are used on detail view and on list search. 	
-	
+
+=head4 HTML / WYSIWYG editor
+
+Summernote editor is used. To use it just change column_type.
+
+	column_type = 'html';
+
+Example of image column conf:
+
 =head4 Image upload
 
 Example of image column conf:

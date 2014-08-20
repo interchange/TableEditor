@@ -192,11 +192,11 @@ sub _build__classes {
     return \%class_hash;
 }
 
-has dropdown_treshold => (
+has dropdown_threshold => (
 	is => 'lazy',
 	default => sub { 
 		my $self = shift;
-		return $self->attr('dropdown_treshold') || 50 
+		return $self->attr('dropdown_threshold') || 50 
 	}
 );
 

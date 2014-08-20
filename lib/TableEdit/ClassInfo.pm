@@ -144,7 +144,7 @@ sub _build_columns_info {
 	
 		    # determine number of records in foreign table
 		    my $count = $rs->count;
-		    if ($count <= $self->schema->dropdown_treshold){
+		    if ($count <= $self->schema->dropdown_threshold){
 				$column_info->display_type ('dropdown');
 				my @foreign_rows = $rs->all;
 				my $items = [];
