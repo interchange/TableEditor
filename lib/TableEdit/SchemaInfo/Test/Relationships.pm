@@ -1,6 +1,7 @@
 package TableEdit::SchemaInfo::Test::Relationships;
 
 use Test::More;
+use Data::Dumper;
 
 use strict;
 use warnings;
@@ -41,9 +42,24 @@ sub test_relationships {
 
 sub test_relationship {
     my ($class, $relationship, $expected) = @_;
-    my $class_name = $class->name;
-    my $rel_name = $relationship->name;
-    my $expected_value;
+    my ($class_name, $rel_name, $expected_value);
+
+    # check whether class is present
+    unless (isa_ok($class, 'TableEdit::ClassInfo')) {
+        diag "Class missing for relationship text, expected values: ", Dumper($expected);
+        return;
+    }
+
+    $class_name = $class->name;
+
+    # check whether relationship is present
+    unless (isa_ok($relationship, 'TableEdit::RelationshipInfo')) {
+        diag "Relationship for class $class_name missing, expected values: ",
+            Dumper($expected);
+        return;
+    }
+
+    $rel_name = $relationship->name;
 
     # type
     my $type = $relationship->type;
