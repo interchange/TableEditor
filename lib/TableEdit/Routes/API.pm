@@ -340,7 +340,7 @@ Returns sql order by parameter.
 sub grid_sort {
 	my ($class_info, $get_params) = @_;
 	# Direction	
-	$get_params->{descending} ? $class_info->sort_direction('DESC') : $class_info->sort_direction('');
+	($get_params->{descending} ? $class_info->sort_direction('DESC') : $class_info->sort_direction('')) if $get_params->{sort};
 	# Selected or Predefined sort
 	$class_info->sort_column($get_params->{sort}) if $get_params->{sort};
 	return $class_info->sort_column . " " . $class_info->sort_direction if $class_info->sort_column;	
@@ -393,7 +393,8 @@ sub grid_rows {
 		for my $column (@$columns_info){
 			
 			my $column_name = $column->{foreign} ? "$column->{foreign}" : "$column->{name}";
-			my $value = $row_inflated->{$column_name};
+			my $value = $row->$column_name;
+			$value = $schema_info->row($value)->to_string if ref $value; # If object
 			push @$row_data, {value => $value};
 		}
 

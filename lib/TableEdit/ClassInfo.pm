@@ -410,7 +410,10 @@ Returns '' as ascending or DESC as descending direction to sort by.
 
 has sort_direction => (
 	is => 'rw',
-	default => '',
+	default => sub{
+		my $self = shift;
+		return $self->attr('grid_sort_direction');
+	},
 );
 
 =head2 label
@@ -545,16 +548,6 @@ sub _build_form_columns_info {
 	return $form_columns; 
 }
 
-=head2 grid_sort
-
-Return column for default sort
-
-=cut
-has grid_sort => (is => 'lazy');
-sub _bulid_grid_sort {
-	my ($self) = @_;
-	return $self->attr('grid_sort');
-}
 
 
 sub find_with_delimiter {
