@@ -267,11 +267,14 @@ sub _build__relationships {
     my $source = $self->source;
     my $columns = {};
     my %rel_hash;
+    my @relationship_list = $self->attr('relationships') ? @{$self->attr('relationships')} : $source->relationships;
+	my $not_found_relastionships;
 
 	# Has many, might have, belongs to
-    for my $rel_name ($source->relationships){
+    for my $rel_name (@relationship_list){
         my $rel_info = $source->relationship_info($rel_name);
 
+        unless ($rel_info) {$not_found_relastionships->{$rel_name} = 1; next;};
         next if $rel_info->{hidden};
 
         # Determine name of class this relationship points to
@@ -329,7 +332,7 @@ sub _build__relationships {
         );
     }
 
-	# Add many to many relationships
+	# Find and Add many to many relationships
 	my $search_str = '__PACKAGE__->many_to_many(';
 	my $filename = Class::Inspector->resolved_filename( $source->result_class );
 	open (my $fh, "<", $filename) or die "cannot open < $filename: $!";
@@ -344,7 +347,10 @@ sub _build__relationships {
 	    my $rel_source = $source->schema->resultset($rel_source_name)->result_source;
 	  	my $class_name = $rel_source->relationship_info($f_rel)->{source};
         $class_name =~ s/\w+:://g;		  		  
-        $rel_source_name =~ s/\w+:://g;		  		  
+        $rel_source_name =~ s/\w+:://g;		  
+        if($self->attr('relationships')){
+        	next unless $not_found_relastionships->{$rel_name}; 
+        }		  
 		
 		$rel_hash{$rel_name} = TableEdit::RelationshipInfo->new(
             name => $rel_name,
