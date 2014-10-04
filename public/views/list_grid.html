@@ -4,8 +4,8 @@
 				<thead>
 					<tr class="labels">
 						<th class="field" ng-repeat="column in data.column_list">
-							<a ng-class="{active: column.name==data.sort_column}" ng-click="sort(column.name)" class="column-label sort">{{column.label}}
-								<i ng-class="{'glyphicon glyphicon-sort-by-attributes-alt': column.name==data.sort_column && sort_desc, 'glyphicon glyphicon-sort-by-attributes': column.name==data.sort_column && !sort_desc}"></i>
+							<a ng-class="{active: column.name==data.sort_column}" ng-click="sort(column)" class="column-label sort">{{column.label}}
+								<i ng-class="{'glyphicon glyphicon-sort-by-attributes-alt': (column.name==data.sort_column || column.foreign_column==data.sort_column) && sort_desc, 'glyphicon glyphicon-sort-by-attributes': (column.name==data.sort_column || column.foreign_column==data.sort_column) && !sort_desc}"></i>
 							</a> 
 						</th>
 						<th>

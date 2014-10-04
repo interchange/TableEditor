@@ -360,6 +360,12 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 	$scope.related = Item.related_link;
 
 	$scope.sort = function (ord) {
+		if(ord.foreign_column){
+			ord = ord.foreign_column;
+		}
+		else{
+			ord = ord.name;
+		}
 		if ($scope.sort_column == ord) { $scope.sort_desc = !$scope.sort_desc; }
 		else { $scope.sort_desc = false; }
 		$scope.sort_column = ord;
@@ -429,6 +435,12 @@ var RelatedClassCtrl = function ($scope, $rootScope, $routeParams, RelatedItem, 
 	$scope.data.page_sizes;
 
 	$scope.sort = function (ord) {
+		if(ord.foreign_column){
+			ord = ord.foreign_column;
+		}
+		else{
+			ord = ord.name;
+		}
 		if ($scope.sort_column == ord) { $scope.sort_desc = !$scope.sort_desc; }
 		else { $scope.sort_desc = false; }
 		$scope.sort_column = ord;
@@ -698,6 +710,12 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 	$scope.error = {};
 
 	$scope.sort = function (ord) {
+		if(ord.foreign_column){
+			ord = ord.foreign_column;
+		}
+		else{
+			ord = ord.name;
+		}
 		if ($scope.data.sort_column == ord) { $scope.sort_desc = !$scope.sort_desc; }
 		else { $scope.sort_desc = false; }
 		$scope.data.sort_column = ord;
