@@ -44,6 +44,9 @@ lib/Interchange6
 environments/*.yml
 /nbproject/private/
 nbproject/
+.project
+.settings
+lib/TableEdit/Plugins
 
 # backup files
 *.old
