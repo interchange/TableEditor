@@ -13,13 +13,14 @@
 	<ul ng-show="class.relations" class="nav nav-tabs">
 			<li ><a href="#/{{item_info.class}}/edit/{{item_info.id}}/">General</a></li>
 			
-			<li ng-if="link.type != 'belongs_to'" ng-class="{active: link.name == relation}" class="sub-menu-item" ng-repeat="link in class.relations">
-				<a class="sub-menu-link" href="#/{{item_info.class}}/{{item_info.id}}/{{link.name}}/{{link.type}}">{{link.label}}</a>
+			<li ng-class="{active: link.name == relation}" class="sub-menu-item" ng-repeat="link in class.relations">
+				<a ng-if="link.type != 'belongs_to'" class="sub-menu-link" href="#/{{item_info.class}}/{{item_info.id}}/{{link.name}}/{{link.type}}">{{link.label}}</a>
+			
 			</li>
 		</ul>
 	<div class="row-fluid">
 		<div class="pull-right">
-			<a class="btn btn-primary" ng-click="showRelatedClass = ! showRelatedClass" ><i class="glyphicon glyphicon-plus"></i> Add existing {{data.class_label}}</a>
+			<a ng-if="item_info.related_type == 'many_to_many'" class="btn btn-primary" ng-click="showRelatedClass = ! showRelatedClass" ><i class="glyphicon glyphicon-plus"></i> Add existing {{data.class_label}}</a>
 			<a class="btn btn-primary" ng-click="create()" ><i class="glyphicon glyphicon-plus"></i> Add new {{data.class_label}}</a>
 		</div>
 

@@ -258,7 +258,9 @@ sub hashref {
 	    $hash->{foreign_type} = $self->foreign_type if $self->foreign_type;
 		$hash->{is_foreign_key} = $self->is_foreign_key if $self->is_foreign_key;
 		$hash->{is_nullable} = $self->is_nullable if $self->is_nullable;
+		$hash->{primary_key} = $self->is_primary if $self->is_primary;
 		$hash->{readonly} = $self->readonly if $self->readonly;
+		$hash->{required} = $self->required if $self->required;
 		$hash->{label} = $self->label if $self->label;
 		$hash->{name} = $self->name if $self->name;
 		$hash->{size} = $self->size if defined $self->size;
@@ -284,7 +286,7 @@ has is_primary => (
 		return undef unless $primary_key;
 		if(ref($primary_key) eq 'ARRAY'){
 			for my $pk (@$primary_key){
-				return 1 if $self->name eq $primary_key;
+				return 1 if $self->name eq $pk;
 			}
 		}
 		return 1 if $self->name eq $primary_key;

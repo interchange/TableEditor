@@ -9,7 +9,7 @@
 
 <script type="text/javascript">
 $(document).ready(function() {
-	  $('.matter input.date').datetimepicker({ 
+	$('.matter input.date:not([readonly])').datetimepicker({ 
 		  dateFormat: 'yy-mm-dd', 
 		  });
 });

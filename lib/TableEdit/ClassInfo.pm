@@ -309,6 +309,9 @@ sub _build__relationships {
                 # example: Strehler::Schema::Result::Description
                 $foreign_type = 'belongs_to';
             }
+            elsif ($rel_info->{attrs}->{is_foreign_key_constraint}) {
+                $foreign_type = 'belongs_to';
+            }
             else {
                 $foreign_type = 'has_many';
             }

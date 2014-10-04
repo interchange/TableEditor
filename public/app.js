@@ -150,7 +150,7 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route) {
 			// Success
 			function(data) {
 				if(data.error){
-					alert('There has been an error saving '+class_label+'! '+data.error);
+					alert('There has been an error saving '+class_label+'! \n'+data.error);
 				}
 				else {
 					$location.path(url);							

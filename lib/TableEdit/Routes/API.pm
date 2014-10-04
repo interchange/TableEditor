@@ -74,7 +74,8 @@ post '/:class/:id/:related/:related_id' => require_login sub {
 	my $related_id = param('related_id');
 	
 	my $relationship_info = $class_info->relationship($related);
-	my $related_row = $relationship_info->resultset->find($related_id);
+	my $relationship_class_info = $schema_info->class($relationship_info->class_name);
+	my $related_row = $relationship_class_info->find_with_delimiter($related_id);
 	
 	my $row = $class_info->find_with_delimiter(param('id'));
 	
@@ -113,7 +114,8 @@ del '/:class/:id/:related/:related_id' => require_login sub {
 	my $relationship_class_info = $schema_info->class($relationship_info->class_name);
 	
 	my $row = $class_info->find_with_delimiter(param('id'));
-	my $related_row = $relationship_class_info->resultset->find($related_id);
+	
+	my $related_row = $relationship_class_info->find_with_delimiter($related_id);
 	
 	# Has many
 	if($relationship_info->{cond}){ 
@@ -143,7 +145,7 @@ get '/:class/:id/:related/items' => require_login sub {
 	my $get_params = params('query') || {};
 
 	# row lookup
-	$row = $class_info->resultset->find($id);
+	$row = $class_info->find_with_delimiter($id);
 	my $related_items = $row->$related;
 
 	my $relationship_info = $class_info->relationship($related);
