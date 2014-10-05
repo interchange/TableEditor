@@ -294,7 +294,6 @@ sub grid_template_params {
 	add_values($grid_params->{column_list}, $where_params);
 	
 	my $rs = $related_items || $class_info->resultset;
-
 	my $primary_key = $class_info->primary_key;
     
 	my $page = $get_params->{page} || 1; 

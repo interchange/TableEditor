@@ -345,7 +345,7 @@ sub _build__relationships {
 		next if $index == -1;
 		my $rel_info = substr $row, $index + length($search_str), index($row, ')') - $index - length($search_str) ;
 		my ($rel_name, $rel, $f_rel) = eval("($rel_info)");
-		  
+
 	    my $rel_source_name = $source->relationship_info($rel)->{source};
 	    my $rel_source = $source->schema->resultset($rel_source_name)->result_source;
 	  	my $class_name = $rel_source->relationship_info($f_rel)->{source};

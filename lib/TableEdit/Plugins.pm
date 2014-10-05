@@ -1,7 +1,7 @@
 package TableEdit::Plugins;
 use Dancer ':syntax';
 
-use TableEdit::Plugins::Order::API;
+#use TableEdit::Plugins::plugin_name::API;
 
 my $active_plugin_list = config->{table_editor_plugins};
 my $plugins = [];
