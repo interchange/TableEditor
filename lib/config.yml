@@ -3,8 +3,18 @@ TableEditor:
   page_size: 10
   primary_key_delimiter: "_"
   page_sizes: [10, 20, 50, 100]
+  plugins: [ "Chinook" ]
 #  menu_classes: [Users, Products]
-    
+  
+  classes:
+    Album:
+     to_string: return $row->title.' ('.$row->artist->name.')';
+    Artist:
+     to_string: return $row->name;
+    Invoice:
+      columns:
+        billingaddress:
+          label: 'Billing Address'
       
     
     

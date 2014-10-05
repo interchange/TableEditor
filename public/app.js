@@ -804,6 +804,7 @@ var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Pl
 			function(data){
 				angular.forEach(data, function(value, key){							
 					loadjscssfile(value.js, "js");
+					loadjscssfile(value.css, "css");
 				});
 			
 			}

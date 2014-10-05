@@ -16,7 +16,7 @@
 					</tr>
 					<tr>
 						<th class="column-search" ng-repeat="column in data.column_list">
-							<div class="nullable" ng_if="!column.foreign_column" ng-include="'views/column/'+column.display_type+'.html'"></div>
+							<div class="nullable"  ng-include="'views/column/'+column.display_type+'.html'"></div>
 						</th>
 						<th><button class="btn btn-default" ng-click="reset()">Filter</button></th>
 					</tr>

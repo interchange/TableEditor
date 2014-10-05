@@ -2,12 +2,17 @@ package TableEdit::Plugins;
 use Dancer ':syntax';
 
 #use TableEdit::Plugins::plugin_name::API;
+use TableEdit::Plugins::Chinook::API;
 
-my $active_plugin_list = config->{table_editor_plugins};
-my $plugins = [];
+my $active_plugin_list = attr('plugins');
+my $plugins;
 
 for my $plugin (@$active_plugin_list){
-	push @$plugins, {name => $plugin, js => "api/plugins/$plugin/public/js/app.js"};
+	push @$plugins, {
+		name => $plugin, 
+		js => "api/plugins/$plugin/public/js/app.js",
+		css => "api/plugins/$plugin/public/css/style.css"
+	};
 }
 
 prefix '/api';
@@ -33,5 +38,23 @@ get '/plugins/:plugin/public/**' => sub {
 	
 	return send_file($file, system_path => 1);
 };
+
+=head2 attributes
+
+Return attribute value
+
+=cut
+
+sub attr  {
+		my (@path) = @_;
+		my $value;
+		unshift @path, 'TableEditor';
+		my $node = config;
+		for my $p (@path){
+			$node = $node->{$p};
+			return $node unless defined $node;
+		}
+		return $node;
+}
 
 1;

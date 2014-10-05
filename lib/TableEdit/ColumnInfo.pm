@@ -3,7 +3,6 @@ package TableEdit::ColumnInfo;
 use Dancer ':syntax';
 use Moo;
 
-with 'TableEdit::SchemaInfo::Role::Label';
 
 =head1 ATTRIBUTES
 
@@ -60,6 +59,25 @@ has column_type => (
     default => sub {
         my $self = shift;
     	return $self->attr('column_type'); 
+    },
+);
+has label => (
+    is => 'lazy',
+    default => sub {
+        my $self = shift;
+    	return $self->attr('label') if $self->attr('label');
+    	
+    	 my $label = $self->name;
+
+	    $label =~ s/_/ /g;
+	
+	    # Add space in front of capital letters.
+	    $label =~ s/(?<! )([A-Z])/ $1/g;
+	
+	    # Strip out extra starting whitespace followed by A-Z
+	    $label =~ s/^ (?=[A-Z])//;
+	
+	    return ucfirst($label); 
     },
 );
 
