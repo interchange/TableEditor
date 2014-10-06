@@ -2,7 +2,6 @@ package TableEdit::Plugins;
 use Dancer ':syntax';
 
 #use TableEdit::Plugins::plugin_name::API;
-use TableEdit::Plugins::Chinook::API;
 
 my $active_plugin_list = attr('plugins');
 my $plugins;
