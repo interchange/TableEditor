@@ -22,7 +22,7 @@
 				<div class="alert-box span12"></div>
 			</div>
 			<ul ng-show="data.relations" class="nav nav-tabs" ng-if="!create">
-				<li class="active"><a href="#">General</a></li>
+				<li class="active"><a>General</a></li>
 				<li class="sub-menu-item" ng-repeat="link in data.relations">
 					<!-- Has many or Many to many -->
 					<a ng-if="link.type == 'has_many' || link.type == 'many_to_many' || link.type == 'might_have'" 
