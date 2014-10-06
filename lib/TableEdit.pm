@@ -19,10 +19,9 @@ URIs when the application is mounted at /myurl/.
 =cut
 
 get '/' => sub {
-
     template 'index.html', {
     	base_url => config->{base_url}, 
-    	plugins => config->{table_editor_plugins},
+    	plugins => TableEdit::Plugins::attr('plugins'),
     };
 };
 

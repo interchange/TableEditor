@@ -214,7 +214,8 @@ has menu => (
 
 		my $menu;
 		for my $classInfo (@$classes){
-			#my $classInfo = $self->class($class);
+			my $class_name = !ref($classInfo) ? $classInfo : $classInfo->name; 
+			$classInfo = $self->class($class_name);
 			$menu->{$classInfo->label} = {name => $classInfo->label, url=> join('/', '#' . $classInfo->name, 'list'),};
 		}
 		$menu = [map $menu->{$_}, sort keys %$menu] if $sort;
