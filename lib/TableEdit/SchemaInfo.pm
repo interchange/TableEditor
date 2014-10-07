@@ -232,6 +232,14 @@ has primary_key_delimiter  => (
 	}
 );
 
+has page_sizes  => (
+	is => 'lazy',
+	default => sub { 
+		my $self = shift;
+		return $self->attr('page_sizes') || ","; 	
+	}
+);
+
 =head2 attributes
 
 Return attribute value

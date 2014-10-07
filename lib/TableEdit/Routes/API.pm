@@ -324,7 +324,7 @@ sub grid_template_params {
 	$grid_params->{pages} = ceil($count / $page_size);
 	$grid_params->{count} = $count;
 	$grid_params->{page_size} = $page_size;
-	$grid_params->{page_sizes} = [1,2,3,10,10000];
+	$grid_params->{page_sizes} = $schema_info->page_sizes;
 	$grid_params->{sort_column} = $class_info->sort_column;
 	$grid_params->{sort_direction} = $class_info->sort_direction;
 	
