@@ -141,6 +141,7 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route) {
 			var class_name = this.data.class;
 			var class_label = this.data.class_label;
 			var url = Url.edit || "/"+class_name+"/list";
+			Url.edit = null;
 			var item = this.item;
 			// ClassItem.item
 			ClassItem.save({
