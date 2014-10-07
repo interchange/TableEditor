@@ -259,6 +259,10 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 	$scope.data.page_size;
 	$scope.data.page_sizes = [3,7,9, 10, 20];
 	$scope.error = {};
+	$scope.showRelatedClass = true;
+	$scope.showRelated = function () {
+		$scope.showRelatedClass = ! $scope.showRelatedClass;
+	};
 
 	$scope.item_info = RelatedList.get({
 		class: $routeParams.class,
