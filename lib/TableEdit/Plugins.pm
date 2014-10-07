@@ -4,7 +4,7 @@ use Dancer ':syntax';
 #use TableEdit::Plugins::plugin_name::API;
 
 my $active_plugin_list = attr('plugins');
-my $plugins;
+my $plugins = [];
 
 for my $plugin (@$active_plugin_list){
 	push @$plugins, {
