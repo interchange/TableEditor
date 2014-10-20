@@ -92,14 +92,9 @@ post '/:class/:id/:related/:related_id' => require_login sub {
 	}
 	# Many to Many
 	else {
-		# Check if already related
-		my $inter_name = $relationship_info->intermediate_name;
-		my $related_row_info = $schema_info->row($related_row);
-		my $exists = $row->$inter_name->find($related_row_info->primary_key_value);
-		return to_json {'exists' => 1} if $exists;
-		
 		my $add_method = "add_to_$related"; 
-		$row->$add_method($related_row);	
+		eval {$row->$add_method($related_row)};	
+		return to_json {'exists' => 1} if $@;
 	}
 	return to_json {'added' => 1};
 };
