@@ -97,10 +97,12 @@ CrudApp.factory('AuthInterceptor',['$q','$location',function($q,$location){
 
 CrudApp.factory('Auth', function($resource){
 	return {
-		login: $resource('login', {}, {method:'POST'}),
-		logout: $resource('logout', {}, {method:'POST'}),
+		login: $resource('login', {}),
+		logout: $resource('logout', {}),
 	};
+
 });
+
 CrudApp.factory('Plugins', function($resource) { 
 	return $resource('api/plugins');
 });
