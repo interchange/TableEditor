@@ -317,15 +317,19 @@ has is_primary => (
 Returns 'required' if column is required
 
 =cut
-sub required {
-	my $self = shift;
-	return 'required' if !$self->default_value and $self->is_nullable == 0;
-	if($self->is_foreign_key){
-		return undef if $self->foreign_type and $self->foreign_type eq 'might_have';
-		return 'required' unless $self->is_nullable and $self->is_nullable != 1;
-	}
-	return undef;
-};
+has required => (
+	is => 'lazy',
+    default => sub {
+		my $self = shift;
+		return 'required' if $self->attr('required');
+		return 'required' if !$self->default_value and $self->is_nullable == 0;
+		if($self->is_foreign_key){
+			return undef if $self->foreign_type and $self->foreign_type eq 'might_have';
+			return 'required' unless $self->is_nullable and $self->is_nullable != 1;
+		}
+		return undef;
+    }
+);
 
 
 =head2 attr
