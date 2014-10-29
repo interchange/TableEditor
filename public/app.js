@@ -145,6 +145,12 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route) {
 			var url = Url.edit || "/"+class_name+"/list";
 			Url.edit = null;
 			var item = this.item;
+			
+			if(this.form.$invalid){
+				alert('Error in form!');
+				return;
+			}
+			
 			// ClassItem.item
 			ClassItem.save({
 				class: class_name,
@@ -713,7 +719,7 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 	$scope.item.values = {};
 	$scope.sort_desc = null;
 	$scope.current_page = 1;
-	$scope.actions = 'class_list';
+	$scope.actions = $scope.actions || 'class_list';
 	$scope.error = {};
 
 	$scope.sort = function (ord) {
