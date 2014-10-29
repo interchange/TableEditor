@@ -22,6 +22,13 @@ has class => (
     required => 1,
 );
 
+has column_info => (
+	is => 'lazy',
+    default => sub {
+        my $self = shift;
+    	return $self->class->resultset->result_source->column_info($self->name);
+    }
+);
 
 =head2 position
 
@@ -337,14 +344,24 @@ has required => (
 =cut
 sub attr  {
 		my ($self, @path) = @_;
-		my $value;
-		unshift @path, 'TableEditor', 'classes', $self->class->name, 'columns', $self->name;
-		my $node = config;
+		my ($value, $node);
+		
+		# Config file
+		$node = config;
+		for my $p ('TableEditor', 'classes', $self->class->name, 'columns', $self->name, @path){
+			$node = $node->{$p};
+			last unless defined $node; 
+		}
+		return $node if defined $node;
+		
+		# Schema config
+		$node = $self->column_info;
 		for my $p (@path){
 			$node = $node->{$p};
-			return $node unless defined $node;
+			next if defined $node and ref $node eq 'hash';
 		}
-		return $node;
+		return $node if defined;
+		
 }
 
 

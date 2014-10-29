@@ -49,7 +49,7 @@ It is easy to change the Bootstrap theme to get a different look for Table Edit.
 =head1 USE
 
 With basic configuration done you can start using Table Edit. You will probably want to fine tune it a bit though.
-Table editor specific configuration is located in lib/config.yml.
+Table editor specific configuration is located in lib/config.yml. Configuration can also be set in schema classes.
 
 =head2 CRUD
 
@@ -160,7 +160,25 @@ For this example we will use following model and config file.
 		payment_status: 
 		  readonly: 1
 
-=for html <div><img src="https://raw.githubusercontent.com/interchange/TableEditor/master/screenshots/TE%20configuration.png"></div>
+=head2 Configuration in schema classes
+
+Setting can also be set in schema classes in similar fashion. So for example column properties are set like so (just add them to column definition):
+
+	"upload",
+	  {
+	    data_type => "varchar",
+	    default_value => \"null",
+	    is_nullable => 1,
+	    size => 255,
+	    column_type => 'image_upload'
+	  },
+
+Class wide setting are in __PACKAGE__->resultset_attributes();
+
+	__PACKAGE__->resultset_attributes({ 
+		label => 'Employees',
+		grid_columns => [users_id, username],
+	});
 
 =head2 Global properties
 

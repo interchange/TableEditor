@@ -435,7 +435,7 @@ has label => (is => 'lazy');
 sub _build_label {
     my $self = shift;
 	my $class = $self->name;
-	my $label = config->{TableEditor}->{classes}->{$class}->{label};
+	my $label = $self->attr('label');
 	return $label if $label;
 	$class =~ s/_/ /g;	
 	$class =~ s/(?<! )([A-Z])/ $1/g; # Add space in front of Capital leters 
@@ -451,14 +451,23 @@ Return attribute value
 
 sub attr  {
 		my ($self, @path) = @_;
-		my $value;
-		unshift @path, 'TableEditor', 'classes', $self->name;
-		my $node = config;
+		my ($value, $node);
+		
+		# Config file
+		$node = config;
+		for my $p ('TableEditor', 'classes', $self->name, @path){
+			$node = $node->{$p};
+			last unless defined $node; 
+		}
+		return $node if defined $node;
+		
+		# Schema config
+		$node = $self->resultset->result_source->resultset_attributes;
 		for my $p (@path){
 			$node = $node->{$p};
-			return $node unless defined $node;
+			next if defined $node and ref $node eq 'hash';
 		}
-		return $node;
+		return $node if defined;
 }
 
 
