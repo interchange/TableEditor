@@ -390,7 +390,12 @@ sub grid_rows {
 			
 			my $column_name = $column->{foreign} ? "$column->{foreign}" : "$column->{name}";
 			my $value = $row->$column_name;
-			$value = $schema_info->row($value)->to_string if ref $value; # If object
+			if( index(ref $value, ref schema) == 0 ){ # If schema object
+				$value = $schema_info->row($value)->to_string; 
+			} 
+			elsif ( ref $value ) { # some other object
+				$value = $row_inflated->{$column_name};
+			}
 			push @$row_data, {value => $value};
 		}
 
