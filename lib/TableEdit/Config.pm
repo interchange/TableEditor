@@ -117,6 +117,10 @@ post '/db-config' => sub {
 	return to_json {db => 'configured'};
 };
 
+get '/schema/deploy' => sub {
+	return to_json {deploy_errors => schema->deploy};
+};
+
 sub make_schema {
 	my $db = shift;
 	# Automaticly generate schema

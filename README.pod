@@ -41,6 +41,12 @@ files as this differs between systems).
 Make sure that you are using the appropriate UTF-8 flag for L<Dancer::Plugin::DBIC>, as
 this plugin doesn't set it automatically.
 
+=head2 Schema deployment
+
+If you have a schema and no db tables you want to use schema deploy to create them for you. After setting DB settings you simpli goto followning URL and wait for it.
+
+	/api/schema/deploy
+
 =head1 FRONTEND
 
 Table Edit uses L<Angular|http://angularjs.org/Angular> and L<Bootstrap|http://getbootstrap.com/> for the frontend.
