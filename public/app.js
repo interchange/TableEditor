@@ -581,7 +581,7 @@ var CreateCtrl = function ($scope, $routeParams, ClassItem, Item) {
 			{	class: $routeParams.class,   	},
 			// Success
 			function(data) {
-				$scope.title = "New" + data.class_label;
+				$scope.title = "New " + data.class_label;
 			},
 			// Error
 			function() {
