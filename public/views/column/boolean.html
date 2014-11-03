@@ -3,7 +3,7 @@
 	class="form-control" 
 	id="media_format" 
 	ng-model="item.values[column.name]" 
-	ng-required="!column.is_nullable" 
+	ng-required="column.required" 
 	ng-readonly="column.readonly || (column.primary_key && !create)" 
 	>
 	<option></option>

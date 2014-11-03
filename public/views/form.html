@@ -46,7 +46,17 @@
 	
 							<!-- Text input-->
 							<div ng-repeat="column in data.columns">
-								<div ng-if="column.hidden != 1 && (!(column.is_auto_increment || (column.readonly && !column.primary_key) && create))">
+								<div ng-if="
+								column.hidden == 0 || (
+									column.hidden != 1 && (
+										!(
+											column.is_auto_increment || 
+											(column.readonly && !column.primary_key) && 
+											create
+										)
+									)
+							   )
+									">
 									<div class="form-group form-field">
 										<label class="control-label ">{{ column.label }}</label>
 										<ng-form name="validationScope">

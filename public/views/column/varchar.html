@@ -2,8 +2,12 @@
 	name="column"
 	class="form-control"
 	ng-required="column.required" 
-	ng-readonly="column.readonly || (column.primary_key && !create)" 
+	ng-readonly="
+		column.readonly 
+			|| 
+		(column.primary_key && !create)
+		" 
 	ng-model="item.values[column.name]" 
 	maxlength="{{column.size}}"
 	type="text" >
-	<span ng-include="'views/column/partials/standard_validation.html'"></span>
+<span ng-include="'views/column/partials/standard_validation.html'"></span>

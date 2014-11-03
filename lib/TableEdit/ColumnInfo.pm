@@ -201,7 +201,8 @@ has hidden => (
 	is => 'lazy',
     default => sub {
 		my $self = shift;
-		return $self->attr('hidden');
+		return $self->attr('hidden') if $self->attr('hidden');
+		return undef;
 	}
 );
 
@@ -215,7 +216,9 @@ has readonly => (
 	is => 'lazy',
     default => sub {
 		my $self = shift;
-		return $self->attr('readonly');
+		return $self->attr('readonly') if $self->attr('readonly');
+		return 1 if $self->column_info->{dynamic_default_on_update} or $self->column_info->{dynamic_default_on_create};
+		return undef;
 	}
 );
 
@@ -276,7 +279,7 @@ has upload_max_size => (
 sub hashref {
 		my $self = shift;
 		
-		my $hash = {};
+		my $hash = $self->column_info;
 		$hash->{data_type} = $self->data_type;
 		$hash->{display_type} = $self->display_type;
 		$hash->{foreign_column} = $self->foreign_column if $self->foreign_column;
@@ -286,6 +289,7 @@ sub hashref {
 		$hash->{primary_key} = $self->is_primary if $self->is_primary;
 		$hash->{readonly} = $self->readonly if $self->readonly;
 		$hash->{required} = $self->required if $self->required;
+		$hash->{hidden} = $self->hidden if defined $self->hidden;
 		$hash->{label} = $self->label if $self->label;
 		$hash->{name} = $self->name if $self->name;
 		$hash->{size} = $self->size if defined $self->size;
@@ -329,7 +333,15 @@ has required => (
     default => sub {
 		my $self = shift;
 		return 'required' if $self->attr('required');
-		return 'required' if ! defined $self->default_value and $self->is_nullable and $self->is_nullable == 0;
+		return 'required' if 
+			!defined $self->default_value 
+				and 
+			!defined $self->column_info->{dynamic_default_on_update} 
+				and 
+			defined $self->is_nullable 
+				and 
+			$self->is_nullable == 0;
+			
 		if($self->is_foreign_key){
 			return undef if $self->foreign_type and $self->foreign_type eq 'might_have';
 			return 'required' unless $self->is_nullable and $self->is_nullable != 1;
