@@ -111,7 +111,7 @@ Returns L<TableEdit::ColumnInfo> object for column name.
 
 sub column {
     my ($self, $name) = @_;
-    my $columns = $self->columns;
+    my $columns = $self->columns_info;
 
     if (exists $columns->{$name}) {
     	return $columns->{$name};
@@ -130,7 +130,7 @@ sub column {
 has columns_info => (is => 'lazy');
 sub _build_columns_info { 
     my ($self, $selected_columns) = @_;
-    my $columns_info = [];
+    my $columns_info = {};
 	
 	$selected_columns = [$self->columns] unless $selected_columns;
 	
@@ -158,7 +158,7 @@ sub _build_columns_info {
 				$column_info->dropdown_options($items);
 		    }
 		}
-		push @$columns_info, $column_info->hashref;
+		$columns_info->{$column_info->name} = $column_info;
     }
 
     return $columns_info;
