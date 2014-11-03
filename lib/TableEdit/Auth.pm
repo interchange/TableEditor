@@ -1,7 +1,7 @@
 package TableEdit::Auth;
 use Dancer ':syntax';
 use Dancer::Plugin::Auth::Extensible;
-use TableEdit::Session
+use TableEdit::Session;
 
 prefix '/';
 
@@ -12,7 +12,7 @@ get '/login' => sub {
 		};
 	}
 	else {
-		send_error("Not logged in", 401);
+		send_error("Forbidden", 403);
 		return to_json {};
 	}
 };
