@@ -88,7 +88,6 @@ CrudApp.factory('AuthInterceptor',['$q','$location',function($q,$location){
         responseError: function(rejection) {
             if (rejection.status === 401) {
                 console.log("Response Error 401",rejection);
-                $location.path('/login').search('returnTo', $location.path());
             }
             return $q.reject(rejection);
         }
@@ -852,6 +851,7 @@ var LoginCtrl = function ($scope, $rootScope, Auth, Url, $location) {
 						$rootScope.active = data.active;
 						$scope.error = null;
 						$scope.success = 'Successfully logged in as '+data.username;
+						if (Url.login == '/login' || !Url.login ) Url.login = '/'; // Redirect to home if last route was login 
 						$location.path(Url.login);
 					}
 					else {
