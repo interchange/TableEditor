@@ -156,10 +156,34 @@ Options to select values from for this column.
 
 =cut
 
-has dropdown_options => (
-    is => 'rw',
-    default => '',
-);
+sub dropdown_options {
+	my $self = shift;
+	
+	# Belongs to or Has one
+	my $foreign_type = $self->foreign_type;
+
+	if ($foreign_type eq 'belongs_to' or $foreign_type eq 'might_have') {
+	    my $rs = $self->relationship->resultset;
+
+	    # determine number of records in foreign table
+	    my $count = $rs->count;
+	    my $treshold = config->{TableEditor}->{dropdown_threshold} if config->{TableEditor} and config->{TableEditor}->{dropdown_threshold};
+	    if ($count <= $treshold){
+			$self->display_type ('dropdown');
+			my @foreign_rows = $rs->all;
+			my $items = [];
+			for my $row (@foreign_rows){
+				my $rowInfo = TableEdit::RowInfo->new(row => $row, class => $self->relationship->{class});
+				my $primary_key = $self->relationship->{class}->primary_key;
+				my $id = $rowInfo->primary_key_string;
+				my $name = $rowInfo->to_string;
+				push @$items, {option_label=>$name, value=>$id};
+			}
+			return $items;
+	    }
+	}
+	return undef;
+}
 
 =head2 is_nullable
 

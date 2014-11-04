@@ -136,28 +136,7 @@ sub _build_columns_info {
 	
     for my $column_info (@$selected_columns) {
 
-		# Belongs to or Has one
-		my $foreign_type = $column_info->foreign_type;
-	
-		if ($foreign_type eq 'belongs_to' or $foreign_type eq 'might_have') {
-		    my $rs = $column_info->relationship->resultset;
-	
-		    # determine number of records in foreign table
-		    my $count = $rs->count;
-		    if ($count <= $self->schema->dropdown_threshold){
-				$column_info->display_type ('dropdown');
-				my @foreign_rows = $rs->all;
-				my $items = [];
-				for my $row (@foreign_rows){
-					my $rowInfo = TableEdit::RowInfo->new(row => $row, class => $column_info->relationship->{class});
-					my $primary_key = $column_info->relationship->{class}->primary_key;
-					my $id = $rowInfo->primary_key_string;
-					my $name = $rowInfo->to_string;
-					push @$items, {option_label=>$name, value=>$id};
-				}
-				$column_info->dropdown_options($items);
-		    }
-		}
+		
 		$columns_info->{$column_info->name} = $column_info;
     }
 
@@ -178,7 +157,8 @@ sub _build__columns {
         # build hash by source column
         if(
         	$rel_info->type ne 'many_to_many' and 
-        	$rel_info->type ne 'has_many'
+        	$rel_info->type ne 'has_many' and
+        	$rel_info->type ne 'might_have'
         ){
 	        $rel_hash{$rel_info->self_column} = $rel_info;
         } 
