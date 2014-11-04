@@ -9,5 +9,7 @@
 		" 
 	ng-model="item.values[column.name]" 
 	maxlength="{{column.size}}"
-	type="text" >
+	type="text"
+	placeholder="{{column.placeholder}}"
+	>
 <span ng-include="'views/column/partials/standard_validation.html'"></span>

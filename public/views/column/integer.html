@@ -5,5 +5,7 @@
 	ng-readonly="column.readonly || (column.primary_key && !create)" 
 	ng-model="item.values[column.name]" 
 	maxlength="{{column.size}}"
-	type="text" >
+	placeholder="{{column.placeholder}}" 
+	type="text"
+	>
 	<span ng-include="'views/column/partials/standard_validation.html'"></span>

@@ -4,6 +4,7 @@
 	ng-required="column.required" 
 	ng-readonly="column.readonly || (column.primary_key && !create)" 
 	ng-model="item.values[column.name]" 
+	placeholder="{{column.placeholder}}"
 	type="text" >
 <span ng-include="'views/column/partials/standard_validation.html'"></span>
 

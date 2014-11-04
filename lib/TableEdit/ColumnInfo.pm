@@ -22,13 +22,6 @@ has class => (
     required => 1,
 );
 
-has column_info => (
-	is => 'lazy',
-    default => sub {
-        my $self = shift;
-    	return $self->class->resultset->result_source->column_info($self->name);
-    }
-);
 
 =head2 position
 
@@ -104,7 +97,7 @@ has display_type => (
 		my $column_type = $self->column_type || $self->data_type;
 		
 		# Check if widget for this type exists or use plain text field
-		$column_type = 'textfiled' unless grep( /^$column_type/, TableEdit::Config::column_types() );
+		$column_type = 'textfield' unless grep( /^$column_type/, TableEdit::Config::column_types() );
 	
 		return $column_type;
     },
@@ -185,25 +178,6 @@ sub dropdown_options {
 	return undef;
 }
 
-=head2 is_nullable
-
-Whether column is nullable or not.
-
-=cut
-
-has is_nullable => (
-    is => 'ro',
-);
-
-=head2 size
-
-Column size
-
-=cut
-
-has size => (
-    is => 'ro',
-);
 
 =head2 default_value
 
@@ -241,7 +215,7 @@ has readonly => (
     default => sub {
 		my $self = shift;
 		return $self->attr('readonly') if $self->attr('readonly');
-		return 1 if $self->column_info->{dynamic_default_on_update} or $self->column_info->{dynamic_default_on_create};
+		return 1 if $self->attr('dynamic_default_on_update') or $self->attr('dynamic_default_on_create');
 		return undef;
 	}
 );
@@ -303,24 +277,22 @@ has upload_max_size => (
 sub hashref {
 		my $self = shift;
 		
-		my $hash = $self->column_info;
+		my $hash = $self->attrs;
+		$hash->{options} = $self->dropdown_options if $self->dropdown_options;
 		$hash->{data_type} = $self->data_type;
 		$hash->{display_type} = $self->display_type;
 		$hash->{foreign_column} = $self->foreign_column if $self->foreign_column;
 	    $hash->{foreign_type} = $self->foreign_type if $self->foreign_type;
 		$hash->{is_foreign_key} = $self->is_foreign_key if $self->is_foreign_key;
-		$hash->{is_nullable} = $self->is_nullable if $self->is_nullable;
 		$hash->{primary_key} = $self->is_primary if $self->is_primary;
 		$hash->{readonly} = $self->readonly if $self->readonly;
 		$hash->{required} = $self->required if $self->required;
 		$hash->{hidden} = $self->hidden if defined $self->hidden;
 		$hash->{label} = $self->label if $self->label;
 		$hash->{name} = $self->name if $self->name;
-		$hash->{size} = $self->size if defined $self->size;
 		$hash->{upload_max_size} = $self->upload_max_size if defined $self->upload_max_size;
 		$hash->{upload_extensions} = $self->upload_extensions if $self->upload_extensions;
 		$hash->{upload_dir} = $self->upload_dir if $self->upload_dir;
-		$hash->{options} = $self->dropdown_options if $self->dropdown_options;
 	
 	    return $hash;
 }
@@ -360,15 +332,13 @@ has required => (
 		return 'required' if 
 			!defined $self->default_value 
 				and 
-			!defined $self->column_info->{dynamic_default_on_update} 
+			!defined $self->attr('dynamic_default_on_update') 
 				and 
-			defined $self->is_nullable 
-				and 
-			$self->is_nullable == 0;
+			defined $self->attr('is_nullable') and $self->attr('is_nullable') == 0;
 			
 		if($self->is_foreign_key){
 			return undef if $self->foreign_type and $self->foreign_type eq 'might_have';
-			return 'required' unless $self->is_nullable and $self->is_nullable != 1;
+			return 'required';
 		}
 		return undef;
     }
@@ -376,6 +346,8 @@ has required => (
 
 
 =head2 attr
+
+Column atribute specified in config or schema 
 
 =cut
 sub attr  {
@@ -391,7 +363,7 @@ sub attr  {
 		return $node if defined $node;
 		
 		# Schema config
-		$node = $self->column_info;
+		$node = $self->class->resultset->result_source->column_info($self->name);
 		for my $p (@path){
 			$node = $node->{$p};
 			next if defined $node and ref $node eq 'hash';
@@ -399,6 +371,31 @@ sub attr  {
 		return $node if defined;
 		
 }
+=head2 attrs
+
+All column atributes specified in config or schema 
+
+=cut
+has attrs => (
+    is => 'lazy',
+    default => sub {
+		my ($self) = @_;
+		my ($node);
+
+		# Schema config
+		my $schema_attrs = $self->class->resultset->result_source->column_info($self->name) || {};
+
+		# Config file
+		$node = config;
+		for my $p ('TableEditor', 'classes', $self->class->name, 'columns', $self->name){
+			$node = $node->{$p};
+			last unless defined $node; 
+		}
+		my $config_attrs = $node || {};
+
+		return {%$schema_attrs, %$config_attrs};		
+	}
+);
 
 
 1;

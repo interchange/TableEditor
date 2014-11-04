@@ -466,7 +466,7 @@ sub _build_grid_columns {
     for my $column_info ($self->columns){
 		# Leave out inappropriate columns
 		next if $column_info->data_type and $column_info->data_type eq 'text';
-		next if $column_info->size and $column_info->size > 255;
+		next if $column_info->attr('size') and $column_info->attr('size') > 255;
 	
 		push @$columns, $column_info->name;
     }

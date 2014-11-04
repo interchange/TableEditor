@@ -58,7 +58,8 @@
 							   )
 									">
 									<div class="form-group form-field">
-										<label class="control-label ">{{ column.label }}</label>
+										<label class="control-label " ng-bind="column.label"></label>
+										<div ng-bind="column.description"></div>
 										<ng-form name="validationScope">
 										<div class="controls control-group" ng-class="{'error': validationScope.column.$invalid}">
 											<div ng-include="'views/column/'+column.display_type+'.html'"></div>

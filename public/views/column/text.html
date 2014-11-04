@@ -8,6 +8,7 @@
 		ng-required="column.required"
 		ng-readonly="column.readonly || (column.primary_key && !create)" 
 		maxlength="{{column.size}}"
+		placeholder="{{column.placeholder}}"
 		>
 	</textarea>
 	<span ng-include="'views/column/partials/standard_validation.html'"></span>
