@@ -58,10 +58,10 @@
 							   )
 									">
 									<div class="form-group form-field">
-										<label class="control-label " ng-bind="column.label"></label>
-										<div ng-bind="column.description"></div>
-										<ng-form name="validationScope">
-										<div class="controls control-group" ng-class="{'error': validationScope.column.$invalid}">
+										<div class="controls control-group" ng-class="{'has-error': validationScope.column.$invalid && form.submitted}">
+											<label class="control-label " ng-bind="column.label"></label><span ng-show="column.required">*</span>
+											<div ng-bind="column.description"></div>
+											<ng-form name="validationScope">
 											<div ng-include="'views/column/'+column.display_type+'.html'"></div>
 										</div>
 										</ng-form>

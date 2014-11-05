@@ -77,6 +77,51 @@ CrudApp.directive('activeLink', function($location) {
 
 
 //Factories
+
+CrudApp.factory('InfoBar', ['$rootScope', '$sce', function ($rootScope, $sce) {
+	var types = ['success', 'info', 'warning', 'danger'];
+	var add = function (type, message) {
+		if (!$rootScope.infoBar[type]) $rootScope.infoBar[type] = '';
+		$rootScope.infoBar[type] += '<div>'+message+'</div>';
+		window.scrollTo(0, top);
+	};
+	var addNext = function (type, message) {
+		if (!$rootScope.infoBarNext[type]) $rootScope.infoBarNext[type] = '';
+		$rootScope.infoBarNext[type] += '<div>'+message+'</div>';
+	};
+	var set = function (type, message) {
+		$rootScope.infoBar[type] = '<div>'+message+'</div>';
+	};
+	var clear = function (type) {
+		if(!type || type == 'all'){
+			$.each(types, function( index, type ) {
+				$rootScope.infoBar[type] = '';
+			});
+		}
+		else
+			$rootScope.infoBar[type] = '';
+	};
+	var clearAllAndLoadNext = function () {
+		$.each(types, function( index, type ) {
+			$rootScope.infoBar[type] = $rootScope.infoBarNext[type];
+		});
+		$rootScope.infoBarNext = {};
+	}
+	var get = function (type) {
+		return $sce.trustAsHtml($rootScope.infoBar[type]);
+	};
+
+	return {
+		add: add,
+		addNext: addNext,
+		set: set,
+		get: get,
+		clear: clear,
+		clearAllAndLoadNext: clearAllAndLoadNext,
+		types: types,
+	};
+}]);
+
 CrudApp.factory('AuthInterceptor',['$q','$location',function($q,$location){
     return {
         response: function(response){
@@ -133,7 +178,7 @@ CrudApp.factory('Related', function($resource) {
 	return $resource('api/:class/:id/:related/:relationship', { class: '@class', id: '@id', related: '@related', relationship: 'might_have'});
 });
 
-CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route) {
+CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route, InfoBar) {
 	// var root = $scope;
 	return {
 		read: $resource('api/:class/:id', { class: '@class', id: '@id' }),
@@ -144,9 +189,11 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route) {
 			var url = Url.edit || "/"+class_name+"/list";
 			Url.edit = null;
 			var item = this.item;
+			this.form.submitted = 1;			
+			InfoBar.clear();
 			
 			if(this.form.$invalid){
-				alert('Error in form!');
+				InfoBar.add('danger', 'Form has errors!');
 				return;
 			}
 			
@@ -158,15 +205,16 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route) {
 			// Success
 			function(data) {
 				if(data.error){
-					alert('There has been an error saving '+class_label+'! \n'+data.error);
+					InfoBar.add('danger', 'There has been an error saving '+class_label+'! \n'+data.error);
 				}
 				else {
+					InfoBar.addNext('success', data.name + ' succesfuly saved!');
 					$location.path(url);							
 				}
 			},
 			// Error
 			function() {
-				alert('There has been an error saving '+class_label+'!');
+				InfoBar.add('danger', 'There has been an error saving '+class_label+'!' );
 			}
 			);
 		},
@@ -184,7 +232,7 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route) {
 						},
 						// Error
 						function() {
-							alert('There has been an error deleting '+class_label+'!');
+							InfoBar.add('danger', 'There has been an error deleting '+class_label+'!');
 						}
 				);
 			}
@@ -252,6 +300,8 @@ CrudApp.config(['$httpProvider',function($httpProvider) {
     //Http Intercpetor to check auth failures for xhr requests
     $httpProvider.interceptors.push('AuthInterceptor');
 }]);
+
+
 //Controllers
 
 
@@ -314,7 +364,7 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 		},
 		// Error
 		function() {
-			alert('Could not remove item!');
+			InfoBar.add('danger', 'Could not remove item!');
 		}
 		);
 	};
@@ -481,12 +531,12 @@ var RelatedClassCtrl = function ($scope, $rootScope, $routeParams, RelatedItem, 
 		},
 		// Success
 		function(data) {
-			if(data.exists) alert('Item already added!');
+			if(data.exists) InfoBar.add('danger', 'Item already added!');
 			if(data.added) $rootScope.$broadcast('relatedListReset');			
 		},
 		// Error
 		function(data) {
-			alert('Could not add item!');
+			InfoBar.add('danger', 'Could not add item!');
 		}
 		);
 	};
@@ -567,7 +617,7 @@ var StatusCtrl = function ($scope, Schema, SchemaCreate, DBConfig) {
 		},
 		// Error
 		function() {
-			alert('Could not add item!');
+			InfoBar.add('danger', 'Could not add item!');
 		}
 		);
 	};
@@ -708,7 +758,7 @@ var EditCtrl = function ($scope, $rootScope, $routeParams, Item, ClassItem, Url,
 };
 
 
-var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, ClassItem, Item, Url) {
+var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, ClassItem, Item, Url, InfoBar) {
 	// $scope.data = Class.get({class: $routeParams.class});
 	$scope.data = {};
 	$scope.data.sort_column = '';
@@ -797,7 +847,13 @@ var SidebarCtrl = function ($scope, Menu) {
 };
 
 
-var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Plugins, ActiveUsers) {
+var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Plugins, ActiveUsers, InfoBar) {
+	$rootScope.infoBar = InfoBar;
+	$rootScope.infoBarNext = {};
+	$rootScope.$on("$routeChangeStart", function(scope, next, current){
+		InfoBar.clearAllAndLoadNext();
+	});
+	
 	$rootScope.logout = function(){
 		Auth.logout.save(
 				{},

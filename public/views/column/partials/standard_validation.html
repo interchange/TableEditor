@@ -1,4 +1,6 @@
-<span ng-show="validationScope.column.$error.required" class="help-inline">Required</span>	
-<span ng-show="validationScope.column.$error.minlength" class="help-inline">Too short</span>	
-<span ng-show="validationScope.column.$error.maxlength" class="help-inline">Too long</span>	
-<span ng-show="validationScope.column.$error.pattern" class="help-inline">Invalid format</span>	
+<span ng-show="form.submitted">
+	<span ng-show="validationScope.column.$error.required" class="help-block">Required</span>	
+	<span ng-show="validationScope.column.$error.minlength" class="help-block">Too short</span>	
+	<span ng-show="validationScope.column.$error.maxlength" class="help-block">Too long</span>	
+	<span ng-show="validationScope.column.$error.pattern" class="help-block">Invalid format</span>
+</span>

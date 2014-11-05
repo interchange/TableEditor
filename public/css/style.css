@@ -188,3 +188,6 @@ list-style: none;
 .loading-box > div {
 	display: inline;
 }
+
+span.help-inline.ng-scope {
+	color: darkred;
