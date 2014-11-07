@@ -239,8 +239,12 @@ post '/:class' => require_login sub {
 	my $item = $body->{item};
 
 	debug "Updating item for ".$class_info->name.": ", $item;
-	
-	return $class_info->resultset->update_or_create( $item->{values} );
+	my $object = $class_info->resultset->update_or_create( $item->{values} );
+	return to_json {} unless  $object;
+	return to_json {
+		name => $schema_info->row($object)->to_string,
+		values => {$object->get_inflated_columns},
+	};
 };
 
 
