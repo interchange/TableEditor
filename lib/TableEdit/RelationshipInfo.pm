@@ -69,9 +69,19 @@ has class => (
     isa => InstanceOf ['TableEdit::ClassInfo'],
 );
 
+=head2 intermediate_relation
+
+Name of second relationship that connects two tables in many_to_many relationship.
+
+=cut
+
+has intermediate_relation => (
+    is => 'ro',
+);
+
 =head2 class_name
 
-Name of intermediate relationship that connects two tables in many_to_many relationship.
+Name of intermediate class that connects two tables in many_to_many relationship.
 
 =cut
 

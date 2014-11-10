@@ -94,7 +94,7 @@ post '/:class/:id/:related/:related_id' => require_login sub {
 	else {
 		my $add_method = "add_to_$related"; 
 		eval {$row->$add_method($related_row)};	
-		return to_json {'exists' => 1} if $@;
+		return to_json {'error' => $@->{msg}} if $@;
 	}
 	return to_json {'added' => 1};
 };
@@ -148,6 +148,33 @@ get '/:class/:id/:related/items' => require_login sub {
 	
 	# Related bind
 	$data = grid_template_params($relationship_class_info, $related_items);
+	
+	return to_json( $data, {allow_unknown => 1} );
+};
+
+
+get '/:class/:id/:related/unrelated/list' => require_login sub {
+	my $id = param('id');
+	my $class_info = $schema_info->class(param('class'));
+	my $related = param('related');
+	my ($row, $data);
+	my $get_params = params('query') || {};
+
+	# row lookup
+	$row = $class_info->find_with_delimiter($id);
+	my $related_items = $row->$related;
+
+	my $relationship_info = $class_info->relationship($related);
+	my $relationship_class_info = $schema_info->class($relationship_info->class_name);
+	my $inter_class_info = $schema_info->class($relationship_info->{intermediate_class_name});
+	my $inter_relationship_info = $inter_class_info->relationship($relationship_info->{intermediate_relation});
+
+	my $rs = schema->resultset($relationship_info->class_name)->search({
+	  $inter_relationship_info->foreign_column => { -not_in => $related_items->get_column($relationship_class_info->primary_key->[0])->as_query },
+	});
+
+	# Related bind
+	$data = grid_template_params($relationship_class_info, $rs);
 	
 	return to_json( $data, {allow_unknown => 1} );
 };
@@ -311,7 +338,7 @@ sub grid_template_params {
 	$grid_params->{rows} = grid_rows(
 		[$rows->all], 
 		$grid_params->{column_list} , 
-		$primary_key, 
+		$primary_key,
 	);
 	
 	$class_info->label;
@@ -378,7 +405,7 @@ Returns a list of database records suitable for the grid display.
 =cut
 
 sub grid_rows {
-	my ($rows, $columns_info, $primary_key, $args) = @_;
+	my ($rows, $columns_info, $primary_key) = @_;
 
 	my @table_rows;
 	
@@ -391,7 +418,6 @@ sub grid_rows {
 		my $row_data = [];
 
 		for my $column (@$columns_info){
-			
 			my $column_name = $column->{foreign} ? "$column->{foreign}" : "$column->{name}";
 			my $value = $row->$column_name;
 			if( index(ref $value, ref schema) == 0 ){ # If schema object

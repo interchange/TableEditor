@@ -170,6 +170,9 @@ CrudApp.factory('DBConfig', function($resource) {
 CrudApp.factory('RelatedList', function($resource) { 
 	return $resource('api/:class/:id/:related/list', { class: '@class' });
 });
+CrudApp.factory('UnrelatedList', function($resource) { 
+	return $resource('api/:class/:id/:related/unrelated/list', { class: '@class' });
+});
 
 CrudApp.factory('ClassItem', function($resource) {
 	return $resource('api/:class', { class: '@class' });
@@ -306,7 +309,7 @@ CrudApp.config(['$httpProvider',function($httpProvider) {
 
 
 
-var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, RelatedList,  RelatedItem, RelatedItems, Item, Url) {
+var RelatedListCtrl = function ($scope, $rootScope, $routeParams, $location, ClassItem, RelatedList,  RelatedItem, RelatedItems, Item, Url) {
 	$scope.relation = $routeParams.related;
 	$scope.related_item = {};
 	$scope.related_item.values = {};
@@ -361,6 +364,7 @@ var RelatedListCtrl = function ($scope, $routeParams, $location, ClassItem, Rela
 		// Success
 		function(data) {
 			$('#row-'+row_id).fadeOut();
+			$rootScope.$broadcast('relatedClassReset');
 		},
 		// Error
 		function() {
@@ -485,7 +489,7 @@ var MightHaveCtrl = function ($scope, $routeParams, $location, Item, RelatedList
 	);
 };
 
-var RelatedClassCtrl = function ($scope, $rootScope, $routeParams, RelatedItem, RelatedClass, RelatedType) {
+var RelatedClassCtrl = function ($scope, $rootScope, $routeParams, RelatedItem, RelatedClass, UnrelatedList, RelatedType, InfoBar) {
 	$scope.related_type = RelatedType;
 	$scope.sort_column = '';
 	$scope.item = {};
@@ -522,7 +526,8 @@ var RelatedClassCtrl = function ($scope, $rootScope, $routeParams, RelatedItem, 
 	};
 
 	$scope.add = function(){
-
+		var row_id = this.row.id
+		
 		RelatedItem.add({
 			class: $routeParams.class,
 			id: $routeParams.id,
@@ -531,7 +536,8 @@ var RelatedClassCtrl = function ($scope, $rootScope, $routeParams, RelatedItem, 
 		},
 		// Success
 		function(data) {
-			if(data.exists) InfoBar.add('danger', 'Item already added!');
+			if(data.error) InfoBar.add('danger', data.error);
+			$('#row-'+row_id).fadeOut();
 			if(data.added) $rootScope.$broadcast('relatedListReset');			
 		},
 		// Error
@@ -544,8 +550,9 @@ var RelatedClassCtrl = function ($scope, $rootScope, $routeParams, RelatedItem, 
 
 	$scope.search = function() {    	
 
-		$scope.data = RelatedClass.get({
+		$scope.data = UnrelatedList.get({
 			class: $routeParams.class,
+			id: $routeParams.id,
 			related: $routeParams.related,
 			q: JSON.stringify($scope.item.values),
 			sort: $scope.sort_column, 
@@ -574,13 +581,16 @@ var RelatedClassCtrl = function ($scope, $rootScope, $routeParams, RelatedItem, 
 		}
 		);
 	};
+	
+	
+	$scope.$on('relatedClassReset', function(){ $scope.reset(); });
 
 	$scope.reset();
 };
 
 
 
-var StatusCtrl = function ($scope, Schema, SchemaCreate, DBConfig) {
+var StatusCtrl = function ($scope, Schema, SchemaCreate, DBConfig, InfoBar) {
 	check_status();
 	function check_status() {
 		$scope.schema = Schema.get({},
