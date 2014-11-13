@@ -9,6 +9,8 @@ require TableEdit::RelationshipInfo;
 require Dancer::Plugin::DBIC;
 require Class::Inspector;
 
+use TableEdit::Permissions;
+
 with 'TableEdit::SchemaInfo::Role::ListUtils';
 
 sub BUILDARGS {
@@ -180,11 +182,16 @@ sub _build__columns {
             $info->{relationship} = $rel_obj;
         }
 
-        $column_hash{$name} = TableEdit::ColumnInfo->new(
+		my $column_info = TableEdit::ColumnInfo->new(
             name => $name,
             position => $column_pos{$name},
             class => $self,
             %$info);
+
+		next unless TableEdit::Permissions::permission('read', $column_info );
+
+        $column_hash{$name} = $column_info;
+            
     }
 
     return \%column_hash;
@@ -568,6 +575,21 @@ sub find_with_delimiter {
 	#return $primary_key_value;
 	return $self->resultset->find($primary_key_value);
 	
+}
+
+has subset_conditions => (is => 'lazy'); 
+sub _build_subset_conditions {
+	my ($self) = @_;
+	my $conditions = {};
+	my $class_column_attrs = $self->attr('columns');
+	for my $column (keys %$class_column_attrs){
+		my $column_subset = $class_column_attrs->{$column}->{subset};
+		next unless $column_subset;
+		for my $condition (keys %$column_subset){
+			$conditions->{$column} = $condition if role_in($column_subset->{$condition})
+		}
+	}
+	return $conditions;
 }
 
 1;

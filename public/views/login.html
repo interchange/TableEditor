@@ -1,13 +1,13 @@
 
 <h1>Login</h1>
-<div>
+<div ng-show="!user.username">
 	<form>
 		<fieldset>
 			<div class="controls form-group">
-				<label class="control-label"> Username </label> <input class="form-control" type="text" name="username" ng-model="user.username" />
+				<label class="control-label"> Username </label> <input class="form-control" type="text" name="username" ng-model="form_user.username" />
 			</div>
 			<div class="controls form-group">
-				<label class="control-label"> Password </label> <input class="form-control" type="password" name="password" ng-model="user.password" />
+				<label class="control-label"> Password </label> <input class="form-control" type="password" name="password" ng-model="form_user.password" />
 			</div>
 			<div class="alert alert-danger" ng-show="error">{{error}}</div>
 			<div class="alert alert-success" ng-show="success">{{success}}</div>
@@ -16,4 +16,8 @@
 			</div>
 		</fieldset>
 	</form>
+</div>
+
+<div ng-show="user.username">
+	<p>Welcome {{ user.username }}</p>
 </div>

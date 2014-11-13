@@ -134,6 +134,7 @@ CrudApp.factory('AuthInterceptor',['$q','$location',function($q,$location){
             if (rejection.status === 403) {
                 console.log("Response Error 403",rejection);
             }
+            $location.path('/');
             return $q.reject(rejection);
         }
     }
@@ -230,12 +231,17 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route, I
 				ClassItem.delete(
 						{id: id, class: this.data.class},
 						// On success
-						function(){
+						function(data){
 							$('#row-'+id).fadeOut();
 						},
 						// Error
-						function() {
-							InfoBar.add('danger', 'There has been an error deleting '+class_label+'!');
+						function(data) {
+							if(data.status == 403){
+								InfoBar.add('danger', 'You don\'t have permission to delete '+class_label+'!');
+							}
+							else {
+								InfoBar.add('danger', 'There has been an error deleting '+class_label+'!');
+							}
 						}
 				);
 			}
@@ -843,7 +849,12 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 		},
 		// Error
 		function(data) {
-			$scope.error.msg = 'Error retrieving '+$routeParams.class+' items.';
+			if(data.status == 403){
+				$scope.error.msg = 'You don\'t have permission to view '+$routeParams.class+' items.';
+			}
+			else {
+				$scope.error.msg = 'Error retrieving '+$routeParams.class+' items.';
+			}
 		}
 		);
 	};
@@ -852,14 +863,10 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 };
 
 
-var SidebarCtrl = function ($scope, Menu) {
-	$scope.menu = Menu.query();
-};
-
-
-var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Plugins, ActiveUsers, InfoBar) {
+var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Plugins, ActiveUsers, InfoBar, Menu) {
 	$rootScope.infoBar = InfoBar;
 	$rootScope.infoBarNext = {};
+	$rootScope.menu = Menu.query(); 
 	$rootScope.$on("$routeChangeStart", function(scope, next, current){
 		InfoBar.clearAllAndLoadNext();
 	});
@@ -869,6 +876,7 @@ var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Pl
 				{},
 				// Success
 				function(data) {
+					$rootScope.menu = {};
 					$rootScope.user = {};
 					$location.path('/');
 				}
@@ -900,24 +908,28 @@ var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Pl
 		
 }
 
-var LoginCtrl = function ($scope, $rootScope, Auth, Url, $location) {
-	$scope.user = {};
+var LoginCtrl = function ($scope, $rootScope, Auth, Url, $location, Menu, InfoBar) {
+	$scope.form_user = {};
 	$scope.error = null;
-
+	
 
 	$rootScope.login = function(){
 		Auth.login.save(
-				{user: $scope.user, smth: 1},
+				{user: $scope.form_user, smth: 1},
 				// Success
 				function(data) {
 					$rootScope.user = {};
-					if (data.username){
-						$rootScope.user.role = data.role;
-						$rootScope.user.username = data.username;
+					if (data.user){
+						$rootScope.user.roles = data.roles;
+						$rootScope.user.username = data.user;
 						$rootScope.active = data.active;
+						$rootScope.menu = Menu.query();
 						$scope.error = null;
-						$scope.success = 'Successfully logged in as '+data.username;
-						if (Url.login == '/login' || !Url.login ) Url.login = '/'; // Redirect to home if last route was login 
+						$scope.success = 'Successfully logged in as '+data.user;
+						InfoBar.addNext('success', data.user + ' succesfuly saved!');
+
+						if (Url.login == '/' || !Url.login ) Url.login = '/login'; // Redirect to home if last route was login 
+						//$location.path('/login');
 						$location.path(Url.login);
 					}
 					else {

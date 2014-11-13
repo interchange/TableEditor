@@ -32,7 +32,7 @@
 		<hr />
 		<h2>Add {{item_info.related_class_label}} to {{ item_info.title }}</h2>
 
-		<div id="list-grid" ng-include='"views/list_grid.html"' ng-controller='RelatedClassCtrl' ng-init="actions='many_list';"></div>
+		<div id="list-grid" ng-if="item_info.related_type == 'many_to_many'" ng-include='"views/list_grid.html"' ng-controller='RelatedClassCtrl' ng-init="actions='many_list';"></div>
 
 	</div>
 </div>

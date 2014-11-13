@@ -63,7 +63,7 @@ var custom_routes = {};
 		<div class="row-fluid">
 
 			<!-- Sidebar -->
-			<div class="left-menu col-xs-2" role="navigation" ng-controller="SidebarCtrl" style="min-width: 130px;">
+			<div class="left-menu col-xs-2" role="navigation" style="min-width: 130px;">
 			
                <div class="input-group custom-search-form" style="margin-bottom: 20px">
                    <input type="text" class="form-control" placeholder="Search...">
@@ -76,7 +76,8 @@ var custom_routes = {};
                      <!-- /input-group -->
            
 					<!--- Sidebar navigation -->
-					<div class="panel panel-default">
+					
+					<div class="panel panel-default" ng-show="menu.length">
 						<div class="panel-heading">
 				        <h3 class="panel-title"><i class="fa fa-table fa-fw"></i> Tables</h3>
 			        </div>
@@ -84,7 +85,8 @@ var custom_routes = {};
 							<li ng-repeat="link in menu" data-active-link=""><a  href="{{link.url}}" class="">{{link.name}}</a></li>
 						</ul>
 					</div>
-					<div class="panel panel-default">
+					Je admin? {{user.roles.indexOf('admin')}}
+					<div class="panel panel-default" ng-show="user.roles && user.roles.indexOf('admin')">
 						<div class="panel-heading">
 				        <h3 class="panel-title"><i class="fa fa-wrench fa-fw"></i> Configuration</h3>
 				      </div>

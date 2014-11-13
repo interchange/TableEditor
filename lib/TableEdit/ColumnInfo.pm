@@ -161,6 +161,7 @@ sub dropdown_options {
 	    # determine number of records in foreign table
 	    my $count = $rs->count;
 	    my $treshold = config->{TableEditor}->{dropdown_threshold} if config->{TableEditor} and config->{TableEditor}->{dropdown_threshold};
+	    $treshold ||= 50;
 	    if ($count <= $treshold){
 			$self->display_type ('dropdown');
 			my @foreign_rows = $rs->all;

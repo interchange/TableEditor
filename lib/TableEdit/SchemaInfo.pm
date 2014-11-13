@@ -7,7 +7,7 @@ use MooX::Types::MooseLike::Base qw/InstanceOf/;
 
 require TableEdit::ClassInfo;
 require TableEdit::RowInfo;
-
+use TableEdit::Permissions;
 
 my $schema = {};
 
@@ -216,13 +216,18 @@ has menu => (
 		for my $classInfo (@$classes){
 			my $class_name = !ref($classInfo) ? $classInfo : $classInfo->name; 
 			$classInfo = $self->class($class_name);
-			$menu->{$classInfo->label} = {name => $classInfo->label, url=> join('/', '#' . $classInfo->name, 'list'),};
+			next unless TableEdit::Permissions::permission('read', $self->class($class_name) );
+			$menu->{$classInfo->label} = {
+				class => $class_name,
+				name => $classInfo->label, 
+				url=> join('/', '#' . $classInfo->name, 'list'),};
 		}
 		$menu = [map $menu->{$_}, sort keys %$menu] if $sort;
 
 		return $menu;
     }	
 );
+
 
 has primary_key_delimiter  => (
 	is => 'lazy',

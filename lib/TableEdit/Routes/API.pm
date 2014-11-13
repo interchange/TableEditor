@@ -14,8 +14,9 @@ use YAML::Tiny;
 use Scalar::Util 'blessed';
 use File::Path qw(make_path remove_tree);
 
-use TableEdit::SchemaInfo;
-use TableEdit::Session;
+require TableEdit::SchemaInfo;
+require TableEdit::Session;
+use TableEdit::Permissions;
 
 # Global variables
 my $appdir = realpath( "$FindBin::Bin/..");
@@ -23,17 +24,19 @@ my $schema_info;
 
 prefix '/api';
 
-
-any '**' => sub {
-    # load schema if necessary
-    $schema_info ||= TableEdit::SchemaInfo->new(
+# One schema_info instance per user (because of different permissions)
+sub schema_info {
+	my $user = logged_in_user;
+	$schema_info->{$user->{user}} ||= TableEdit::SchemaInfo->new(
         schema => schema,
         sort => 1,
 	);
+	return $schema_info->{$user->{user}};
+}
+
+any '**' => sub {
 	TableEdit::Session::seen();
     
-    debug "Route: ", request->uri;
-
 	content_type 'application/json';
 	pass;
 };
@@ -41,16 +44,19 @@ any '**' => sub {
 
 get '/:class/:id/:related/list' => require_login sub {
 	my $id = param('id');
-	my $class_info = $schema_info->class(param('class'));
+	my $class_info = schema_info->class(param('class'));
+	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
 	my $related = param('related');
 	my $data;
 
 	# Row lookup
 	my $row = $class_info->find_with_delimiter(param('id'));
-	my $rowInfo = $schema_info->row($row);
+	my $rowInfo = schema_info->row($row);
 	
 	# Related list
 	my $relationship_info = $class_info->relationship($related);
+	my $relationship_class_info = schema_info->class($relationship_info->class_name);
+	send_error("Forbidden to read ".$relationship_info->class_name, 403) unless permission('read', $relationship_class_info);
 	
 	return '{}' unless ( defined $row );	
 	$data->{'id'} = $id;
@@ -69,12 +75,14 @@ get '/:class/:id/:related/list' => require_login sub {
 
 post '/:class/:id/:related/:related_id' => require_login sub {
 	my $id = param('id');
-	my $class_info = $schema_info->class(param('class'));
+	my $class_info = schema_info->class(param('class'));
+	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
 	my $related = param('related');
 	my $related_id = param('related_id');
 	
 	my $relationship_info = $class_info->relationship($related);
-	my $relationship_class_info = $schema_info->class($relationship_info->class_name);
+	my $relationship_class_info = schema_info->class($relationship_info->class_name);
+	send_error("Forbidden to read ".$relationship_info->class_name, 403) unless permission('read', $relationship_class_info);
 	my $related_row = $relationship_class_info->find_with_delimiter($related_id);
 	
 	my $row = $class_info->find_with_delimiter(param('id'));
@@ -102,11 +110,13 @@ post '/:class/:id/:related/:related_id' => require_login sub {
 
 del '/:class/:id/:related/:related_id' => require_login sub {
 	my $id = param('id');
-	my $class_info = $schema_info->class(param('class'));
+	my $class_info = schema_info->class(param('class'));
+	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
 	my $related = param('related');
 	my $related_id = param('related_id');
 	my $relationship_info = $class_info->relationship($related);
-	my $relationship_class_info = $schema_info->class($relationship_info->class_name);
+	my $relationship_class_info = schema_info->class($relationship_info->class_name);
+	send_error("Forbidden to read ".$relationship_info->class_name, 403) unless permission('read', $relationship_class_info);
 	
 	my $row = $class_info->find_with_delimiter(param('id'));
 	
@@ -134,7 +144,8 @@ del '/:class/:id/:related/:related_id' => require_login sub {
 
 get '/:class/:id/:related/items' => require_login sub {
 	my $id = param('id');
-	my $class_info = $schema_info->class(param('class'));
+	my $class_info = schema_info->class(param('class'));
+	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
 	my $related = param('related');
 	my ($row, $data);
 	my $get_params = params('query') || {};
@@ -144,7 +155,7 @@ get '/:class/:id/:related/items' => require_login sub {
 	my $related_items = $row->$related;
 
 	my $relationship_info = $class_info->relationship($related);
-	my $relationship_class_info = $schema_info->class($relationship_info->class_name);
+	my $relationship_class_info = schema_info->class($relationship_info->class_name);
 	
 	# Related bind
 	$data = grid_template_params($relationship_class_info, $related_items);
@@ -155,7 +166,8 @@ get '/:class/:id/:related/items' => require_login sub {
 
 get '/:class/:id/:related/unrelated/list' => require_login sub {
 	my $id = param('id');
-	my $class_info = $schema_info->class(param('class'));
+	my $class_info = schema_info->class(param('class'));
+	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
 	my $related = param('related');
 	my ($row, $data);
 	my $get_params = params('query') || {};
@@ -165,8 +177,9 @@ get '/:class/:id/:related/unrelated/list' => require_login sub {
 	my $related_items = $row->$related;
 
 	my $relationship_info = $class_info->relationship($related);
-	my $relationship_class_info = $schema_info->class($relationship_info->class_name);
-	my $inter_class_info = $schema_info->class($relationship_info->{intermediate_class_name});
+	return to_json {error => 'Not a many to many relationship'} unless $relationship_info->{type} eq 'many_to_many';
+	my $relationship_class_info = schema_info->class($relationship_info->class_name);
+	my $inter_class_info = schema_info->class($relationship_info->{intermediate_class_name});
 	my $inter_relationship_info = $inter_class_info->relationship($relationship_info->{intermediate_relation});
 
 	my $rs = schema->resultset($relationship_info->class_name)->search({
@@ -181,7 +194,8 @@ get '/:class/:id/:related/unrelated/list' => require_login sub {
 
 
 get '/:class/:related/list' => require_login sub {
-	my $class_info = $schema_info->class(param('class'));
+	my $class_info = schema_info->class(param('class'));
+	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
 	my $related = param('related');
 	my $relationship_info = $class_info->relationship($related);
 	my $relationship_class = $relationship_info->class_name;
@@ -191,21 +205,22 @@ get '/:class/:related/list' => require_login sub {
 
 # Class listing
 get '/:class/list' => require_login sub {
-	my $class_info = $schema_info->class(param('class'));
+	my $class_info = schema_info->class(param('class'));
+	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
 	my $grid_params = grid_template_params($class_info);
 	
 	return to_json($grid_params, {allow_unknown => 1});
 };
 
 
-get '/menu' => sub {    
-    return to_json $schema_info->menu;
+get '/menu' => require_login sub {    
+    return to_json schema_info->menu;
 };
 
 
 post '/:class/:column/upload_image' => require_login sub {
 	my $class = param('class');
-	my $class_info = $schema_info->class($class);
+	my $class_info = schema_info->class($class);
 	my $column = param('column');
 	my $column_info = $class_info->column($column);
 	my $file = upload('file');
@@ -231,7 +246,8 @@ post '/:class/:column/upload_image' => require_login sub {
 get '/:class/:id' => require_login sub {
 	my ($data);
 	my $id = param('id');
-	my $class_info = $schema_info->class(param('class'));
+	my $class_info = schema_info->class(param('class'));
+	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
 
 	$data->{columns} = $class_info->columns_info;
 
@@ -239,7 +255,7 @@ get '/:class/:id' => require_login sub {
 	my $row = $class_info->find_with_delimiter(param('id'));
 	return status '404' unless $row;
 	 
-	my $rowInfo = $schema_info->row($row);
+	my $rowInfo = schema_info->row($row);
 	$data->{title} = $rowInfo->to_string;
 	$data->{id} = $id;
 	$data->{class} = $class_info->name;
@@ -249,9 +265,10 @@ get '/:class/:id' => require_login sub {
 
 
 get '/:class' => require_login sub {
-	my $class_info = $schema_info->class(param('class'));
+	my $class_info = schema_info->class(param('class'));
+	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
 
-	return to_json({ 
+	return to_json({
 		columns => $class_info->form_columns_info,
 		class => $class_info->name,
 		class_label => $class_info->label,
@@ -261,7 +278,8 @@ get '/:class' => require_login sub {
 
 
 post '/:class' => require_login sub {
-	my $class_info = $schema_info->class(param('class'));
+	my $class_info = schema_info->class(param('class'));
+	send_error("Forbidden to update ".param('class'), 403) unless permission('update', $class_info);
 	my $body = from_json request->body;
 	my $item = $body->{item};
 
@@ -269,7 +287,7 @@ post '/:class' => require_login sub {
 	my $object = $class_info->resultset->update_or_create( $item->{values} );
 	return to_json {} unless  $object;
 	return to_json {
-		name => $schema_info->row($object)->to_string,
+		name => schema_info->row($object)->to_string,
 		values => {$object->get_inflated_columns},
 	};
 };
@@ -277,7 +295,8 @@ post '/:class' => require_login sub {
 
 del '/:class' => require_login sub {
 	my $id = param('id');
-	my $class_info = $schema_info->class(param('class'));
+	my $class_info = schema_info->class(param('class'));
+	send_error("Forbidden to delete ".param('class'), 403) unless permission('delete', $class_info);
 	my $row = $class_info->find_with_delimiter(param('id'));
 
     return status '404' unless $row;
@@ -312,7 +331,8 @@ sub grid_template_params {
 	my ($class_info, $related_items) = @_;
 	my $get_params = params('query');
 	my $grid_params;
-	my $where = {};	
+	# Permission subset
+	my $where = $class_info->subset_conditions;	
 	# Grid
 	$grid_params->{column_list} = $class_info->grid_columns_info; 
 	my $where_params = from_json $get_params->{q} if $get_params->{q};
@@ -350,7 +370,7 @@ sub grid_template_params {
 	$grid_params->{pages} = ceil($count / $page_size);
 	$grid_params->{count} = $count;
 	$grid_params->{page_size} = $page_size;
-	$grid_params->{page_sizes} = $schema_info->page_sizes;
+	$grid_params->{page_sizes} = schema_info->page_sizes;
 	$grid_params->{sort_column} = $class_info->sort_column;
 	$grid_params->{sort_direction} = $class_info->sort_direction;
 	
@@ -411,7 +431,7 @@ sub grid_rows {
 	
 	for my $row (@$rows){
 		die 'No primary column' unless $primary_key;
-		my $rowInfo = $schema_info->row($row);
+		my $rowInfo = schema_info->row($row);
 		
 		# unravel row
 		my $row_inflated = {$row->get_columns}; #inflated_
@@ -421,7 +441,7 @@ sub grid_rows {
 			my $column_name = $column->{foreign} ? "$column->{foreign}" : "$column->{name}";
 			my $value = $row->$column_name;
 			if( index(ref $value, ref schema) == 0 ){ # If schema object
-				$value = $schema_info->row($value)->to_string; 
+				$value = schema_info->row($value)->to_string; 
 			} 
 			elsif ( ref $value ) { # some other object
 				$value = $row_inflated->{$column_name};
