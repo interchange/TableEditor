@@ -1,5 +1,5 @@
 <div ng-if="view != 'grid' ">
-	<img src="{{item.values[column.name]}}" style="height: 100px; float:right" />
+	<img src="/api/{{data.class}}/{{column.name}}/image/{{item.values[column.name]}}" style="height: 100px; float:right" />
 	<p>{{item.values[column.name]}}</p>
 		<div style="margin-bottom: 10px">
 			<!-- 

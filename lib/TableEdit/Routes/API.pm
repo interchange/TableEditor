@@ -218,11 +218,17 @@ get '/menu' => require_login sub {
 };
 
 
+get '/:class/:column/image/:file' => require_login sub {
+	my $class_info = schema_info->class(param('class'));
+	my $column_info = $class_info->column(param('column'));
+	my $file = param('file');
+	my $path = $column_info->upload_dir;
+	return send_file($path.$file);
+};
+
 post '/:class/:column/upload_image' => require_login sub {
-	my $class = param('class');
-	my $class_info = schema_info->class($class);
-	my $column = param('column');
-	my $column_info = $class_info->column($column);
+	my $class_info = schema_info->class(param('class'));
+	my $column_info = $class_info->column(param('column'));
 	my $file = upload('file');
 	
 	# Upload dir
@@ -236,7 +242,7 @@ post '/:class/:column/upload_image' => require_login sub {
 		make_path $dir unless (-e $dir);       
 		
 		if($file->copy_to($dir.$fileName)){			
-			return "/$path$fileName";
+			return "$fileName";
 		}		
     }
 	return undef;
