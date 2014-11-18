@@ -28,7 +28,8 @@ WriteMakefile(
 	'Template' => 0,
         'DBIx::Class::Schema::Loader' => 0,
         'Moo' => 0,
-        'MooX::Types::MooseLike' => 0,
+	# needed for Enum type
+        'MooX::Types::MooseLike' => '0.19',
         'MooX::Singleton' => 0,
         'Plack::Handler::Starman' => 0,
     },
