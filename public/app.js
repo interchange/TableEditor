@@ -756,7 +756,7 @@ var EditCtrl = function ($scope, $rootScope, $routeParams, Item, ClassItem, Url,
 	      }
 	      
 	      $scope.upload = $upload.upload({
-	        url: '/api/'+this.item.class+'/'+column+'/upload_image',
+	        url: 'api/'+this.item.class+'/'+column+'/upload_image',
 	        data: {myObj: $scope.myModelObj},
 	        file: file, // or list of files: $files for html5 only
 	      }).progress(function(evt) {
