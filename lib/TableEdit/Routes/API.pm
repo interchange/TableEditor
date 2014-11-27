@@ -15,7 +15,7 @@ use Scalar::Util 'blessed';
 use File::Path qw(make_path remove_tree);
 
 require TableEdit::SchemaInfo;
-require TableEdit::Session;
+use TableEdit::Session;
 use TableEdit::Permissions;
 
 # Global variables
@@ -39,6 +39,14 @@ any '**' => sub {
     
 	content_type 'application/json';
 	pass;
+};
+
+
+get '/sessions/active' => sub {
+	my $active = {interval => schema_info->attr('active_users_interval') || 30};
+	return to_json $active unless session('logged_in_user');
+	$active->{users} = TableEdit::Session::active_sessions_besides_me;
+	return to_json $active;
 };
 
 

@@ -168,6 +168,9 @@ CrudApp.factory('SchemaCreate', function($resource) {
 CrudApp.factory('DBConfig', function($resource) { 
 	return $resource('api/db-config', {}, {query: {isArray: false}});
 });
+CrudApp.factory('ActiveUsers', function($resource) {
+	return $resource('api/sessions/active',{}, {query: {isArray: false}});
+});
 CrudApp.factory('RelatedList', function($resource) { 
 	return $resource('api/:class/:id/:related/list', { class: '@class' });
 });
@@ -257,10 +260,6 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route, I
 
 CrudApp.factory('Menu', function($resource) {
     return $resource('api/menu');
-});
-
-CrudApp.factory('ActiveUsers', function($resource) {
-	return $resource('sessions/active');
 });
 
 
@@ -898,13 +897,21 @@ var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Pl
 	);
 	
 	// Active users
-	$rootScope.active = ActiveUsers.query();
-	$interval(function(){
-		ActiveUsers.query({},
-			function(data){
-				$rootScope.active = data;
-			});
-		}, 10*1000);
+	ActiveUsers.get(
+			{},
+			// Success
+			function(inital_data){
+				$rootScope.active = inital_data.users
+				if(inital_data.interval > 0){
+					$interval(function(){
+						ActiveUsers.get({},
+								function(data){
+							$rootScope.active = data.users;
+						});
+					}, inital_data.interval*1000);
+				}
+			}
+	);
 		
 }
 

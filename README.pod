@@ -206,6 +206,12 @@ Order and selection of classes that show up in menu. Default are all classes in 
 	
 	menu_classes: [user, product]
 	
+=head3 Concurrent active users
+
+By default TE checks every 30 sec if for active users, to warn other users about it. You can set interval in sec or disable it (0)
+	
+	active_users_interval: 0
+	
 =head2 Class properties
 
 Under classes you can specify class properties.
