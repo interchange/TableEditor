@@ -342,7 +342,7 @@ sub grid_template_params {
 	# Grid
 	$grid_params->{column_list} = $class_info->grid_columns_info; 
 	my $where_params = from_json $get_params->{q} if $get_params->{q};
-	grid_where($grid_params->{column_list}, $where, $where_params);
+	$where = grid_where($grid_params->{column_list}, $where, $where_params);
 	add_values($grid_params->{column_list}, $where_params);
 	
 	my $rs = $related_items || $class_info->resultset;
@@ -412,16 +412,22 @@ sub grid_where {
 	for my $column (@$columns) {
 		# Search
 		my $name = $column->{name};
-		if( defined $params->{$name} and $params->{$name} ne '' ){
+		if( exists $params->{$name}){
+			$name = $column->{self_column} || $column->{name};
+			
 			if ($column->{data_type} and ($column->{data_type} eq 'text' or $column->{data_type} eq 'varchar')){
-				$where->{"LOWER($alias.$name)"} = {'LIKE' => "%".lc($params->{$name})."%"};
+				my $sql_name = "LOWER($alias.$name)";
+				delete $where->{$sql_name};
+				$where->{$sql_name} = {'LIKE' => "%".lc($params->{$name})."%"} if defined $params->{$name} and $params->{$name} ne '';
 			}
 			else { 
-				$where->{"$alias.$name"} = $params->{$name};	
+				my $sql_name = "$alias.$name";
+				delete $where->{$sql_name};
+				$where->{$sql_name} = $params->{$name} if defined $params->{$name} and $params->{$name} ne '';	
 			}
 		}
 	};
-	
+	return $where;
 }
 
 =head2 grid_rows
