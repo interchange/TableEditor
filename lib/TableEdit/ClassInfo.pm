@@ -238,7 +238,7 @@ sub relationship {
     my $relationships = $self->_relationships;
 
     if (! exists $relationships->{$name}) {
-        die "No such relationship $name.";
+        die $self->name." has no such relationship name <$name>.";
     }
 
     return $relationships->{$name};
