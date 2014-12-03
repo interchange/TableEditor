@@ -85,7 +85,6 @@ var custom_routes = {};
 							<li ng-repeat="link in menu" data-active-link=""><a  href="{{link.url}}" class="">{{link.name}}</a></li>
 						</ul>
 					</div>
-					Je admin? {{user.roles.indexOf('admin')}}
 					<div class="panel panel-default" ng-show="user.roles && user.roles.indexOf('admin')">
 						<div class="panel-heading">
 				        <h3 class="panel-title"><i class="fa fa-wrench fa-fw"></i> Configuration</h3>
