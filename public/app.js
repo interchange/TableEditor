@@ -730,7 +730,7 @@ var EditCtrl = function ($scope, $rootScope, $routeParams, Item, ClassItem, Url,
 		},
 		// Error
 		function(data) {
-			$scope.error.msg = 'Error retrieving '+$routeParams.class+' infrormation.';
+			$scope.error.msg = 'Error retrieving '+$routeParams.class+' information.';
 		}
 	);
 
