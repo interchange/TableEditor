@@ -325,7 +325,7 @@ Table specific permissions are similar to global ones, they are just nested unde
 			delete: [boss]
 			create: [secreatary]
 
-=head3 Column premission
+=head3 Column permission
 
 Same thing just under certain column. Available levels are restricted, read, update.
 
