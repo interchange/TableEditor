@@ -51,5 +51,9 @@ plugins:
 #        username_column: username
 #        password_column: password
 #        password_check: check_password
-  
+
+# Use different name to avoid conflicts in case
+# we share domain with another Dancer application
+session_name: tedit.session
+
 
