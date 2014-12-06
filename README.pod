@@ -299,54 +299,56 @@ Example of image column conf:
  
 =head2 Permissions
  
-Roles can have limited access to database. By default all roles are without rights except for special 'admin' role, which have all. You can define global right to role by adding it in appropriate array. 
-Following example illustrates scenario where admin has full (all of them), analyst and secreatary have reading permission and boss has delete (and inclusive update and read). Role can be in multiple arrays.
+Roles can have limited access to database. By default all roles are without rights except for special 'admin' role, which have all. You can define global right to role by adding it in appropriate array.
+
+Following example illustrates scenario where admin has full (all of them), analyst and secretary have reading permission and boss has delete (and inclusive update and read). Role can be in multiple arrays.
  
-	read: [analyst, secreatary]
-	update: []
+    read: [analyst, secretary]
+    update: []
 	delete: [boss]
-	create: []
-	full: [admin]
+    create: []
+    full: [admin]
  
-Leves are hierarchical and they include:
-read: []
-update: [read]
-delete: [update]
-create: [update]
-all: [*]
+Levels are hierarchical and they include:
+
+    read: []
+    update: [read]
+    delete: [update]
+    create: [update]
+    all: [*]
  
 =head3 Table permission
 
 Table specific permissions are similar to global ones, they are just nested under certain table. Also we can restrict it and overide global permission.
 
-	classes:
-		Users:
-			restrict: [analyst]			
-			delete: [boss]
-			create: [secreatary]
+    classes:
+        Users:
+            restrict: [analyst]
+            delete: [boss]
+            create: [secretary]
 
 =head3 Column permission
 
 Same thing just under certain column. Available levels are restricted, read, update.
 
-	classes:
-		Users:
-			columns:
-				salary:
-					restrict: [analyst, secreatary]			
-					update: [boss]
-					
+    classes:
+        Users:
+            columns:
+                salary:
+                    restrict: [analyst, secretary]
+                    update: [boss]
+
 =head3 Result subset permissions
  
 If you want to limit records to some role, you can set conditions. 
-For example showing only active (where active = 1) users to secreatary and boss. 
+For example showing only active (where active = 1) users to secretary and boss.
 
-	classes:
-		Users:
-			columns:
-				active:
-					subset:
-						1: [boss, secreatary]	
+    classes:
+        Users:
+            columns:
+                active:
+                    subset:
+                        1: [boss, secretary]	
 			
  
 =head1 PLUGINS
