@@ -309,6 +309,7 @@ sub _build__relationships {
             class_name => $class_name,
             class => $self->schema->class($class_name),
             resultset => $resultset,
+            config => $self->config,
         );
     }
 
@@ -347,6 +348,7 @@ sub _build__relationships {
             intermediate_relation => $f_rel,
             intermediate_class_name => $rel_source_name,
             intermediate_class => $self->schema->class($rel_source_name),
+            config => $self->config,
         );
 	}
 

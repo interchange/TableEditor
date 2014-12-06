@@ -198,5 +198,14 @@ has hashref => (
     },
 );
 
+=head2 attr
+
+Column atribute specified in config or schema (no-op).
+
+=cut
+
+sub attr  {
+    return undef;
+}
 
 1;
