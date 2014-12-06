@@ -19,7 +19,7 @@ my $levels = {
 sub role_in {
 	my ($roles) = @_;
 	return undef unless logged_in_user and $roles;
-	for my $my_role (@{logged_in_user->{roles}}){
+	for my $my_role (user_roles){
 		if(ref $roles eq 'ARRAY'){
 			for my $role (@$roles){
 				return 1 if $role eq $my_role; 
