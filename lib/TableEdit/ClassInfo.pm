@@ -460,7 +460,8 @@ sub attr  {
 			$node = $node->{$p};
 			next if defined $node and ref $node eq 'hash';
 		}
-		return $node if defined;
+
+		return $node;
 }
 
 
