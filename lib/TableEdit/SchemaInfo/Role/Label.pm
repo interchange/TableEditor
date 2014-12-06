@@ -16,6 +16,11 @@ has label => (
 
 sub _build_label {
     my $self = shift;
+
+    if (my $label_attr = $self->attr('label')) {
+        return $label_attr;
+    }
+
     my $label = $self->name;
 
     $label =~ s/_/ /g;

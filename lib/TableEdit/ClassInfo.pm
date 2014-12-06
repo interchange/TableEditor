@@ -1,29 +1,18 @@
 package TableEdit::ClassInfo;
 
-use Dancer ':syntax';
 use Moo;
 use MooX::Types::MooseLike::Base qw/InstanceOf/;
 
 require TableEdit::ColumnInfo;
 require TableEdit::RelationshipInfo;
-require Dancer::Plugin::DBIC;
 require Class::Inspector;
 
 use TableEdit::Permissions;
 
+with 'TableEdit::SchemaInfo::Role::Config';
+with 'TableEdit::SchemaInfo::Role::Label';
 with 'TableEdit::SchemaInfo::Role::ListUtils';
 
-sub BUILDARGS {
-	my $class = shift;
-	my %args = @_;   
-	return { 
-   		name => $args{name}, 
-   		schema => $args{schema}, 
-   		resultset => Dancer::Plugin::DBIC::schema->resultset(ucfirst($args{name})),
-   	};
- };
-
- 
 =head1 ATTRIBUTES
 
 =head2 name
@@ -186,6 +175,7 @@ sub _build__columns {
             name => $name,
             position => $column_pos{$name},
             class => $self,
+            config => $self->config,
             %$info);
 
 		next unless TableEdit::Permissions::permission('read', $column_info );
@@ -266,7 +256,7 @@ sub _build__relationships {
 
         # Determine name of class this relationship points to
         my $class_name = $rel_info->{class};
-        $class_name =~ s/\w+:://g;
+        $class_name =~ s/^(.*?)::Result:://g;
 
         my ($foreign_column, $column_name) = %{$rel_info->{cond}};
 
@@ -308,7 +298,7 @@ sub _build__relationships {
         }
 
 	my $resultset = $source->schema->resultset($rel_info->{class});
-
+        
         $rel_hash{$rel_name} = TableEdit::RelationshipInfo->new(
             name => $rel_name,
             type => $foreign_type,
@@ -383,8 +373,15 @@ Returns number of items per page.
 
 has page_size => (
 	is => 'rw',
-	default => sub{
-		return config->{TableEditor}->{page_size};
+	default => sub {
+        my $self = shift;
+        my $page_size = 10;
+
+        if (defined $self->config->{page_size}) {
+            $page_size = $self->config->{page_size};
+        }
+
+        return $page_size;
 	}
 );
 
@@ -418,24 +415,6 @@ has sort_direction => (
 	},
 );
 
-=head2 label
-
-Returns nice string representation of class
-
-=cut
-
-has label => (is => 'lazy');
-sub _build_label {
-    my $self = shift;
-	my $class = $self->name;
-	my $label = $self->attr('label');
-	return $label if $label;
-	$class =~ s/_/ /g;	
-	$class =~ s/(?<! )([A-Z])/ $1/g; # Add space in front of Capital leters 
-	$class =~ s/^ (?=[A-Z])//; # Strip out extra starting whitespace followed by A-Z
-	return $class;
-}
-
 =head2 attributes
 
 Return attribute value
@@ -444,13 +423,13 @@ Return attribute value
 
 sub attr  {
 		my ($self, @path) = @_;
-		my ($value, $node);
-		
-		# Config file
-		$node = config;
-		for my $p ('TableEditor', 'classes', $self->name, @path){
+		my $value;
+		unshift @path, 'classes', $self->name;
+		my $node = $self->config;
+
+		for my $p (@path){
 			$node = $node->{$p};
-			last unless defined $node; 
+			next if defined $node and ref $node eq 'hash';
 		}
 		return $node if defined $node;
 		

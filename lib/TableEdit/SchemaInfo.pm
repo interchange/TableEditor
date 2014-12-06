@@ -1,17 +1,14 @@
 package TableEdit::SchemaInfo;
 
-use Dancer ':syntax';
 use Moo;
-with 'MooX::Singleton';
 use MooX::Types::MooseLike::Base qw/InstanceOf/;
 
 require TableEdit::ClassInfo;
 require TableEdit::RowInfo;
 use TableEdit::Permissions;
 
-my $schema = {};
-
-
+with 'TableEdit::SchemaInfo::Role::Config';
+ 
 =head1 ATTRIBUTES
 
 =head2 schema
@@ -186,7 +183,12 @@ sub _build__classes {
 
     for my $class (@$candidates) {
         my $rs = $self->schema->resultset($class);
-        $class_hash{$class} = TableEdit::ClassInfo->new(name => $class, schema => $self);
+        $class_hash{$class} = TableEdit::ClassInfo->new(
+            name => $class,
+            schema => $self,
+            resultset => $rs,
+            config => $self->config,
+        );
     }
 
     return \%class_hash;
@@ -254,8 +256,8 @@ Return attribute value
 sub attr  {
 		my ($self, @path) = @_;
 		my $value;
-		unshift @path, 'TableEditor';
-		my $node = config;
+		my $node = $self->config;
+
 		for my $p (@path){
 			$node = $node->{$p};
 			return $node unless defined $node;

@@ -56,6 +56,7 @@ lib/TableEdit/Schema/Result/UserAttribute.pm
 lib/TableEdit/Schema/Result/UserRole.pm
 lib/TableEdit/Schema/Result/UsersAttributesValue.pm
 lib/TableEdit/SchemaInfo.pm
+lib/TableEdit/SchemaInfo/Role/Config.pm
 lib/TableEdit/SchemaInfo/Role/Label.pm
 lib/TableEdit/SchemaInfo/Role/ListUtils.pm
 lib/TableEdit/SchemaInfo/Test/Relationships.pm
