@@ -166,6 +166,16 @@ For this example we will use following model and config file.
 		payment_status: 
 		  readonly: 1
 
+TableEditor loads a specific configuration file in addition to the Dancer
+configuration files. This file is located at F<lib/config.yml>. You can change
+the file name in the Dancer configuration with C<settings_file>:
+
+    settings_file: myte.yml
+
+You can also use an absolute path:
+
+    settings_file: /home/tedit/TableEdit/myte.yml
+              
 =head2 Configuration in schema classes
 
 Setting can also be set in schema classes in similar fashion. So for example column properties are set like so (just add them to column definition):
