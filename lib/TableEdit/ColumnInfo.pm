@@ -1,8 +1,9 @@
 package TableEdit::ColumnInfo;
 
-use Dancer ':syntax';
 use Moo;
 
+with 'TableEdit::SchemaInfo::Role::Config';
+with 'TableEdit::SchemaInfo::Role::Label';
 
 =head1 ATTRIBUTES
 
@@ -59,25 +60,6 @@ has column_type => (
     default => sub {
         my $self = shift;
     	return $self->attr('column_type'); 
-    },
-);
-has label => (
-    is => 'lazy',
-    default => sub {
-        my $self = shift;
-    	return $self->attr('label') if $self->attr('label');
-    	
-    	 my $label = $self->name;
-
-	    $label =~ s/_/ /g;
-	
-	    # Add space in front of capital letters.
-	    $label =~ s/(?<! )([A-Z])/ $1/g;
-	
-	    # Strip out extra starting whitespace followed by A-Z
-	    $label =~ s/^ (?=[A-Z])//;
-	
-	    return ucfirst($label); 
     },
 );
 
@@ -160,7 +142,7 @@ sub dropdown_options {
 
 	    # determine number of records in foreign table
 	    my $count = $rs->count;
-	    my $treshold = config->{TableEditor}->{dropdown_threshold} if config->{TableEditor} and config->{TableEditor}->{dropdown_threshold};
+	    my $treshold = $self->class->schema->attr('dropdown_threshold');
 	    $treshold ||= 50;
 	    if ($count <= $treshold){
 			$self->display_type ('dropdown');
@@ -353,18 +335,19 @@ Column atribute specified in config or schema
 =cut
 sub attr  {
 		my ($self, @path) = @_;
-		my ($value, $node);
-		
-		# Config file
-		$node = config;
-		for my $p ('TableEditor', 'classes', $self->class->name, 'columns', $self->name, @path){
+		my $value;
+
+		unshift @path, 'classes', $self->class->name, 'columns', $self->name;
+		my $node = $self->config;
+
+		for my $p (@path){
 			$node = $node->{$p};
-			last unless defined $node; 
+			next if defined $node and ref $node eq 'hash';
 		}
 		return $node if defined $node;
 		
 		# Schema config
-		$node = $self->class->resultset->result_source->column_info($self->name);
+		$node = $self->class->resultset->result_source->resultset_attributes;
 		for my $p (@path){
 			$node = $node->{$p};
 			next if defined $node and ref $node eq 'hash';
@@ -387,7 +370,7 @@ has attrs => (
 		my $schema_attrs = $self->class->resultset->result_source->column_info($self->name) || {};
 
 		# Config file
-		$node = config;
+		$node = $self->config;
 		for my $p ('TableEditor', 'classes', $self->class->name, 'columns', $self->name){
 			$node = $node->{$p};
 			last unless defined $node; 

@@ -1,9 +1,10 @@
 package TableEdit::RowInfo;
 
-use Dancer ':syntax';
 use DBI;
 use Moo;
 use MooX::Types::MooseLike::Base qw/InstanceOf/;
+
+with 'TableEdit::SchemaInfo::Role::Config';
 
 =head1 NAME
 
@@ -49,7 +50,9 @@ sub to_string {
 	return $label if $label;
 
 	my $class = $self->row->result_source->{source_name};
-	my $classInfo = TableEdit::ClassInfo->new(name => $class, schema => $self->class->schema);
+	my $classInfo = TableEdit::ClassInfo->new(name => $class, schema => $self->class->schema,
+                                          resultset => $self->class->resultset,
+                                          config => $self->class->config);
 	my $primary_key = $classInfo->primary_key;
 	my $id = $self->primary_key_string;
 	return "$id - ".$classInfo->label;
@@ -62,7 +65,7 @@ sub to_string {
 sub attr  {
 		my ($self, @path) = @_;
 		my $value;
-		my $node = config->{TableEditor}->{classes}->{$self->class->name};
+		my $node = $self->config->{classes}->{$self->class->name};
 		for my $p (@path){
 			$node = $node->{$p};
 			return $node unless defined $node;
