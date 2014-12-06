@@ -39,7 +39,7 @@ post '/login' => sub {
 
         $user->{username} = $username;
 
-        debug "Login successful for user $username.";
+        debug "Login successful for user $username with roles: ", join(',', user_roles);
     } else {
         # authentication failed
         debug "Login failed.";
