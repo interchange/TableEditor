@@ -7,6 +7,7 @@ use DBI;
 use DBIx::Class::Schema::Loader qw/ make_schema_at /;
 use FindBin;
 use Cwd qw/realpath/;
+use File::Spec;
 use TableEdit::ConfigSchema;
 use TableEdit::DriverInfo;
 
@@ -17,7 +18,17 @@ my @column_types;
 set views => "$appdir/public/views";
 
 # Load TE settings
-Dancer::Config::load_settings_from_yaml($appdir.'/lib/config.yml');
+my $settings_file = config->{'settings_file'} || 'lib/config.yml';
+my $settings_file_path;
+
+if (File::Spec->file_name_is_absolute($settings_file)) {
+    $settings_file_path = $settings_file;
+}
+else {
+    $settings_file_path = File::Spec->catfile($appdir, $settings_file);
+}
+
+Dancer::Config::load_settings_from_yaml($settings_file_path);
 
 hook 'before' => sub {
 	# Set schema settings
