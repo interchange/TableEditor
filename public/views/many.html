@@ -9,7 +9,7 @@
 
 <!-- Matter -->
 <div class="matter bundle-page">
-	<ul ng-show="class.relations" class="nav nav-tabs">
+	<ul ng-show="class.relations" class="nav nav-pills">
 			<li ><a href="#/{{item_info.class}}/edit/{{item_info.id}}/">General</a></li>
 			
 			<li ng-class="{active: link.name == relation}" class="sub-menu-item" ng-repeat="link in class.relations">
