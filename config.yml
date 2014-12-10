@@ -40,6 +40,7 @@ plugins:
         users:
           - user: admin
             pass: pass
+            roles: [admin]
             
 ### Sample configuration with users in DB               
 #      users:
