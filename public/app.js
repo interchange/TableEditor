@@ -3,6 +3,8 @@
 /* App Module */
 
 var default_routes = {
+	'/': { templateUrl: 'views/login.html', controller: 'StatusCtrl', public: true },
+	'/404': { templateUrl: 'views/404.html', controller: 'StatusCtrl', public: true },
 	'/login': { templateUrl: 'views/login.html', controller: 'LoginCtrl', public: true },
 	'/status': { templateUrl: 'views/status.html', controller: 'StatusCtrl', public: true },
 	'/:class/list': { templateUrl: 'views/list.html', controller: 'ListCtrl' },
@@ -20,23 +22,25 @@ CrudApp.directive('checkUser', function ($rootScope, $location, $route, Url, Aut
 	return {
 		link: function (scope, elem, attrs, ctrl, route) {
 			$rootScope.$on('$routeChangeStart', function(event, currRoute, prevRoute){
-				if(!$rootScope.user){
-					$rootScope.user = {};
+				if(!$rootScope.user && !currRoute.public){
 					Auth.login.get({},
-							// Success
-							function(data) {
-						$rootScope.user.username = data.username; 
-						if (currRoute.public || $rootScope.user.username ) {
-						}
-						else {
-							Url.login = $location.path();
+						// Success
+						function(data) {
+							$rootScope.user = {};
+							$rootScope.user.username = data.username; 
+							if (currRoute.public || $rootScope.user.username ) {
+							}
+							else {
+								Url.login = $location.path();
+								$location.path('login');
+							}
+						},
+						// Error
+						function(data) {
+							$rootScope.user = null;
+							$rootScope.logout();
 							$location.path('login');
 						}
-					},
-					// Error
-					function(data) {
-						$location.path('login');
-					}
 					);
 				}
 				else{
@@ -122,7 +126,15 @@ CrudApp.factory('InfoBar', ['$rootScope', '$sce', function ($rootScope, $sce) {
 	};
 }]);
 
-CrudApp.factory('AuthInterceptor',['$q','$location',function($q,$location){
+CrudApp.factory('Auth', function($resource){
+	return {
+		login: $resource('login', {}),
+		logout: $resource('logout', {}),
+	};
+	
+});
+
+CrudApp.factory('AuthInterceptor',['$q','$location','$rootScope', function($q,$location, $rootScope){
     return {
         response: function(response){
             if (response.status === 403) {
@@ -132,21 +144,14 @@ CrudApp.factory('AuthInterceptor',['$q','$location',function($q,$location){
         },
         responseError: function(rejection) {
             if (rejection.status === 403) {
+            	$rootScope.user = null;
                 console.log("Response Error 403",rejection);
             }
-            $location.path('/');
+            $location.path('/login');
             return $q.reject(rejection);
         }
     }
 }]);
-
-CrudApp.factory('Auth', function($resource){
-	return {
-		login: $resource('login', {}),
-		logout: $resource('logout', {}),
-	};
-
-});
 
 CrudApp.factory('Plugins', function($resource) { 
 	return $resource('api/plugins');
@@ -301,7 +306,7 @@ CrudApp.config(function($routeProvider) {
 		$routeProvider.when(key, value);
 	});
 	
-	$routeProvider.otherwise({redirectTo: '/status'});
+	$routeProvider.otherwise({redirectTo: '/404'});
 });
 
 CrudApp.config(['$httpProvider',function($httpProvider) {
@@ -876,7 +881,7 @@ var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Pl
 				// Success
 				function(data) {
 					$rootScope.menu = {};
-					$rootScope.user = {};
+					$rootScope.user = null;
 					$location.path('/');
 				}
 		);
@@ -931,23 +936,22 @@ var LoginCtrl = function ($scope, $rootScope, Auth, Url, $location, Menu, InfoBa
 						$rootScope.user.username = data.user;
 						$rootScope.active = data.active;
 						$rootScope.menu = Menu.query();
-						$scope.error = null;
-						$scope.success = 'Successfully logged in as '+data.user;
-						InfoBar.addNext('success', data.user + ' succesfuly saved!');
+						$scope.error = null;						
+						InfoBar.addNext('success', 'You are logged in as '+data.user+'!');
 
 						if (Url.login == '/' || !Url.login ) Url.login = '/login'; // Redirect to home if last route was login 
 						//$location.path('/login');
 						$location.path(Url.login);
 					}
 					else {
-						$rootScope.user = {};
+						$rootScope.user = null;
 						$scope.error = 'Wrong username or password';
 					}
 				},
 				// Error
 				function(data) {
 					$scope.error = 'Connection error';
-					$rootScope.user = {};
+					$rootScope.user = null;
 				}
 		);
 	};
