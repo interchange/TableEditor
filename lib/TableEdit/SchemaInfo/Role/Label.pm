@@ -19,6 +19,9 @@ sub _build_label {
     my $label = $self->name;
 
     $label =~ s/_/ /g;
+    
+    # Trim both
+    $label =~ s/^\s+|\s+$//g;
 
     # Add space in front of capital letters.
     $label =~ s/(?<! )([A-Z])/ $1/g;
