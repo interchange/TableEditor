@@ -3,10 +3,11 @@ use Dancer ':syntax';
 
 
 my $active_sessions = {};
-my $timeout = config->{active_user_timeout} || 100;
+my $interval = defined config->{TableEditor}->{active_users_interval} ? config->{TableEditor}->{active_users_interval} : 100;
+
 
 sub active_sessions {
-	my $threshold = time - $timeout;
+	my $threshold = $interval;
 	for my $s (keys %$active_sessions)	{
 		delete $active_sessions->{$s} if $active_sessions->{$s}->{'last_seen'} < $threshold;
 	}
@@ -28,5 +29,14 @@ sub seen {
 		$active_sessions->{$id}->{'username'} = session('logged_in_user');
 	}
 }
+
+prefix '/api';
+
+get '/sessions/active' => sub {
+	my $active = {interval => $interval};
+	return to_json $active unless session('logged_in_user');
+	$active->{users} = active_sessions_besides_me;
+	return to_json $active;
+};
 
 1;

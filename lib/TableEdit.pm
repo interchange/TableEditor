@@ -7,6 +7,7 @@ our $VERSION = '0.1';
 use Dancer::Plugin::DBIC qw(schema resultset rset);
 use TableEdit::Config;
 use TableEdit::Plugins;
+use TableEdit::Session;
 use TableEdit::Routes::API;
 use TableEdit::Auth;
 
