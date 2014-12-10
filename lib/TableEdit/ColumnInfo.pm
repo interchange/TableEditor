@@ -242,8 +242,10 @@ has upload_dir => (
     is => 'lazy',
     default => sub {
     	my $self = shift; 
-    	return undef unless $self->display_type eq 'image_upload';
-    	return $self->attr('upload_dir') || "images/upload/".$self->class->name."/".$self->name."/";
+    	return undef unless $self->display_type eq 'image_upload' or $self->attr('upload_dir');
+    	my $dir = $self->attr('upload_dir') || "upload/".$self->class->name."/".$self->name."/";
+    	$dir = "$dir/" unless substr($dir, -1) eq '/'; 
+    	return $dir;
     }
 );
 =head2 upload extensions

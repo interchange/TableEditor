@@ -225,6 +225,7 @@ get '/:class/:column/image/:file' => require_login sub {
 	return send_file($path.$file);
 };
 
+
 post '/:class/:column/upload_image' => require_login sub {
 	my $class_info = schema_info->class(param('class'));
 	my $column_info = $class_info->column(param('column'));
@@ -236,6 +237,30 @@ post '/:class/:column/upload_image' => require_login sub {
 	# Upload image
     if($file){
 		my $fileName = $file->{filename};
+		
+		my $dir = "$appdir/public/$path";
+		make_path $dir unless (-e $dir);       
+		
+		if($file->copy_to($dir.$fileName)){			
+			return "$fileName";
+		}		
+    }
+	return undef;
+};
+
+
+post '/:class/:column/upload' => require_login sub {
+	my $class_info = schema_info->class(param('class'));
+	my $column_info = $class_info->column(param('column'));
+	my $file = upload('file');
+	
+	
+	# Upload dir
+	my $path = $column_info->upload_dir; 
+	
+	# Upload image
+    if($file){
+		my $fileName = param('filename') || $file->{filename};
 		
 		my $dir = "$appdir/public/$path";
 		make_path $dir unless (-e $dir);       
