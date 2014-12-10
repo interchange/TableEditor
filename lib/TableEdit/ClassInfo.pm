@@ -542,8 +542,8 @@ Returns array of column objects appropriate for form
 
 =cut
 
-has form_columns_info => (is => 'lazy');
-sub _build_form_columns_info {
+has form_columns_array => (is => 'lazy');
+sub _build_form_columns_array {
 	my ($self) = @_;
 	my $form_columns = [];
 	my $columns = $self->form_columns;
@@ -555,6 +555,24 @@ sub _build_form_columns_info {
 		#$col_copy{required} = 0 ;
 		
 		push @$form_columns, \%col_copy; 		
+	}
+	
+	return $form_columns; 
+}
+
+has form_columns_hash => (is => 'lazy');
+sub _build_form_columns_hash {
+	my ($self) = @_;
+	my $form_columns = {};
+	my $columns = $self->form_columns;
+	for my $col (@$columns){
+	    my $col_info = $self->column($col)->hashref;
+		my %col_copy = %{$col_info};
+
+		# Cleanup
+		#$col_copy{required} = 0 ;
+		
+		$form_columns->{$col} = \%col_copy; 		
 	}
 	
 	return $form_columns; 

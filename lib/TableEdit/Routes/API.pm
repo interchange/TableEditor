@@ -283,7 +283,8 @@ get '/:class' => require_login sub {
 	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
 
 	return to_json({
-		columns => $class_info->form_columns_info,
+		columns => $class_info->form_columns_array,
+		columns_info => $class_info->form_columns_hash,
 		class => $class_info->name,
 		class_label => $class_info->label,
 		relations => $class_info->relationships_info,
