@@ -378,14 +378,18 @@ All plugins are located in /Plugins/name_of_plugin dir. Inside they usually have
 				|-app.js
 			|-views
 	
-URL to images folder is: 
-api/plugins/Locator/public/images/
+Link to public dir is: 
+api/plugins/<plugin name>/public/
+
+Views will also be found in plugins view dir, if they don't exist in main views dir.
+
+api.pm is required.
 
 =head2 Activating plugin
 
-Active plugins are listed in config.
+Active plugins are listed in config. Order is important as first will have priority over second. 
 
-	table_editor_plugins: [ "SomePlugin", "SomeOtherPlugin" ]
+	plugins: [ "SomePlugin", "SomeOtherPlugin" ]
 
 =head2 Custom pages
 
