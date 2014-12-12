@@ -21,7 +21,11 @@
 		class="form-control" 
 		id="media_format" 
 		ng-model="item.values[column.name]" 
-		ng-options="option.value as option.option_label for option in column.options">
+		ng-options="option.value as option.option_label for option in 
+			column.is_nullable ?
+			[{value: '<notnull>', option_label: 'Not empty'}, {value: '<null>', option_label: 'Empty'}, {value: '', option_label: '-------'}].concat(column.options) :
+			column.options
+			">
 		<option></option>
 	</select>
 	<span ng-include="'views/column/partials/standard_validation.html'"></span>

@@ -177,14 +177,33 @@ has resultset => (
     },
 );
 
-has hashref => (
+
+=head2 hashref
+
+Static and dynamic propeties about column
+
+=cut
+sub hashref {
+		my $self = shift;
+		
+        my $foreign_column;
+        $foreign_column = $self->origin_class->column($self->self_column) if $self->self_column;
+
+		my $hash = $self->static_hashref;
+		
+        $hash->{options} = $foreign_column->dropdown_options if $foreign_column;
+        $hash->{display_type} = $foreign_column->display_type if $foreign_column;
+
+	    return $hash;
+}
+
+
+has static_hashref => (
     is => 'lazy',
     default => sub {
         my $self = shift;
-       # my $foreign_column = $self->origin_class->column($self->foreign_column);
-        my %hash = (
+        my $hash = {
             foreign_column => $self->foreign_column,
-        #    display_type => $foreign_column->display_type,
             class_name => $self->class_name, 
             hidden => $self->hidden,
             label => $self->label,
@@ -193,9 +212,8 @@ has hashref => (
             type => $self->type,
             origin_class_name => $self->origin_class->name,
             origin_class_label => $self->origin_class->label,
-        );
-
-        return \%hash;
+        };
+        return $hash;
     },
 );
 

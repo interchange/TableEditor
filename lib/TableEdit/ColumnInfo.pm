@@ -165,15 +165,17 @@ sub dropdown_options {
 	    if ($count <= $treshold){
 			$self->display_type ('dropdown');
 			my @foreign_rows = $rs->all;
-			my $items = [];
+			my @items;
 			for my $row (@foreign_rows){
 				my $rowInfo = TableEdit::RowInfo->new(row => $row, class => $self->relationship->{class});
 				my $primary_key = $self->relationship->{class}->primary_key;
 				my $id = $rowInfo->primary_key_string;
 				my $name = $rowInfo->to_string;
-				push @$items, {option_label=>$name, value=>$id};
+				push @items, {option_label=>$name, value=>$id};
 			}
-			return $items;
+			@items = sort { lc $a->{option_label} cmp lc $b->{option_label} } @items;
+
+			return [@items];
 	    }
 	}
 	return undef;
@@ -276,11 +278,29 @@ has upload_max_size => (
 
 =head2 hashref
 
+Static and dynamic propeties about column
+
 =cut
 sub hashref {
 		my $self = shift;
 		
-		my $hash = $self->attrs;
+		my $hash = $self->static_hashref;
+		$hash->{options} = $self->dropdown_options if $self->dropdown_options;
+		
+	    return $hash;
+}
+
+
+=head2 static_hashref
+
+Lazy attr for all static column properties
+
+=cut
+has static_hashref => (
+    is => 'lazy',
+    default => sub {
+		my $self = shift;
+    	my $hash = $self->attrs;
 		$hash->{options} = $self->dropdown_options if $self->dropdown_options;
 		$hash->{data_type} = $self->data_type;
 		$hash->{display_type} = $self->display_type;
@@ -298,7 +318,8 @@ sub hashref {
 		$hash->{upload_dir} = $self->upload_dir if $self->upload_dir;
 	
 	    return $hash;
-}
+    }
+);	
 
 
 =head2 is_primary

@@ -471,8 +471,7 @@ Return array of all column names suitable for grid display.
 
 =cut
 
-has grid_columns => (is => 'lazy');
-sub _build_grid_columns {
+sub grid_columns {
 	my $self = shift;
     my $columns = $self->attr('grid_columns');
     return $columns if defined $columns;
@@ -493,8 +492,8 @@ sub _build_grid_columns {
 Return array of all columns suitable for grid display with attributes.
 
 =cut
-has grid_columns_info => (is => 'lazy');
-sub _build_grid_columns_info {
+
+sub grid_columns_info {
 	my ($self) = @_;
 	my $grid_columns = [];
 	my $columns = $self->grid_columns;
@@ -520,8 +519,8 @@ Returns array of column names appropriate for form
 
 =cut
 
-has form_columns => (is => 'lazy');
-sub _build_form_columns {
+
+sub form_columns {
 	my ($self) = @_;
 	my $columns = $self->attr('form_columns');
     return $columns if defined $columns;
@@ -542,8 +541,7 @@ Returns array of column objects appropriate for form
 
 =cut
 
-has form_columns_array => (is => 'lazy');
-sub _build_form_columns_array {
+sub form_columns_array {
 	my ($self) = @_;
 	my $form_columns = [];
 	my $columns = $self->form_columns;
@@ -560,8 +558,7 @@ sub _build_form_columns_array {
 	return $form_columns; 
 }
 
-has form_columns_hash => (is => 'lazy');
-sub _build_form_columns_hash {
+sub form_columns_hash {
 	my ($self) = @_;
 	my $form_columns = {};
 	my $columns = $self->form_columns;

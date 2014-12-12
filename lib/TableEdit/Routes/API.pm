@@ -320,6 +320,7 @@ post '/:class' => require_login sub {
 	return to_json {
 		name => schema_info->row($object)->to_string,
 		values => {$object->get_inflated_columns},
+		id => $object->id,
 	};
 };
 
@@ -359,11 +360,11 @@ Returns data for grid view
 =cut
 
 sub grid_template_params {
-	my ($class_info, $related_items) = @_;
+	my ($class_info, $related_items, $grid_rows) = @_;
 	my $get_params = params('query');
 	my $grid_params;
 	# Permission subset
-	my $where = $class_info->subset_conditions;	
+	my $where = {%{$class_info->subset_conditions}};	
 	# Grid
 	$grid_params->{column_list} = $class_info->grid_columns_info; 
 	my $where_params = from_json $get_params->{q} if $get_params->{q};
@@ -386,7 +387,8 @@ sub grid_template_params {
 	  },);
 	my $count = $rs->search($where)->count;
 
-	$grid_params->{rows} = grid_rows(
+	my $make_rows = $grid_rows || \&grid_rows;
+	$grid_params->{rows} = $make_rows->(
 		[$rows->all], 
 		$grid_params->{column_list} , 
 		$primary_key,
@@ -440,7 +442,10 @@ sub grid_where {
 		if( exists $params->{$name}){
 			$name = $column->{self_column} || $column->{name};
 			
-			if ($column->{data_type} and ($column->{data_type} eq 'text' or $column->{data_type} eq 'varchar')){
+			$params->{$name} = { '=' => undef } and delete $column->{data_type} if $params->{$name} eq '<null>';
+			$params->{$name} = { '!=' => undef } and delete $column->{data_type} if $params->{$name} eq '<notnull>';
+			
+			if ($column->{data_type} and ! ref $params->{$name} and ($column->{data_type} eq 'text' or $column->{data_type} eq 'varchar')){
 				my $sql_name = "LOWER($alias.$name)";
 				delete $where->{$sql_name};
 				$where->{$sql_name} = {'LIKE' => "%".lc($params->{$name})."%"} if defined $params->{$name} and $params->{$name} ne '';

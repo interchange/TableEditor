@@ -113,6 +113,7 @@ list-style: none;
 
 .column-search input, .column-search select {
 	width: 100%;
+	padding: 3px;
 }
 .column-search input[type="checkbox"] {
 	width: initial;
