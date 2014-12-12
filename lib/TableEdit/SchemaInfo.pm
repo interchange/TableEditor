@@ -1,7 +1,7 @@
 package TableEdit::SchemaInfo;
 
 use Moo;
-use MooX::Types::MooseLike::Base qw/InstanceOf/;
+use MooX::Types::MooseLike::Base qw/ArrayRef InstanceOf/;
 
 require TableEdit::ClassInfo;
 require TableEdit::RowInfo;
@@ -37,6 +37,36 @@ has sort => (
 has _classes => (
     is => 'lazy',
 );
+
+=head2 user_roles
+
+List of roles which the current user belongs to.
+
+=cut
+
+has user_roles => (
+    is => 'ro',
+    isa => ArrayRef,
+    default => sub {[]},
+);
+
+=head2 permissions
+
+Returns L<TableEdit::SchemaInfo::Permissions> object for this schema.
+
+=cut
+
+has permissions => (
+    is => 'lazy',
+    isa => InstanceOf['TableEdit::Permissions'],
+);
+
+sub _build_permissions {
+    my $self = shift;
+    my $p = TableEdit::Permissions->new(roles => $self->user_roles,
+                                        schema => $self);
+    return $p;
+}
 
 =head1 METHODS
 
@@ -218,7 +248,7 @@ has menu => (
 		for my $classInfo (@$classes){
 			my $class_name = !ref($classInfo) ? $classInfo : $classInfo->name; 
 			$classInfo = $self->class($class_name);
-			next unless TableEdit::Permissions::permission('read', $self->class($class_name) );
+			next unless $self->permissions->permission('read', $self->class($class_name) );
 			$menu->{$classInfo->label} = {
 				class => $class_name,
 				name => $classInfo->label, 
@@ -230,6 +260,18 @@ has menu => (
     }	
 );
 
+=head2 column_types
+
+List of available column types for this schema.
+Returns array reference.
+
+=cut
+
+has column_types => (
+    is => 'ro',
+    isa => ArrayRef,
+    default => sub {[]},
+);
 
 has primary_key_delimiter  => (
 	is => 'lazy',

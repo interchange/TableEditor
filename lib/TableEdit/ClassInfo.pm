@@ -178,7 +178,7 @@ sub _build__columns {
             config => $self->config,
             %$info);
 
-		next unless TableEdit::Permissions::permission('read', $column_info );
+		next unless $self->schema->permissions->permission('read', $column_info );
 
         $column_hash{$name} = $column_info;
             

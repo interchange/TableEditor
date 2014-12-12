@@ -1,10 +1,19 @@
 package TableEdit::Permissions;
 
-use Dancer ':syntax';
-use Dancer::Plugin::Auth::Extensible;
-use Dancer::Plugin;
+use Moo;
+use MooX::Types::MooseLike::Base qw/ArrayRef InstanceOf/;
 
-require TableEdit::Routes::API;
+has schema => (
+    is => 'ro',
+    required => 1,
+    isa => InstanceOf['TableEdit::SchemaInfo'],
+);
+
+has roles => (
+    is => 'ro',
+    isa => ArrayRef,
+    default => sub {[]},
+);
 
 # Permission levels
 # KEY level is granted to users with this level or levels specified in ARRAY
@@ -17,9 +26,10 @@ my $levels = {
 
 
 sub role_in {
-	my ($roles) = @_;
-	return undef unless logged_in_user and $roles;
-	for my $my_role (user_roles){
+	my ($self, $roles) = @_;
+    return undef if ! defined $roles;
+
+	for my $my_role (@{$self->roles}) {
 		if(ref $roles eq 'ARRAY'){
 			for my $role (@$roles){
 				return 1 if $role eq $my_role; 
@@ -31,12 +41,11 @@ sub role_in {
 	}
 	return undef;
 }
-register role_in  => \&role_in;
 
 
 sub permission {
-	my($level, $item, $op) = @_;
-	#debug "Checking for permission $level for ".$item->name;
+	my ($self, $level, $item, $op) = @_;
+    #debug "Checking for permission $level for ".$item->name;
 	my @granted_levels = ($level, @{$levels->{$level}});
 	# Global
 	unless(ref $item){
@@ -46,29 +55,26 @@ sub permission {
 	else {
 		# Class
 		if(ref $item eq 'TableEdit::ClassInfo'){
-			return 0 if role_in($item->attr('restricted'));
+			return 0 if $self->role_in($item->attr('restricted'));
 			for my $granted_level (@granted_levels){
-				return 1 if role_in($item->attr($granted_level));
+				return 1 if $self->role_in($item->attr($granted_level));
 			}
 		}
 		# Column
 		elsif(ref $item eq 'TableEdit::ColumnInfo'){
-			return 0 if role_in($item->attr('restricted'));
+			return 0 if $self->role_in($item->attr('restricted'));
 			for my $granted_level (@granted_levels){
-				return 1 if role_in($item->attr($granted_level));
+				return 1 if $self->role_in($item->attr($granted_level));
 			}
-			return permission($level, $item->class);
+			return $self->permission($level, $item->class);
 		}
 	}
 	for my $granted_level (@granted_levels){
-		my $schema_info = TableEdit::Routes::API->schema_info;
-		return 1 if role_in($schema_info->attr($granted_level));
+		my $schema_info = $self->schema;
+		return 1 if $self->role_in($schema_info->attr($granted_level));
 	}
 	return undef;
 }
-register permission  => \&permission;
 
-
-register_plugin for_versions => [qw(1 2)];
 1;
 
