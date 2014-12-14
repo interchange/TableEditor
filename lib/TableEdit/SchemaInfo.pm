@@ -2,7 +2,6 @@ package TableEdit::SchemaInfo;
 
 use Dancer ':syntax';
 use Moo;
-with 'MooX::Singleton';
 use MooX::Types::MooseLike::Base qw/InstanceOf/;
 
 require TableEdit::ClassInfo;
