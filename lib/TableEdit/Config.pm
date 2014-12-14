@@ -12,7 +12,7 @@ use TableEdit::ConfigSchema;
 use TableEdit::DriverInfo;
 
 
-my $appdir = realpath( "$FindBin::Bin/..");
+my $appdir = config->{'appdir'};
 my $SQLite = _bootstrap_config_schema();
 my @column_types;
 set views => "$appdir/public/views";
