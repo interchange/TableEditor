@@ -31,7 +31,7 @@ sub schema_info {
         sort => 1,
         config => config->{TableEditor},
         user_roles => [user_roles],
-        column_types => TableEdit::Config::column_types(),
+        column_types => [TableEdit::Config::column_types()],
 	);
 	return $schema_info->{$user->{user}};
 }
