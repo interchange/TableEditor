@@ -62,7 +62,7 @@ sub to_string {
 sub attr  {
 		my ($self, @path) = @_;
 		my $value;
-		my $node = $self->config->{classes}->{$self->class->name};
+		my $node = $self->class->config->{classes}->{$self->class->name};
 		for my $p (@path){
 			$node = $node->{$p};
 			return $node unless defined $node;
