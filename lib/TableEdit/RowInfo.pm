@@ -49,10 +49,9 @@ sub to_string {
 	return $label if $label;
 
 	my $class = $self->row->result_source->{source_name};
-	my $classInfo = TableEdit::ClassInfo->new(name => $class, schema => $self->class->schema);
-	my $primary_key = $classInfo->primary_key;
+	my $primary_key = $self->class->primary_key;
 	my $id = $self->primary_key_string;
-	return "$id - ".$classInfo->label;
+	return "$id - ".$self->class->label;
 }
 
 
