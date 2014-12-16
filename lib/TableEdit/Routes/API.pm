@@ -15,7 +15,7 @@ use Scalar::Util 'blessed';
 use File::Path qw(make_path remove_tree);
 
 require TableEdit::SchemaInfo;
-use TableEdit::Permissions;
+use TableEdit::Config;
 
 # Global variables
 my $appdir = realpath( "$FindBin::Bin/..");
@@ -29,6 +29,9 @@ sub schema_info {
 	$schema_info->{$user->{user}} ||= TableEdit::SchemaInfo->new(
         schema => schema,
         sort => 1,
+        config => config->{TableEditor},
+        user_roles => [user_roles],
+        column_types => TableEdit::Config::column_types(),
 	);
 	return $schema_info->{$user->{user}};
 }
@@ -44,7 +47,7 @@ any '**' => sub {
 get '/:class/:id/:related/list' => require_login sub {
 	my $id = param('id');
 	my $class_info = schema_info->class(param('class'));
-	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
+	send_error("Forbidden to read ".param('class'), 403) unless schema_info->permissions->permission('read', $class_info);
 	my $related = param('related');
 	my $data;
 
@@ -55,7 +58,7 @@ get '/:class/:id/:related/list' => require_login sub {
 	# Related list
 	my $relationship_info = $class_info->relationship($related);
 	my $relationship_class_info = schema_info->class($relationship_info->class_name);
-	send_error("Forbidden to read ".$relationship_info->class_name, 403) unless permission('read', $relationship_class_info);
+	send_error("Forbidden to read ".$relationship_info->class_name, 403) unless schema_info->permissions->permission('read', $relationship_class_info);
 	
 	return '{}' unless ( defined $row );	
 	$data->{'id'} = $id;
@@ -75,13 +78,13 @@ get '/:class/:id/:related/list' => require_login sub {
 post '/:class/:id/:related/:related_id' => require_login sub {
 	my $id = param('id');
 	my $class_info = schema_info->class(param('class'));
-	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
+	send_error("Forbidden to read ".param('class'), 403) unless schema_info->permissions->permission('read', $class_info);
 	my $related = param('related');
 	my $related_id = param('related_id');
 	
 	my $relationship_info = $class_info->relationship($related);
 	my $relationship_class_info = schema_info->class($relationship_info->class_name);
-	send_error("Forbidden to read ".$relationship_info->class_name, 403) unless permission('read', $relationship_class_info);
+	send_error("Forbidden to read ".$relationship_info->class_name, 403) unless schema_info->permissions->permission('read', $relationship_class_info);
 	my $related_row = $relationship_class_info->find_with_delimiter($related_id);
 	
 	my $row = $class_info->find_with_delimiter(param('id'));
@@ -110,12 +113,12 @@ post '/:class/:id/:related/:related_id' => require_login sub {
 del '/:class/:id/:related/:related_id' => require_login sub {
 	my $id = param('id');
 	my $class_info = schema_info->class(param('class'));
-	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
+	send_error("Forbidden to read ".param('class'), 403) unless schema_info->permissions->permission('read', $class_info);
 	my $related = param('related');
 	my $related_id = param('related_id');
 	my $relationship_info = $class_info->relationship($related);
 	my $relationship_class_info = schema_info->class($relationship_info->class_name);
-	send_error("Forbidden to read ".$relationship_info->class_name, 403) unless permission('read', $relationship_class_info);
+	send_error("Forbidden to read ".$relationship_info->class_name, 403) unless schema_info->permissions->permission('read', $relationship_class_info);
 	
 	my $row = $class_info->find_with_delimiter(param('id'));
 	
@@ -144,7 +147,7 @@ del '/:class/:id/:related/:related_id' => require_login sub {
 get '/:class/:id/:related/items' => require_login sub {
 	my $id = param('id');
 	my $class_info = schema_info->class(param('class'));
-	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
+	send_error("Forbidden to read ".param('class'), 403) unless schema_info->permissions->permission('read', $class_info);
 	my $related = param('related');
 	my ($row, $data);
 	my $get_params = params('query') || {};
@@ -166,7 +169,7 @@ get '/:class/:id/:related/items' => require_login sub {
 get '/:class/:id/:related/unrelated/list' => require_login sub {
 	my $id = param('id');
 	my $class_info = schema_info->class(param('class'));
-	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
+	send_error("Forbidden to read ".param('class'), 403) unless schema_info->permissions->permission('read', $class_info);
 	my $related = param('related');
 	my ($row, $data);
 	my $get_params = params('query') || {};
@@ -194,7 +197,7 @@ get '/:class/:id/:related/unrelated/list' => require_login sub {
 
 get '/:class/:related/list' => require_login sub {
 	my $class_info = schema_info->class(param('class'));
-	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
+	send_error("Forbidden to read ".param('class'), 403) unless schema_info->permissions->permission('read', $class_info);
 	my $related = param('related');
 	my $relationship_info = $class_info->relationship($related);
 	my $relationship_class = $relationship_info->class_name;
@@ -205,7 +208,7 @@ get '/:class/:related/list' => require_login sub {
 # Class listing
 get '/:class/list' => require_login sub {
 	my $class_info = schema_info->class(param('class'));
-	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
+	send_error("Forbidden to read ".param('class'), 403) unless schema_info->permissions->permission('read', $class_info);
 	my $grid_params = grid_template_params($class_info);
 	
 	return to_json($grid_params, {allow_unknown => 1});
@@ -277,7 +280,7 @@ get '/:class/:id' => require_login sub {
 	my ($data);
 	my $id = param('id');
 	my $class_info = schema_info->class(param('class'));
-	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
+	send_error("Forbidden to read ".param('class'), 403) unless schema_info->permissions->permission('read', $class_info);
 
 	$data->{columns} = $class_info->columns_info;
 
@@ -296,7 +299,7 @@ get '/:class/:id' => require_login sub {
 
 get '/:class' => require_login sub {
 	my $class_info = schema_info->class(param('class'));
-	send_error("Forbidden to read ".param('class'), 403) unless permission('read', $class_info);
+	send_error("Forbidden to read ".param('class'), 403) unless schema_info->permissions->permission('read', $class_info);
 
 	return to_json({
 		columns => $class_info->form_columns_array,
@@ -310,7 +313,7 @@ get '/:class' => require_login sub {
 
 post '/:class' => require_login sub {
 	my $class_info = schema_info->class(param('class'));
-	send_error("Forbidden to update ".param('class'), 403) unless permission('update', $class_info);
+	send_error("Forbidden to update ".param('class'), 403) unless schema_info->permissions->permission('update', $class_info);
 	my $body = from_json request->body;
 	my $item = $body->{item};
 
@@ -328,7 +331,7 @@ post '/:class' => require_login sub {
 del '/:class' => require_login sub {
 	my $id = param('id');
 	my $class_info = schema_info->class(param('class'));
-	send_error("Forbidden to delete ".param('class'), 403) unless permission('delete', $class_info);
+	send_error("Forbidden to delete ".param('class'), 403) unless schema_info->permissions->permission('delete', $class_info);
 	my $row = $class_info->find_with_delimiter(param('id'));
 
     return status '404' unless $row;

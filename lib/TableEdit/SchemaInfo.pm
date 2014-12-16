@@ -1,16 +1,14 @@
 package TableEdit::SchemaInfo;
 
-use Dancer ':syntax';
 use Moo;
-use MooX::Types::MooseLike::Base qw/InstanceOf/;
+use MooX::Types::MooseLike::Base qw/ArrayRef InstanceOf/;
 
 require TableEdit::ClassInfo;
 require TableEdit::RowInfo;
 use TableEdit::Permissions;
 
-my $schema = {};
-
-
+with 'TableEdit::SchemaInfo::Role::Config';
+ 
 =head1 ATTRIBUTES
 
 =head2 schema
@@ -39,6 +37,36 @@ has sort => (
 has _classes => (
     is => 'lazy',
 );
+
+=head2 user_roles
+
+List of roles which the current user belongs to.
+
+=cut
+
+has user_roles => (
+    is => 'ro',
+    isa => ArrayRef,
+    default => sub {[]},
+);
+
+=head2 permissions
+
+Returns L<TableEdit::SchemaInfo::Permissions> object for this schema.
+
+=cut
+
+has permissions => (
+    is => 'lazy',
+    isa => InstanceOf['TableEdit::Permissions'],
+);
+
+sub _build_permissions {
+    my $self = shift;
+    my $p = TableEdit::Permissions->new(roles => $self->user_roles,
+                                        schema => $self);
+    return $p;
+}
 
 =head1 METHODS
 
@@ -185,7 +213,12 @@ sub _build__classes {
 
     for my $class (@$candidates) {
         my $rs = $self->schema->resultset($class);
-        $class_hash{$class} = TableEdit::ClassInfo->new(name => $class, schema => $self);
+        $class_hash{$class} = TableEdit::ClassInfo->new(
+            name => $class,
+            schema => $self,
+            resultset => $rs,
+            config => $self->config,
+        );
     }
 
     return \%class_hash;
@@ -215,7 +248,7 @@ has menu => (
 		for my $classInfo (@$classes){
 			my $class_name = !ref($classInfo) ? $classInfo : $classInfo->name; 
 			$classInfo = $self->class($class_name);
-			next unless TableEdit::Permissions::permission('read', $self->class($class_name) );
+			next unless $self->permissions->permission('read', $self->class($class_name) );
 			$menu->{$classInfo->label} = {
 				class => $class_name,
 				name => $classInfo->label, 
@@ -227,6 +260,18 @@ has menu => (
     }	
 );
 
+=head2 column_types
+
+List of available column types for this schema.
+Returns array reference.
+
+=cut
+
+has column_types => (
+    is => 'ro',
+    isa => ArrayRef,
+    default => sub {[]},
+);
 
 has primary_key_delimiter  => (
 	is => 'lazy',
@@ -253,8 +298,8 @@ Return attribute value
 sub attr  {
 		my ($self, @path) = @_;
 		my $value;
-		unshift @path, 'TableEditor';
-		my $node = config;
+		my $node = $self->config;
+
 		for my $p (@path){
 			$node = $node->{$p};
 			return $node unless defined $node;
