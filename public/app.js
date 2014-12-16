@@ -17,6 +17,42 @@ var default_routes = {
 	'/:class/:id/:related/many_to_many': { templateUrl: 'views/many.html', controller: 'RelatedListCtrl' },
 };
 
+CrudApp.directive('autoComplete', function(Autocomplete) {
+    return {
+        restrict: 'A',
+        link: function(scope, elem, attr, ctrl) {
+                    // elem is a jquery lite object if jquery is not present,
+                    // but with jquery and jquery ui, it will be a full jquery object.
+        	var fclass = scope.column.foreign_class;
+        	var col = scope.column;
+        	var item = scope.item;
+        	var options;
+            elem.autocomplete({
+            	minLength: 2,
+				source: 
+					function( request, response ) {
+					$.ajax({
+						url: "/api/"+fclass+"/autocomplete",
+						column: col,
+						item: item,
+						dataType: "json",
+						data: {
+							q: request.term
+						},
+						success: function( data ) {
+							
+	                    	response( data )
+						},						
+					});
+				},
+				select: function( event, ui ) {
+					item.values[col.name] = ui.item.value;
+				
+				}
+			});
+        }
+    };
+});
 
 CrudApp.directive('checkUser', function ($rootScope, $location, $route, Url, Auth) {
 	return {
@@ -265,6 +301,10 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route, I
 
 CrudApp.factory('Menu', function($resource) {
     return $resource('api/menu');
+});
+
+CrudApp.factory('Autocomplete', function($resource) {
+	return $resource('api/:class/autocomplete');
 });
 
 

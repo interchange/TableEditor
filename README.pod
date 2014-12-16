@@ -200,7 +200,7 @@ Class wide setting are in __PACKAGE__->resultset_attributes();
 
 =head3 Dropdown threshold
 
-You can set number of rows that are still ok for dropdown. Tables with more than that will show items ID istead of dropdown by default.
+You can set number of rows that are still ok for dropdown. Tables with more than that will show items ID with autocomplete search istead of dropdown by default. 
 
 	dropdown_threshold: 50
 	
@@ -245,6 +245,12 @@ Snippet should return string.
 		 my $company = $row->company || "";
 		 return "$row->username ($row->id) $company";
 
+=head3 Class search columns
+
+Autocomplete searches on all columns by default. This can be altered with this attribute.
+
+	search_columns: [name, description]	
+	
 =head3 Grid / form visible columns
 
 Often you don't care about all columns when you browse though rows or there are simply to many. You can specify a list of columns that will appear on grid or form. You have to be careful not to omit required columns and similar on form view.
@@ -289,6 +295,14 @@ Available widgets are: boolean, date, datetime, dropdown, html, image_upload, in
 	column_type = 'text';
 
 These column types are used on detail view and on list search. 	
+
+=head4 Autocomplete foreign key
+
+Automatic search on all columns on foreign class, to find foreign objects ID. You can also set which columns are searched on class.
+
+	column_type = 'autocomplete';
+
+Example of image column conf:
 
 =head4 HTML / WYSIWYG editor
 

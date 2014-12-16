@@ -114,6 +114,17 @@ has foreign_column => (
     default => '',
 );
 
+=head2 foreign_class
+
+Class object of foreign key.
+
+=cut
+
+has foreign_class => (
+    is => 'ro',
+    default => '',
+);
+
 =head2 foreign_type
 
 Type of foreign key.
@@ -158,6 +169,9 @@ sub dropdown_options {
 			@items = sort { lc $a->{option_label} cmp lc $b->{option_label} } @items;
 
 			return [@items];
+	    }
+	    else {
+	    	$self->display_type ('autocomplete');
 	    }
 	}
 	return undef;
@@ -287,6 +301,7 @@ has static_hashref => (
 		$hash->{data_type} = $self->data_type;
 		$hash->{display_type} = $self->display_type;
 		$hash->{foreign_column} = $self->foreign_column if $self->foreign_column;
+		$hash->{foreign_class} = $self->foreign_class->name if $self->foreign_class;
 	    $hash->{foreign_type} = $self->foreign_type if $self->foreign_type;
 		$hash->{is_foreign_key} = $self->is_foreign_key if $self->is_foreign_key;
 		$hash->{primary_key} = $self->is_primary if $self->is_primary;

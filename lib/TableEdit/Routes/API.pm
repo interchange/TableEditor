@@ -215,6 +215,26 @@ get '/:class/list' => require_login sub {
 };
 
 
+get '/:class/autocomplete' => require_login sub {
+	my $class_info = schema_info->class(param('class'));
+	send_error("Forbidden to read ".param('class'), 403) unless schema_info->permissions->permission('read', $class_info);
+	
+	my $search_columns = $class_info->search_columns;
+	
+	my $items = $class_info->resultset->search(
+		{
+			'-or' => {
+				map {$_ => {'-like' => '%'.param('q').'%'} } @$search_columns
+			}
+		},
+		{rows => 10}
+	);
+
+	
+	return to_json [map {{label => $_->name, value => $_->id}} $items->all];
+};
+
+
 get '/menu' => require_login sub {    
     return to_json schema_info->menu;
 };
@@ -443,20 +463,21 @@ sub grid_where {
 		# Search
 		my $name = $column->{name};
 		if( exists $params->{$name}){
+			my $condition = $params->{$name};
 			$name = $column->{self_column} || $column->{name};
 			
-			$params->{$name} = { '=' => undef } and delete $column->{data_type} if $params->{$name} eq '<null>';
-			$params->{$name} = { '!=' => undef } and delete $column->{data_type} if $params->{$name} eq '<notnull>';
+			$condition = { '=' => undef } and delete $column->{data_type} if $condition eq '<null>';
+			$condition = { '!=' => undef } and delete $column->{data_type} if $condition eq '<notnull>';
 			
-			if ($column->{data_type} and ! ref $params->{$name} and ($column->{data_type} eq 'text' or $column->{data_type} eq 'varchar')){
+			if ($column->{data_type} and ! ref $condition and ($column->{data_type} eq 'text' or $column->{data_type} eq 'varchar')){
 				my $sql_name = "LOWER($alias.$name)";
 				delete $where->{$sql_name};
-				$where->{$sql_name} = {'LIKE' => "%".lc($params->{$name})."%"} if defined $params->{$name} and $params->{$name} ne '';
+				$where->{$sql_name} = {'LIKE' => "%".lc($condition)."%"} if defined $condition and $condition ne '';
 			}
 			else { 
 				my $sql_name = "$alias.$name";
 				delete $where->{$sql_name};
-				$where->{$sql_name} = $params->{$name} if defined $params->{$name} and $params->{$name} ne '';	
+				$where->{$sql_name} = $condition if defined $condition and $condition ne '';	
 			}
 		}
 	};

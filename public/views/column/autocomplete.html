@@ -1,0 +1,15 @@
+<input 
+	name="column"
+	class="form-control autocomplete"
+	ng-required="column.required" 
+	ng-readonly="
+		column.readonly 
+			|| 
+		(column.primary_key && !create)
+		" 
+	ng-model="item.values[column.name]" 
+	type="text"
+	placeholder="{{column.placeholder}}"
+	id="{{column.name}}"
+	auto-complete
+/>

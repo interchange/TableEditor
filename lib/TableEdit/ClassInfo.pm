@@ -118,6 +118,15 @@ sub column {
 
 }
 
+
+has search_columns => (is => 'lazy');
+sub _build_search_columns { 
+    my $self = shift;
+	my $columns = $self->attr('search_columns') ? $self->attr('search_columns') : [$self->source->columns];
+	return $columns;
+}
+
+
 has columns_info => (is => 'lazy');
 sub _build_columns_info { 
     my ($self, $selected_columns) = @_;
@@ -168,6 +177,7 @@ sub _build__columns {
 
             $info->{foreign_column} = $rel_obj->foreign_column;
             $info->{foreign_type} = $rel_obj->type;
+            $info->{foreign_class} = $rel_obj->class;
             $info->{relationship} = $rel_obj;
         }
 
@@ -257,6 +267,9 @@ sub _build__relationships {
         # Determine name of class this relationship points to
         my $class_name = $rel_info->{class};
         $class_name =~ s/^(.*?)::Result:://g;
+		my $class_info = $self->schema->class($class_name);
+
+		next unless $self->schema->permissions->permission('read', $class_info );
 
         my ($foreign_column, $column_name) = %{$rel_info->{cond}};
 
@@ -307,7 +320,7 @@ sub _build__relationships {
             foreign_column => $foreign_column,
             origin_class => $self,
             class_name => $class_name,
-            class => $self->schema->class($class_name),
+            class => $class_info,
             resultset => $resultset,
             config => $self->config,
         );
@@ -332,7 +345,11 @@ sub _build__relationships {
 	    my $rel_source_name = $source->relationship_info($rel)->{source};
 	    my $rel_source = $source->schema->resultset($rel_source_name)->result_source;
 	  	my $class_name = $rel_source->relationship_info($f_rel)->{source};
-        $class_name =~ s/\w+:://g;		  		  
+        $class_name =~ s/\w+:://g;		
+        my $class_info = $self->schema->class($class_name);
+
+		next unless $self->schema->permissions->permission('read', $class_info );
+          		  
         $rel_source_name =~ s/\w+:://g;		  
         if($self->attr('relationships')){
         	next unless $not_found_relastionships->{$rel_name}; 
@@ -343,7 +360,7 @@ sub _build__relationships {
             type => 'many_to_many',
             origin_class => $self,
             class_name => $class_name,
-            class => $self->schema->class($class_name),
+            class => $class_info,
             intermediate_name => $rel,
             intermediate_relation => $f_rel,
             intermediate_class_name => $rel_source_name,
