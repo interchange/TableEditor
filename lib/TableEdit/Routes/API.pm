@@ -16,6 +16,7 @@ use File::Path qw(make_path remove_tree);
 
 require TableEdit::SchemaInfo;
 use TableEdit::Config;
+use TableEdit::Session;
 
 # Global variables
 my $appdir = realpath( "$FindBin::Bin/..");
