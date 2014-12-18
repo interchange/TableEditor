@@ -21,6 +21,7 @@ WriteMakefile(
         'Test::Database' => 0,
         'YAML'       => 0,
         'Array::Utils' => 0,
+        'Class::Load' => 0,
         'DBD::SQLite' => 1.38_01,
         'Dancer'     => 1.3118,
         'Dancer::Plugin::DBIC' => 0,

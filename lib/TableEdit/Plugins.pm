@@ -3,7 +3,7 @@ use Dancer ':syntax';
 
 use FindBin;
 use Cwd qw/realpath/;
-use Dancer::ModuleLoader;
+use Class::Load qw/load_class/;
 
 my $active_plugin_list = attr('plugins');
 my $plugins = [];
@@ -11,9 +11,8 @@ my $appdir = realpath( "$FindBin::Bin/..");
 
 	for my $plugin (@$active_plugin_list){
 		my $plugin_module = "TableEdit::Plugins::".$plugin."::API";
-		Dancer::ModuleLoader->load($plugin_module)
-        	or warn "Couldn't load $plugin_module\n";
-		push @$plugins, {
+        load_class($plugin_module);
+        push @$plugins, {
 			name => $plugin, 
 			js => "api/plugins/$plugin/public/js/app.js",
 			css => "api/plugins/$plugin/public/css/style.css"
