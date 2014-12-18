@@ -4,10 +4,11 @@ use Dancer ':syntax';
 use FindBin;
 use Cwd qw/realpath/;
 use Class::Load qw/load_class/;
+use TableEdit::Config;
 
 my $active_plugin_list = attr('plugins');
 my $plugins = [];
-my $appdir = realpath( "$FindBin::Bin/..");
+my $appdir = TableEdit::Config::appdir();
 
 	for my $plugin (@$active_plugin_list){
 		my $plugin_module = "TableEdit::Plugins::".$plugin."::API";

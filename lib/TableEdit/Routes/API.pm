@@ -19,7 +19,7 @@ use TableEdit::Config;
 use TableEdit::Session;
 
 # Global variables
-my $appdir = realpath( "$FindBin::Bin/..");
+my $appdir = TableEdit::Config::appdir();
 my $schema_info;
 
 prefix '/api';

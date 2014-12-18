@@ -30,6 +30,11 @@ else {
 
 Dancer::Config::load_settings_from_yaml($settings_file_path);
 
+# Returns root directory for TableEditor application
+sub appdir {
+    return $appdir;
+}
+
 hook 'before' => sub {
 	# Set schema settings
 	unless (config->{plugins}->{DBIC}->{default}){
