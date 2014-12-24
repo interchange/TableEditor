@@ -469,14 +469,13 @@ sub grid_where {
 			
 			$condition = { '=' => undef } and delete $column->{data_type} if $condition eq '<null>';
 			$condition = { '!=' => undef } and delete $column->{data_type} if $condition eq '<notnull>';
+			my $sql_name = "$alias.$name";
 			
 			if ($column->{data_type} and ! ref $condition and ($column->{data_type} eq 'text' or $column->{data_type} eq 'varchar')){
-				my $sql_name = "LOWER($alias.$name)";
 				delete $where->{$sql_name};
-				$where->{$sql_name} = {'LIKE' => "%".lc($condition)."%"} if defined $condition and $condition ne '';
+				$where->{$sql_name} = {'LIKE' => "%".$condition."%"} if defined $condition and $condition ne '';
 			}
 			else { 
-				my $sql_name = "$alias.$name";
 				delete $where->{$sql_name};
 				$where->{$sql_name} = $condition if defined $condition and $condition ne '';	
 			}
