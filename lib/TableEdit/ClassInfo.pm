@@ -271,6 +271,7 @@ sub _build__relationships {
 
 		next unless $self->schema->permissions->permission('read', $class_info );
 
+		next unless ref $rel_info->{cond} eq 'HASH'; 
         my ($foreign_column, $column_name) = %{$rel_info->{cond}};
 
         $foreign_column =~ s/^foreign\.//;
