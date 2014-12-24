@@ -32,7 +32,7 @@ CrudApp.directive('autoComplete', function(Autocomplete) {
 				source: 
 					function( request, response ) {
 					$.ajax({
-						url: "/api/"+fclass+"/autocomplete",
+						url: "api/"+fclass+"/autocomplete",
 						column: col,
 						item: item,
 						dataType: "json",
@@ -84,7 +84,7 @@ CrudApp.directive('checkUser', function ($rootScope, $location, $route, Url, Aut
 					}
 					else {
 						Url.login = $location.path();
-						$location.path('login');
+						$location.path('/');
 					}
 				}
 			});
