@@ -45,7 +45,7 @@ post '/login' => sub {
         debug "Login failed.";
     }
 
-	return to_json logged_in_user;
+	return to_json $user;
 };
 
 

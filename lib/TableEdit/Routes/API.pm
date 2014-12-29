@@ -26,15 +26,15 @@ prefix '/api';
 
 # One schema_info instance per user (because of different permissions)
 sub schema_info {
-	my $user = logged_in_user;
-	$schema_info->{$user->{user}} ||= TableEdit::SchemaInfo->new(
+	my $username = session('logged_in_user');
+	$schema_info->{$username} ||= TableEdit::SchemaInfo->new(
         schema => schema,
         sort => 1,
         config => config->{TableEditor},
         user_roles => [user_roles],
         column_types => [TableEdit::Config::column_types()],
 	);
-	return $schema_info->{$user->{user}};
+	return $schema_info->{$username};
 }
 
 any '**' => sub {
