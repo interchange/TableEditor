@@ -11,6 +11,10 @@ use File::Spec;
 use TableEdit::ConfigSchema;
 use TableEdit::DriverInfo;
 
+use Exporter 'import';
+our @EXPORT_OK = qw(
+  appdir column_types load_settings
+);
 
 my $appdir = config->{'appdir'};
 my $SQLite = _bootstrap_config_schema();
@@ -19,16 +23,8 @@ set views => "$appdir/public/views";
 
 # Load TE settings
 my $settings_file = config->{'settings_file'} || 'lib/config.yml';
-my $settings_file_path;
 
-if (File::Spec->file_name_is_absolute($settings_file)) {
-    $settings_file_path = $settings_file;
-}
-else {
-    $settings_file_path = File::Spec->catfile($appdir, $settings_file);
-}
-
-Dancer::Config::load_settings_from_yaml($settings_file_path);
+load_settings($settings_file);
 
 # Returns root directory for TableEditor application
 sub appdir {
@@ -244,6 +240,26 @@ sub _bootstrap_config_schema {
     return $schema;
 }
 
+=head2 load_settings $path
+
+Loads configuration file from path $path, which can be an absolute path
+or a relative path starting at appdir.
+
+=cut
+
+sub load_settings {
+    my $settings_file = shift;
+    my $settings_file_path;
+
+    if (File::Spec->file_name_is_absolute($settings_file)) {
+        $settings_file_path = $settings_file;
+    }
+    else {
+        $settings_file_path = File::Spec->catfile($appdir, $settings_file);
+    }
+
+    Dancer::Config::load_settings_from_yaml($settings_file_path);
+}
 
 sub column_types {
 	my $dir = $appdir.'/public/views/column';

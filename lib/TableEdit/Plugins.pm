@@ -4,11 +4,11 @@ use Dancer ':syntax';
 use FindBin;
 use Cwd qw/realpath/;
 use Class::Load qw/load_class/;
-use TableEdit::Config;
+use TableEdit::Config qw/appdir load_settings/;
 
 my $active_plugin_list = attr('plugins');
 my $plugins = [];
-my $appdir = TableEdit::Config::appdir();
+my $appdir = appdir();
 
 for my $plugin (@$active_plugin_list){
     my $plugin_module = "TableEdit::Plugins::".$plugin."::API";
@@ -18,6 +18,11 @@ for my $plugin (@$active_plugin_list){
         js => "api/plugins/$plugin/public/js/app.js",
         css => "api/plugins/$plugin/public/css/style.css"
     };
+    # check for configuration file
+    my $settings_file = "$appdir/lib/TableEdit/Plugins/$plugin/config.yml";
+    if (-f $settings_file) {
+        load_settings($settings_file);
+    }
 }
 
 prefix '/api';
