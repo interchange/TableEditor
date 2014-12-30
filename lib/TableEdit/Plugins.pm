@@ -10,15 +10,15 @@ my $active_plugin_list = attr('plugins');
 my $plugins = [];
 my $appdir = TableEdit::Config::appdir();
 
-	for my $plugin (@$active_plugin_list){
-		my $plugin_module = "TableEdit::Plugins::".$plugin."::API";
-        load_class($plugin_module);
-        push @$plugins, {
-			name => $plugin, 
-			js => "api/plugins/$plugin/public/js/app.js",
-			css => "api/plugins/$plugin/public/css/style.css"
-		};
-	}
+for my $plugin (@$active_plugin_list){
+    my $plugin_module = "TableEdit::Plugins::".$plugin."::API";
+    load_class($plugin_module);
+    push @$plugins, {
+        name => $plugin, 
+        js => "api/plugins/$plugin/public/js/app.js",
+        css => "api/plugins/$plugin/public/css/style.css"
+    };
+}
 
 prefix '/api';
 
