@@ -44,7 +44,13 @@ for my $testdb (@handles) {
 
     isa_ok($schema, 'Interchange6::Schema');
 
-    $schema_info = TableEdit::SchemaInfo->new(schema => $schema);
+    $schema_info = TableEdit::SchemaInfo->new(
+        schema => $schema,
+        user_roles => ['tester'],
+        config => {
+            read => ['tester'],
+        },
+    );
 
     my $classes = $schema_info->classes;
 

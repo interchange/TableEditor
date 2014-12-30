@@ -10,7 +10,13 @@ use TableEdit::SchemaInfo::Test::Relationships qw(test_relationships);
 
 isa_ok(Schema, 'DBIx::Class::Schema');
 
-my $schema_info = TableEdit::SchemaInfo->new(schema => Schema);
+my $schema_info = TableEdit::SchemaInfo->new(
+    schema => Schema,
+    user_roles => ['tester'],
+    config => {
+        read => ['tester'],
+    },
+);
 
 isa_ok($schema_info, 'TableEdit::SchemaInfo');
 
