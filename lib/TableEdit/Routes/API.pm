@@ -394,7 +394,7 @@ sub grid_template_params {
 	# Grid
 	$grid_params->{column_list} = $class_info->grid_columns_info; 
 	my $where_params = from_json $get_params->{q} if $get_params->{q};
-	$where = grid_where($grid_params->{column_list}, $where, $where_params);
+	$where = grid_where($class_info, $where, $where_params);
 	add_values($grid_params->{column_list}, $where_params);
 	
 	my $rs = $related_items || $class_info->resultset;
@@ -460,9 +460,10 @@ Sets sql conditions.
 =cut
 
 sub grid_where {
-	my ($columns, $where, $params, $alias) = @_;
+	my ($class_info, $where, $params, $alias) = @_;
 	$alias ||= 'me';
-	for my $column (@$columns) {
+	my @columns = $class_info->columns;
+	for my $column (@columns) {
 		# Search
 		my $name = $column->{name};
 		if( exists $params->{$name}){
