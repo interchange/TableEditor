@@ -23,7 +23,8 @@ WriteMakefile(
         'Array::Utils' => 0,
         'Class::Load' => 0,
         'DBD::SQLite' => 1.38_01,
-        'Dancer'     => 1.3118,
+        # we rely on deep configuration merging
+        'Dancer'     => 1.3127,
         'Dancer::Plugin::DBIC' => 0,
         'Dancer::Plugin::Auth::Extensible' => 0,
 	'Template' => 0,
