@@ -313,6 +313,7 @@ has static_hashref => (
 		$hash->{upload_max_size} = $self->upload_max_size if defined $self->upload_max_size;
 		$hash->{upload_extensions} = $self->upload_extensions if $self->upload_extensions;
 		$hash->{upload_dir} = $self->upload_dir if $self->upload_dir;
+		$hash->{relationship} = $hash->{relationship}->hashref if $hash->{relationship};
 	
 	    return $hash;
     }
@@ -409,11 +410,11 @@ has attrs => (
 
 		# Config file
 		$node = $self->config;
-		for my $p ('TableEditor', 'classes', $self->class->name, 'columns', $self->name){
+		for my $p ('classes', $self->class->name, 'columns', $self->name){
 			$node = $node->{$p};
 			last unless defined $node; 
 		}
-		my $config_attrs = $node || {};
+		my $config_attrs = \%{$node} || {};
 
 		return {%$schema_attrs, %$config_attrs};		
 	}

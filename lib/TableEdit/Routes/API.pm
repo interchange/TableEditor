@@ -303,7 +303,8 @@ get '/:class/:id' => require_login sub {
 	my $class_info = schema_info->class(param('class'));
 	send_error("Forbidden to read ".param('class'), 403) unless schema_info->permissions->permission('read', $class_info);
 
-	$data->{columns} = $class_info->columns_info;
+	$data->{columns} = $class_info->form_columns_array;
+	$data->{columns_info} = $class_info->form_columns_hash;
 
 	# row lookup
 	my $row = $class_info->find_with_delimiter(param('id'));
@@ -321,14 +322,14 @@ get '/:class/:id' => require_login sub {
 get '/:class' => require_login sub {
 	my $class_info = schema_info->class(param('class'));
 	send_error("Forbidden to read ".param('class'), 403) unless schema_info->permissions->permission('read', $class_info);
-
-	return to_json({
+	my $data = {
 		columns => $class_info->form_columns_array,
 		columns_info => $class_info->form_columns_hash,
 		class => $class_info->name,
 		class_label => $class_info->label,
 		relations => $class_info->relationships_info,
-	}, {allow_unknown => 1}); 
+	};
+	return to_json($data, {allow_unknown => 1}); 
 };
 
 
@@ -341,11 +342,12 @@ post '/:class' => require_login sub {
 	debug "Updating item for ".$class_info->name.": ", $item;
 	my $object = $class_info->resultset->update_or_create( $item->{values} );
 	return to_json {} unless  $object;
-	return to_json {
+	my $object_hash = {
 		name => schema_info->row($object)->to_string,
-		values => {$object->get_inflated_columns},
+		values => {$object->get_columns},
 		id => $object->id,
 	};
+	return to_json ($object_hash,{allow_unknown => 1});
 };
 
 

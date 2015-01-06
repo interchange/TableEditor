@@ -24,7 +24,7 @@ set views => "$appdir/public/views";
 # Load TE settings
 my $settings_file = config->{'settings_file'} || 'lib/config.yml';
 
-load_settings($settings_file);
+load_settings($settings_file) if (-f $settings_file);
 
 # Returns root directory for TableEditor application
 sub appdir {
