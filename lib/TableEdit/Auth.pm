@@ -21,7 +21,7 @@ post '/login' => sub {
 	my $post = from_json request->body;
     my $username = $post->{user}->{username} || '';
 	my $password = $post->{user}->{password} || '';
-	my $user = {role => 'guest'};
+	my $user = {};
 
     # removing surrounding whitespaces
     $username =~ s/^\s+//;
@@ -38,6 +38,7 @@ post '/login' => sub {
         session logged_in_user_realm => $realm;
 
         $user->{username} = $username;
+        $user->{roles} = user_roles;
 
         debug "Login successful for user $username with roles: ", join(',', user_roles);
     } else {

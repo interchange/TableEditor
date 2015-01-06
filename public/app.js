@@ -960,27 +960,29 @@ var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Pl
 		
 }
 
-var LoginCtrl = function ($scope, $rootScope, Auth, Url, $location, Menu, InfoBar) {
-	$scope.form_user = {};
+var LoginCtrl = function ($scope, $rootScope, $timeout, Auth, Url, $location, Menu, InfoBar) {
 	$scope.error = null;
-	
 
 	$rootScope.login = function(){
-		Auth.login.save(
-				{user: $scope.form_user, smth: 1},
+		$timeout(Auth.login.save(
+				{user: {
+					// Browser autofill doesn't trigger change so we have to read values with plain js
+					username: document.getElementsByName("username")[0].value,
+					password: document.getElementsByName("password")[0].value,
+					} 
+				},
 				// Success
 				function(data) {
 					$rootScope.user = {};
-					if (data.user){
+					if (data.username){
 						$rootScope.user.roles = data.roles;
-						$rootScope.user.username = data.user;
+						$rootScope.user.username = data.username;
 						$rootScope.active = data.active;
 						$rootScope.menu = Menu.query();
 						$scope.error = null;						
-						InfoBar.addNext('success', 'You are logged in as '+data.user+'!');
+						InfoBar.addNext('success', 'You are logged in as '+data.username+'!');
 
 						if (Url.login == '/' || !Url.login ) Url.login = '/login'; // Redirect to home if last route was login 
-						//$location.path('/login');
 						$location.path(Url.login);
 					}
 					else {
@@ -993,7 +995,7 @@ var LoginCtrl = function ($scope, $rootScope, Auth, Url, $location, Menu, InfoBa
 					$scope.error = 'Connection error';
 					$rootScope.user = null;
 				}
-		);
+		));
 	};
 
 

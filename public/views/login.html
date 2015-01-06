@@ -1,18 +1,18 @@
 
 <h1>Login</h1>
 <div ng-show="!user.username">
-	<form>
+	<form name="login_form">
 		<fieldset>
 			<div class="controls form-group">
-				<label class="control-label"> Username </label> <input class="form-control" type="text" name="username" ng-model="form_user.username" />
+				<label class="control-label"> Username </label> <input class="form-control" type="text" name="username" ng-model="form_user.username" required />
 			</div>
 			<div class="controls form-group">
-				<label class="control-label"> Password </label> <input class="form-control" type="password" name="password" ng-model="form_user.password" />
+				<label class="control-label"> Password </label> <input class="form-control" type="password" name="password" ng-model="form_user.password" required/>
 			</div>
 			<div class="alert alert-danger" ng-show="error">{{error}}</div>
 			<div class="alert alert-success" ng-show="success">{{success}}</div>
 			<div class="controls form-group">
-				<button class="btn btn-primary" ng-click="login()">Login</button>
+				<input type="submit" class="btn btn-primary" ng-click="login()" value="Login"></input>
 			</div>
 		</fieldset>
 	</form>
