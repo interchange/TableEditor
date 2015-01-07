@@ -236,7 +236,7 @@ Custom table lable. Default is generated from table name.
 
 Default redirect is to list, but in some cases you may prefer to be redirected to newly created item, so you can manipulate relationships immediately. This can be set as follows:
 
-	new_redirect: item
+	redirect_after_create: item
 
 =head3 Row in string representation
 

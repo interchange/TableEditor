@@ -258,7 +258,7 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route, I
 				else {
 					InfoBar.addNext('success', data.name + ' succesfuly saved!');
 					var url = Url.edit || "/"+class_name+"/list";
-					if (create && data.new_redirect == 'item') url = "/"+class_name+"/edit/"+data.id;															 
+					if (create && data.redirect_after_create == 'item') url = "/"+class_name+"/edit/"+data.id;															 
 					
 					$location.path(url);							
 				}
