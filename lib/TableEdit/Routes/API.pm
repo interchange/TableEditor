@@ -338,14 +338,16 @@ post '/:class' => require_login sub {
 	send_error("Forbidden to update ".param('class'), 403) unless schema_info->permissions->permission('update', $class_info);
 	my $body = from_json request->body;
 	my $item = $body->{item};
+	return to_json {error => 'Please fill the form.'} unless $item->{values} and %{$item->{values}};
 
 	debug "Updating item for ".$class_info->name.": ", $item;
 	my $object = $class_info->resultset->update_or_create( $item->{values} );
-	return to_json {} unless  $object;
+	return to_json {error => 'Unable to save.'} unless  $object;
 	my $object_hash = {
 		name => schema_info->row($object)->to_string,
 		values => {$object->get_columns},
 		id => $object->id,
+		new_redirect => $class_info->attr('new_redirect'),
 	};
 	return to_json ($object_hash,{allow_unknown => 1});
 };
