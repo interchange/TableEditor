@@ -232,6 +232,12 @@ Custom table lable. Default is generated from table name.
 
 	label: Employees
 
+=head3 Redirect after new item save
+
+Default redirect is to list, but in some cases you may prefer to be redirected to newly created item, so you can manipulate relationships immediately. This can be set as follows:
+
+	new_redirect: item
+
 =head3 Row in string representation
 
 Row often has to be represented as string (titles, drop-down selectors, ...) so it is a good idea to 

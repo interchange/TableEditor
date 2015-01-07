@@ -234,9 +234,9 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route, I
 		update: function(){
 			var class_name = this.data.class;
 			var class_label = this.data.class_label;
-			var url = Url.edit || "/"+class_name+"/list";
 			Url.edit = null;
 			var item = this.item;
+			var create = this.create;
 			this.form.submitted = 1;			
 			InfoBar.clear();
 			
@@ -257,6 +257,9 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route, I
 				}
 				else {
 					InfoBar.addNext('success', data.name + ' succesfuly saved!');
+					var url = Url.edit || "/"+class_name+"/list";
+					if (create && data.new_redirect == 'item') url = "/"+class_name+"/edit/"+data.id;															 
+					
 					$location.path(url);							
 				}
 			},
