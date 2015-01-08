@@ -358,10 +358,6 @@ has required => (
 				and 
 			defined $self->attr('is_nullable') and $self->attr('is_nullable') == 0;
 			
-		if($self->is_foreign_key){
-			return undef if $self->foreign_type and $self->foreign_type eq 'might_have';
-			return 'required';
-		}
 		return undef;
     }
 );
@@ -386,11 +382,8 @@ sub attr  {
 		return $node if defined $node;
 		
 		# Schema config
-		$node = $self->class->resultset->result_source->resultset_attributes;
-		for my $p (@path){
-			$node = $node->{$p};
-			next if defined $node and ref $node eq 'hash';
-		}
+		$node = $self->class->resultset->result_source->column_info($self->name);
+		$node = $node->{$path[-1]};
 		return $node;
 		
 }
