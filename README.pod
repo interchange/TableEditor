@@ -300,6 +300,12 @@ Available widgets are: boolean, date, datetime, dropdown, html, image_upload, in
 
 	column_type = 'text';
 
+=head3 Prefill colum
+
+You can set a value to fill field on "new" form.
+
+	prefill = '<strong>Important</strong>';
+
 These column types are used on detail view and on list search. 	
 
 =head4 Autocomplete foreign key

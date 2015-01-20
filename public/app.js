@@ -695,6 +695,11 @@ var CreateCtrl = function ($scope, $routeParams, ClassItem, Item) {
 			// Success
 			function(data) {
 				$scope.title = "New " + data.class_label;
+				angular.forEach($scope.data.columns, function(column, key){							
+					if(column.prefill){
+						$scope.item.values[column.name] = column.prefill;
+					}
+				});
 			},
 			// Error
 			function() {
