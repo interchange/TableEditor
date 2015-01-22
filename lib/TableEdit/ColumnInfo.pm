@@ -356,7 +356,10 @@ has required => (
 				and 
 			!defined $self->attr('dynamic_default_on_update') 
 				and 
-			defined $self->attr('is_nullable') and $self->attr('is_nullable') == 0;
+			(	!defined $self->attr('is_nullable') 
+					or 
+				defined $self->attr('is_nullable') and $self->attr('is_nullable') == 0
+			);
 			
 		return undef;
     }
