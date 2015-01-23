@@ -306,6 +306,10 @@ CrudApp.factory('Menu', function($resource) {
     return $resource('api/menu');
 });
 
+CrudApp.factory('TinyMCE', function($resource) {
+	return $resource('api/TinyMCE');
+});
+
 CrudApp.factory('Autocomplete', function($resource) {
 	return $resource('api/:class/autocomplete');
 });
@@ -866,6 +870,11 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 
 	$scope.del = Item.delete;
 
+	$scope.edit = function () {
+		Url.edit = $location.path();
+		var id = this.row.id;
+		$location.path('/'+this.data.class+'/edit/'+id);		
+	};
 
 	$scope.create = function () {
 		Url.edit = $location.path();
@@ -915,7 +924,7 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 };
 
 
-var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Plugins, ActiveUsers, InfoBar, Menu) {
+var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Plugins, ActiveUsers, InfoBar, Menu, TinyMCE) {
 	$rootScope.infoBar = InfoBar;
 	$rootScope.infoBarNext = {};
 	$rootScope.menu = Menu.query(); 
@@ -966,6 +975,8 @@ var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Pl
 			}
 	);
 		
+	// TinyMCE settings
+	$rootScope.tinymceOptions = TinyMCE.get();
 }
 
 var LoginCtrl = function ($scope, $rootScope, $timeout, Auth, Url, $location, Menu, InfoBar) {

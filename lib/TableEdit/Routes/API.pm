@@ -44,6 +44,10 @@ any '**' => sub {
 	pass;
 };
 
+get '/TinyMCE' => sub {
+	return to_json schema_info->attr('tiny_mce') || {};
+};
+
 
 get '/:class/:id/:related/list' => require_login sub {
 	my $id = param('id');
@@ -364,6 +368,7 @@ del '/:class' => require_login sub {
 	$row->delete;
 	return 1;
 };
+
 
 =head1 Fuctions
 
