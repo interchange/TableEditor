@@ -300,7 +300,7 @@ Available widgets are: boolean, date, datetime, dropdown, html, image_upload, in
 
 	column_type = 'text';
 
-=head3 Prefill colum
+=head3 Prefill column
 
 You can set a value to fill field on "new" form.
 
