@@ -411,6 +411,7 @@ All plugins are located in /Plugins/name_of_plugin dir. Inside they usually have
 	Plugins
 	|-Some_plugin
 		|-api.pm
+        |-config.yml
 		|-public
 			|-images
 			|-js
@@ -429,6 +430,17 @@ api.pm is required.
 Active plugins are listed in config. Order is important as first will have priority over second. 
 
 	plugins: [ "SomePlugin", "SomeOtherPlugin" ]
+
+=head2 Configuration file
+
+Any plugin might have a configuration file, F<config.yml> in the main directory of the plugin.
+For example:
+
+  TableEditor:
+    classes:
+      MessageType:
+        to_string: |
+           my $name = $row->name; $name =~ s/_/ /g; $name = ucfirst($name);
 
 =head2 Custom pages
 
