@@ -244,7 +244,7 @@ has menu => (
 			$sort = 1;
 		}
 
-		my $menu;
+		my $menu = {};
 		for my $classInfo (@$classes){
 			my $class_name = !ref($classInfo) ? $classInfo : $classInfo->name; 
 			$classInfo = $self->class($class_name);
