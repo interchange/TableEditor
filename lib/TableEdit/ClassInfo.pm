@@ -342,7 +342,6 @@ sub _build__relationships {
 		$rel_info = substr $row, $index_candy + length($search_str_candy), index($row, ';') - $index_candy - length($search_str_candy) if $index_candy >= 0;
 		next unless $rel_info;
 		my ($rel_name, $rel, $f_rel) = eval("($rel_info)");
-        warn "REL_INFO $rel_info REL $rel FREL $f_rel.\n";
         
 	    my $rel_source_name = $source->relationship_info($rel)->{source};
 	    my $rel_source = $source->schema->resultset($rel_source_name)->result_source;
