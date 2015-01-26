@@ -388,7 +388,26 @@ sub add_values {
 
 =head2 grid_template_params
 
-Returns data for grid view
+Returns data for grid view.
+
+Parameters are:
+
+=over 4
+
+=item $class_info
+
+L<TableEdit::ClassInfo> object for class.
+
+=item $related_items
+
+List of related items
+
+=item $grid_rows
+
+Subroutine to retrieve items for grid display.
+Defaults to C<grid_rows> function.
+
+=back
 
 =cut
 
@@ -462,7 +481,29 @@ sub grid_sort {
 
 =head2 grid_where
 
-Sets sql conditions.
+Determines conditions for grid search.
+
+Parameters are:
+
+=over 4
+
+=item $class_info
+
+L<TableEdit::ClassInfo> object for class.
+
+=item $where
+
+Hashref with conditions.
+
+=item $params
+
+Column parameters.
+
+=item $alias
+
+Table alias.
+
+=back
 
 =cut
 
