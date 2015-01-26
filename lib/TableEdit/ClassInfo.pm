@@ -602,7 +602,8 @@ sub _build_subset_conditions {
 		my $column_subset = $class_column_attrs->{$column}->{subset};
 		next unless $column_subset;
 		for my $condition (keys %$column_subset){
-			$conditions->{$column} = $condition if role_in($column_subset->{$condition})
+			$conditions->{$column} = $condition
+                if $self->schema->permissions->role_in($column_subset->{$condition})
 		}
 	}
 	return $conditions;
