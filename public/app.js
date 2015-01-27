@@ -3,7 +3,7 @@
 /* App Module */
 
 var default_routes = {
-	'/': { templateUrl: 'views/login.html', controller: 'StatusCtrl', public: true },
+	'/': { templateUrl: 'views/login.html', controller: 'LoginCtrl', public: true },
 	'/404': { templateUrl: 'views/404.html', controller: 'StatusCtrl', public: true },
 	'/login': { templateUrl: 'views/login.html', controller: 'LoginCtrl', public: true },
 	'/status': { templateUrl: 'views/status.html', controller: 'StatusCtrl', public: true },
@@ -980,6 +980,7 @@ var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Pl
 }
 
 var LoginCtrl = function ($scope, $rootScope, $timeout, Auth, Url, $location, Menu, InfoBar) {
+	$location.path('/login');
 	$scope.error = null;
 
 	$rootScope.login = function(){
