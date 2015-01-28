@@ -67,6 +67,11 @@ angular.module('ui.tinymce', [])
               ed.save();
               updateView();
             });
+            // Update on every click
+		    ed.on('Click', function(e) {
+		    	ed.save();
+	            	updateView();
+            });
             if (configSetup) {
               configSetup(ed);
             }
