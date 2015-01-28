@@ -542,24 +542,34 @@ sub grid_rows {
 	my ($rows, $columns_info, $primary_key) = @_;
 
 	my @table_rows;
-	
+
 	for my $row (@$rows){
 		die 'No primary column' unless $primary_key;
 		my $rowInfo = schema_info->row($row);
-		
+
 		# unravel row
 		my $row_inflated = {$row->get_columns}; #inflated_
 		my $row_data = [];
 
 		for my $column (@$columns_info){
-			my $column_name = $column->{foreign} ? "$column->{foreign}" : "$column->{name}";
-			my $value = $row->$column_name;
-			if( index(ref $value, ref schema) == 0 ){ # If schema object
-				$value = schema_info->row($value)->to_string; 
-			} 
-			elsif ( ref $value ) { # some other object
-				$value = $row_inflated->{$column_name};
-			}
+            my ($value, $rel_name, $rel_class);
+            my $column_name = "$column->{name}";
+
+            if ($column->{foreign_column}) {
+                $rel_name = $column->{relationship}->{name};
+                $value = $row->$rel_name;
+            }
+            else {
+                $value = $row->$column_name;
+            }
+
+            if ( index(ref $value, ref schema) == 0 ){ # If schema object
+                $value = schema_info->row($value)->to_string; 
+            }
+            elsif ( ref $value ) { # some other object
+                $value = $row_inflated->{$column_name};
+            }
+
 			push @$row_data, {value => $value};
 		}
 
