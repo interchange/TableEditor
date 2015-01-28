@@ -445,10 +445,7 @@ sub grid_template_params {
 		$grid_params->{column_list} , 
 		$primary_key,
 	);
-	
-	$class_info->label;
-	$class_info->label;
-	
+
 	$grid_params->{class} = $class_info->name;
 	$grid_params->{class_label} = $class_info->label;
 	$grid_params->{page} = $page;
