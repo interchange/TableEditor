@@ -256,7 +256,7 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route, I
 					InfoBar.add('danger', 'There has been an error saving '+class_label+'! \n'+data.error);
 				}
 				else {
-					InfoBar.addNext('success', data.name + ' succesfuly saved!');
+					InfoBar.addNext('success', data.name + ' successfully saved!');
 					var url = Url.edit || "/"+class_name+"/list";
 					if (create && data.redirect_after_create == 'item') url = "/"+class_name+"/edit/"+data.id;															 
 					
