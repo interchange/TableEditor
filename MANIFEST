@@ -96,7 +96,7 @@ t/manifest.t
 t/pod-coverage.t
 t/pod.t
 t/schema-info/driver-info.t
-t/schema-info/schema-info.t
+t/schema-info/interchange6.t
 TODO
 views/field/boolean.html
 views/field/boolean.xml
