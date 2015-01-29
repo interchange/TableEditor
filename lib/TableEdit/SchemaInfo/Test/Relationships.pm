@@ -28,9 +28,9 @@ sub test_relationships {
             join(', ', @rel_names);
 
     while (my ($name, $info) = each %$expected) {
-        ok(exists $rels->{$name}, "Test whether relationship $name exists.");
-
-        test_relationship($class, $rels->{$name}, $info);
+        if (ok(exists $rels->{$name}, "Test whether relationship $name exists.")) {
+            test_relationship($class, $rels->{$name}, $info);
+        }
     }
 }
 
