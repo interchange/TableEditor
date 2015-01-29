@@ -4,7 +4,7 @@ use warnings;
 use Test::Most;
 use Test::Database;
 
-use Interchange6::Schema;
+use Interchange6::Schema 0.070;
 use TableEdit::SchemaInfo;
 use TableEdit::SchemaInfo::Test::Relationships qw(test_relationships test_relationship);
 
@@ -55,7 +55,7 @@ for my $testdb (@handles) {
     my $classes = $schema_info->classes;
 
     my $count = scalar(keys %$classes);
-    my $expected_value = 44;
+    my $expected_value = 49;
 
     ok ($count == $expected_value, "Test number of classes")
         || diag "Number of classes: $count instead of $expected_value.";
