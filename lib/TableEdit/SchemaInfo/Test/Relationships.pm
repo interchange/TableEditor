@@ -9,6 +9,8 @@ use warnings;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(test_relationships test_relationship);
 
+$Data::Dumper::Terse = 1;
+
 sub test_relationships {
     my ($class, $expected) = @_;
     my $expected_value;
@@ -71,16 +73,30 @@ sub test_relationship {
     # self column
     my $self_column = $relationship->self_column;
     $expected_value = $expected->{self_column};
-    ok($self_column eq $expected_value,
-       "Test self column for class $class_name and relationship $rel_name.")
-        || diag "$self_column instead of $expected_value";
+
+    if ($self_column) {
+        ok($self_column eq $expected_value,
+           "Test self column for class $class_name and relationship $rel_name.")
+            || diag "$self_column instead of $expected_value";
+    }
+    else {
+        fail("Self column missing for class $class_name and relationship $rel_name: "
+                 . Dumper($relationship->hashref));
+    }
 
     # foreign column
     my $foreign_column = $relationship->foreign_column;
     $expected_value = $expected->{foreign_column};
-    ok($foreign_column eq $expected_value,
-       "Test foreign column for class $class_name and relationship $rel_name.")
-        || diag "$foreign_column instead of $expected_value";
+
+    if ($foreign_column) {
+        ok($foreign_column eq $expected_value,
+           "Test foreign column for class $class_name and relationship $rel_name")
+            || diag "$foreign_column instead of $expected_value";
+    }
+    else {
+        fail("Foreign column missing for class $class_name and relationship $rel_name: "
+                 . Dumper($relationship->hashref));
+    }
 
 	# origin class
 	my $origin_class = $relationship->origin_class;
