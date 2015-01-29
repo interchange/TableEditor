@@ -177,7 +177,7 @@ for my $testdb (@handles) {
         || diag "Number of columns: $count instead of $expected_value.";
 
     %expected = (
-        role => {
+        roles_id => {
             is_foreign_key => 1,
             foreign_column => 'roles_id',
             foreign_type => 'belongs_to',
@@ -185,7 +185,7 @@ for my $testdb (@handles) {
             data_type => 'integer',
             position => 2,
         },
-        user => {
+        users_id => {
             is_foreign_key => 1,
             foreign_column => 'users_id',
             foreign_type => 'belongs_to',
@@ -222,6 +222,7 @@ for my $testdb (@handles) {
     # test relationships for Permission class
     %expected = (
         role => {
+            class_name => 'Role',
             type => 'belongs_to',
             self_column => 'roles_id',
             foreign_column => 'roles_id',
