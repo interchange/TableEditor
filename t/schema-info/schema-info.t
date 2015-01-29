@@ -95,7 +95,7 @@ for my $testdb (@handles) {
     ok ($rs_name eq $expected_value, "Test name of Role resultset.")
 	|| diag "$rs_name instead of $expected_value.";
 
-    $expected_value = 3;
+    $expected_value = 4;
 
     # retrieve columns as array
     my @cols = $classes->{Role}->columns;
@@ -111,7 +111,7 @@ for my $testdb (@handles) {
         || diag "Number of columns: $count instead of $expected_value.";
 
     # test order in array
-    my @expected_order = qw/roles_id name label/;
+    my @expected_order = qw/roles_id name label description/;
     my @order = map {$_->name} @cols;
 
     is_deeply(\@order, \@expected_order, "Order of columns (array)");
@@ -130,24 +130,37 @@ for my $testdb (@handles) {
             label => 'Label',
             position => 3,
         },
+        description => {
+            label => 'Description',
+            position => 4,
+        },
     );
 
     # test column info for class
     test_columns($classes->{Role}, \%expected);
 
     %expected = (
-        GroupPricing => {
+        price_modifiers => {
+            class_name => 'PriceModifier',
             type => 'has_many',
             self_column => 'roles_id',
             foreign_column => 'roles_id',
         },
-        Permission => {
+        permissions => {
+            class_name => 'Permission',
             type => 'has_many',
             self_column => 'roles_id',
             foreign_column => 'roles_id',
         },
-        UserRole => {
+        user_roles => {
+            class_name => 'UserRole',
             type => 'has_many',
+            self_column => 'roles_id',
+            foreign_column => 'roles_id',
+        },
+        users => {
+            class_name => 'User',
+            type => 'many_to_many',
             self_column => 'roles_id',
             foreign_column => 'roles_id',
         },
@@ -164,7 +177,7 @@ for my $testdb (@handles) {
         || diag "Number of columns: $count instead of $expected_value.";
 
     %expected = (
-        roles_id => {
+        role => {
             is_foreign_key => 1,
             foreign_column => 'roles_id',
             foreign_type => 'belongs_to',
@@ -172,7 +185,7 @@ for my $testdb (@handles) {
             data_type => 'integer',
             position => 2,
         },
-        users_id => {
+        user => {
             is_foreign_key => 1,
             foreign_column => 'users_id',
             foreign_type => 'belongs_to',
@@ -206,15 +219,16 @@ for my $testdb (@handles) {
                        $classes->{Product}->relationships->{Inventory},
                        \%expected);
 
+    # test relationships for Permission class
     %expected = (
-        type => 'belongs_to',
-        self_column => 'roles_id',
-        foreign_column => 'roles_id',
+        role => {
+            type => 'belongs_to',
+            self_column => 'roles_id',
+            foreign_column => 'roles_id',
+        },
     );
 
-    test_relationship($classes->{Permission},
-                      $classes->{Permission}->relationships->{Role},
-                       \%expected);
+    test_relationships($classes->{Permission}, \%expected);
 
     test_columns($classes->{Tax}, {
 	decimal_places => {
