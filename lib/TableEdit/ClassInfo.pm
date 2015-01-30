@@ -328,21 +328,63 @@ sub _build__relationships {
     }
 
 	# Find and Add many to many relationships
-	my $search_str = '__PACKAGE__->many_to_many('; #__PACKAGE__->many_to_many('addresses' => 'user_address', 'address');
-	my $search_str_candy = 'many_to_many '; #many_to_many orderlines => "orderlines_shipping", "orderline";
 	my $filename = Class::Inspector->resolved_filename( $source->result_class );
+    my $m2m_found = '';
+    my $rel_info_buffer;
+
 	open (my $fh, "<", $filename) or die "cannot open < $filename: $!";
 	while (my $row = <$fh>) {
 		chomp $row;
-		my $index = index $row, $search_str;
-		my $index_candy = index $row, $search_str_candy;
-		next if ($index == -1 and $index_candy == -1);
-		my $rel_info;
-		$rel_info = substr $row, $index + length($search_str), index($row, ')') - $index - length($search_str) if $index >= 0;
-		$rel_info = substr $row, $index_candy + length($search_str_candy), index($row, ';') - $index_candy - length($search_str_candy) if $index_candy >= 0;
-		next unless $rel_info;
+        my ($index, $index_candy, $m2m_complete);
+
+        # check for start of relationship method call
+        if ($row =~ s/__PACKAGE__->many_to_many\((.*)/$1/) {
+            $m2m_found = 'standard';
+            $rel_info_buffer = '';
+        }
+        elsif ($row =~ s/many_to_many\s(.*)/$1/) {
+            $m2m_found = 'candy';
+            $rel_info_buffer = '';
+        }
+
+		next if ! $m2m_found;
+
+        # strip whitespace
+        $row =~ s/^\s+//;
+        $row =~ s/\s+$//;
+
+        $m2m_complete = 0;
+
+        if ($m2m_found eq 'standard') {
+            # Check for closing )
+            if ($row =~ /(.*)\)/) {
+                $row = $1;
+                $m2m_complete = 1;
+            }
+        }
+        elsif ($m2m_found eq 'candy') {
+            # Check for closing ;
+            if ($row =~ s/(.*?);/$1/) {
+                $m2m_complete = 1;
+            }
+        }
+
+        $rel_info_buffer .= $row;
+
+        next if ! $m2m_complete;
+
+        my $rel_info = $rel_info_buffer;
+
+        $rel_info_buffer = '';
+        $m2m_found = 0;
+
+        # many to many relationship parameters complete
 		my ($rel_name, $rel, $f_rel) = eval("($rel_info)");
-        
+
+        if ($@) {
+            die "Failed to eval relationship parameters ($rel_info): $@";
+        }
+
 	    my $rel_source_name = $source->relationship_info($rel)->{source};
 	    my $rel_source = $source->schema->resultset($rel_source_name)->result_source;
 	  	my $class_name = $rel_source->relationship_info($f_rel)->{source};
