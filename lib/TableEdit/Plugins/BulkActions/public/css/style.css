@@ -1,0 +1,50 @@
+.uploadDrop {
+	border: 3px #CCC dashed;
+	padding: 40px;
+	background: rgba(30, 30, 30, 0.1);
+}
+
+.bulkImageUpload  img:hover {
+	max-width: 300px;
+	width: auto;
+	max-height: 300px;
+	height: auto;
+	z-index: 99;
+}
+
+.bulkImageUpload  .img-box {
+	width: 100px; 
+	height: 100px;
+	display: inline-block;
+}
+
+.bulkImageUpload  .add-box {
+	vertical-align: top;
+	display: inline-block;
+}
+
+.bulkImageUpload  img {
+	max-width: 90px;
+	max-height: 90px;
+	border-radius: 4px;
+	position: absolute;
+}
+
+.bulkImageUpload  .item {
+	border-top: 1px grey solid;
+	padding: 10px 0px;
+}
+
+.bulkImageUpload .form-control {
+	display: initial;
+	width: auto;
+}
+
+.bulkImageUpload span.remove {
+	float: right;
+}
+
+.bulkImageUpload span.remove:hover {
+	opacity: 1;
+	cursor: pointer;
+}

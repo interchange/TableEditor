@@ -1,0 +1,61 @@
+<div ng-if="!data.columns" ng-include="'views/loading.html'" class="loading-box"></div>
+
+<div ng-if="data.columns">
+	<!-- Page heading -->
+	<div class="page-head" ng-init="view='form'" checkUser>
+		<!-- Page heading -->
+		<h1 ng-if="create" class="title">{{ title }}</h1>
+		<h1 ng-if="!create" class="title">
+			<a href="#{{data.class}}/list" class="grey super-title">{{ data.class_label }}</a> {{ item.title }}
+		</h1>
+		<!-- Breadcrumb -->
+	
+		<div class="clearfix"></div>
+	
+	</div>
+	<!-- Page heading ends -->
+	
+	<!-- Matter -->
+	<div class="matter bulkImageUpload" id="details">
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="alert-box span12"></div>
+			</div>
+
+			<span class="transparent-box add">
+				Select or drop images or zip of images <br />
+					<input class="uploadDrop" value="bla" type="file" accept="image/*" ng-file-select="onImageSelect($files)" multiple=1/>
+			</span>
+
+			<div class="row-fluid">
+				<h2>Images</h2>
+				{{assigned}}
+				<div class="">
+					<div ng-repeat="img in media.images" class="item" id="media-{{img.file}}">
+						<div class="img-box">
+							<img ng-src="api/{{media_class}}/{{media_column}}/image/{{img.file}}"/>
+						</div>
+						<div class="add-box">
+						<label>Add to {{data.class}}</label><br />
+							<input 
+							   name="{{img.file}}"
+								class="form-control"
+								type="text"
+								auto-complete-bulk-image-upload
+							/>
+							
+							<div>	
+								<ul>
+									<li ng-repeat="s in assigned[img.file]"><a href="#/{{s.class}}/edit/{{s.id}}">{{s.label}}</a></li>
+								</ul>					
+							</div>
+						</div>
+						<span class="remove" ng-click="removeMedia(img.file)"><i class="glyphicon glyphicon-remove"></i></span>
+					</div>
+				</div>
+			</div>
+		
+	
+		</div>
+	</div>
+</div>

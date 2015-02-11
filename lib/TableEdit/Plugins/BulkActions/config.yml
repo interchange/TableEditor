@@ -1,0 +1,14 @@
+TableEditor:
+  classes:
+    Product:
+      bulk_image_upload:
+        images:
+          path: Media/
+          media_class: Media
+          media_column: file
+          intermediate_class: MediaProduct
+          intermediate_media_id: media_id 
+          intermediate_class_id: sku
+          
+ 
+
