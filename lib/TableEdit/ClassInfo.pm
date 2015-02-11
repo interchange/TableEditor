@@ -502,7 +502,7 @@ sub attr  {
 			next if defined $node and ref $node eq 'hash';
 		}
 
-		return $node;
+		return $node || @path ? undef : {};
 }
 
 
