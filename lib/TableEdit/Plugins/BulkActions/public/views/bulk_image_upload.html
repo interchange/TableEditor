@@ -31,7 +31,7 @@
 				<h2>Images</h2>
 				{{assigned}}
 				<div class="">
-					<div ng-repeat="img in media.images" class="item" id="media-{{img.file}}">
+					<div ng-repeat="img in media.images | orderBy:'file'" class="item" id="media-{{img.file}}">
 						<div class="img-box">
 							<img ng-src="api/{{media_class}}/{{media_column}}/image/{{img.file}}"/>
 						</div>
