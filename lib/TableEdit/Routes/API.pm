@@ -13,6 +13,7 @@ use Cwd qw/realpath/;
 use YAML::Tiny;
 use Scalar::Util 'blessed';
 use File::Path qw(make_path remove_tree);
+use Time::HiRes;
 
 require TableEdit::SchemaInfo;
 use TableEdit::Config;
@@ -254,6 +255,18 @@ get '/:class/:column/image/:file' => require_login sub {
 };
 
 
+get '/:class/:column/image/:fileid/:filelabel' => require_login sub {
+	my $class_info = schema_info->class(param('class'));
+	my $column_info = $class_info->column(param('column'));
+	my $row = $class_info->find_with_delimiter(param('fileid'));
+	my $file_col = $column_info->attr('file_column') || 'file';
+	my $file = $row->$file_col;
+	return status '404' unless $row;
+	my $path = $column_info->upload_dir;
+	return send_file($path.$file);
+};
+
+
 post '/:class/:column/upload_image' => require_login sub {
 	my $class_info = schema_info->class(param('class'));
 	my $column_info = $class_info->column(param('column'));
@@ -288,7 +301,7 @@ post '/:class/:column/upload' => require_login sub {
 	
 	# Upload image
     if($file){
-		my $fileName = param('filename') || $file->{filename};
+		my $fileName = time().'-'.$file->{filename};
 		
 		my $dir = "$appdir/public/$path";
 		make_path $dir unless (-e $dir);       
@@ -326,13 +339,13 @@ get '/:class/:id' => require_login sub {
 get '/:class' => require_login sub {
 	my $class_info = schema_info->class(param('class'));
 	send_error("Forbidden to read ".param('class'), 403) unless schema_info->permissions->permission('read', $class_info);
-	my $data = {
-		columns => $class_info->form_columns_array,
-		columns_info => $class_info->form_columns_hash,
-		class => $class_info->name,
-		class_label => $class_info->label,
-		relations => $class_info->relationships_info,
-	};
+	my $data = {%{$class_info->attr}};
+	$data->{columns} = $class_info->form_columns_array;
+	$data->{columns_info} = $class_info->form_columns_hash;
+	$data->{class} = $class_info->name;
+	$data->{class_label} = $class_info->label;
+	$data->{relations} = $class_info->relationships_info;
+	
 	return to_json($data, {allow_unknown => 1}); 
 };
 
