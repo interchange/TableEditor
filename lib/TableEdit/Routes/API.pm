@@ -339,7 +339,7 @@ get '/:class/:id' => require_login sub {
 get '/:class' => require_login sub {
 	my $class_info = schema_info->class(param('class'));
 	send_error("Forbidden to read ".param('class'), 403) unless schema_info->permissions->permission('read', $class_info);
-	my $data = {%{$class_info->attr}};
+	my $data = {%{$class_info->attr}} if $class_info->attr;
 	$data->{columns} = $class_info->form_columns_array;
 	$data->{columns_info} = $class_info->form_columns_hash;
 	$data->{class} = $class_info->name;
