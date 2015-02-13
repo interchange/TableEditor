@@ -62,6 +62,31 @@ get '/bulkUploadImages/temp_image/:file' => require_login sub {
 };
 
 
+get '/bulkAssign/:class/list' => require_login sub {
+	my $class_info = schema_info->class(param('class'));
+	send_error("Forbidden to read ".param('class'), 403) unless schema_info->permissions->permission('read', $class_info);
+	
+	my $rows = $class_info->resultset->search(
+	{},
+	  {
+	    #page => $page,  # page to return (defaults to 1)
+	    #rows => $page_size, # number of results per page
+	    #order_by => grid_sort($class_info, $get_params),	
+	  },);
+	
+	my @items;
+	while(my $row = $rows->next){
+		push @items, {$row->get_columns};
+	}
+	
+	
+	return to_json({
+		items => \@items
+	}
+	
+	, {allow_unknown => 1});
+};
+
 =asd
 post '/bulkUploadImages/upload_image' => require_login sub {
 	my $file = upload('file');

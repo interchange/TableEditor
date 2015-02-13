@@ -24,7 +24,7 @@
 
 			<span class="transparent-box add">
 				Select or drop images or zip of images <br />
-					<input class="uploadDrop" value="bla" type="file" accept="image/*" ng-file-select="onImageSelect($files)" multiple=1/>
+					<input class="uploadDrop" value="bla" type="file" accept="image/*|.zip" ng-file-select="onImageSelect($files)" multiple=1/>
 			</span>
 
 			<div class="row-fluid">
@@ -41,7 +41,7 @@
 							   name="{{img.file}}"
 								class="form-control"
 								type="text"
-								auto-complete-bulk-image-upload
+								auto-complete-bulk
 							/>
 							
 							<div>	
