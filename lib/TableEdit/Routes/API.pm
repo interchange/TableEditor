@@ -235,9 +235,14 @@ get '/:class/autocomplete' => require_login sub {
 		},
 		{rows => 10}
 	);
-
 	
-	return to_json [map {{label => $_->name, value => $_->id}} $items->all];
+	my @results;
+	for my $item ($items->all){
+		my $rowInfo = schema_info->row($item);
+		push @results, {label => $rowInfo->to_string, value => $rowInfo->primary_key_string};
+	}
+	
+	return to_json \@results;
 };
 
 
@@ -339,7 +344,7 @@ get '/:class/:id' => require_login sub {
 get '/:class' => require_login sub {
 	my $class_info = schema_info->class(param('class'));
 	send_error("Forbidden to read ".param('class'), 403) unless schema_info->permissions->permission('read', $class_info);
-	my $data = {%{$class_info->attr}};
+	my $data = $class_info->attrs;
 	$data->{columns} = $class_info->form_columns_array;
 	$data->{columns_info} = $class_info->form_columns_hash;
 	$data->{class} = $class_info->name;

@@ -485,7 +485,7 @@ Return attribute value
 
 sub attr  {
 		my ($self, @path) = @_;
-		my $value;
+		my $value;		
 		unshift @path, 'classes', $self->name;
 		my $node = $self->config;
 
@@ -502,7 +502,19 @@ sub attr  {
 			next if defined $node and ref $node eq 'hash';
 		}
 
-		return $node || @path ? undef : {};
+		return $node;
+}
+
+=head2 all attributes
+
+Return all attributes
+
+=cut
+
+sub attrs  {
+		my ($self) = @_;
+		my $attrs = $self->attr || {};		
+		return {%{$attrs}};
 }
 
 
