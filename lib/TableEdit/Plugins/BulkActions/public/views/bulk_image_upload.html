@@ -29,7 +29,6 @@
 
 			<div class="row-fluid">
 				<h2>Images</h2>
-				{{assigned}}
 				<div class="">
 					<div ng-repeat="img in media.images | orderBy:'file'" class="item" id="media-{{img.file}}">
 						<div class="img-box">
@@ -52,6 +51,7 @@
 						</div>
 						<span class="remove" ng-click="removeMedia(img.file)"><i class="glyphicon glyphicon-remove"></i></span>
 					</div>
+					
 				</div>
 			</div>
 		
