@@ -81,12 +81,12 @@ var custom_routes = {};
            
 					<!--- Sidebar navigation -->
 					
-					<div class="panel panel-default" ng-show="menu.length">
+					<div class="panel panel-default" ng-repeat="block in menu">
 						<div class="panel-heading">
-				        <h3 class="panel-title"><i class="fa fa-table fa-fw"></i> Tables</h3>
+				        <h3 class="panel-title"><i class="fa fa-table fa-fw"></i> {{block.title}}</h3>
 			        </div>
 						<ul class="nav nav-pills nav-stacked">
-							<li ng-repeat="link in menu" data-active-link=""><a  href="{{link.url}}" class="">{{link.name}}</a></li>
+							<li ng-repeat="link in block.items" data-active-link=""><a  href="{{link.url}}" class="">{{link.name}}</a></li>
 						</ul>
 					</div>
 					<div class="panel panel-default" ng-show="user.roles && user.roles.indexOf('admin')">

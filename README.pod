@@ -390,14 +390,20 @@ Same thing just under certain column. Available levels are restricted, read, upd
 =head3 Result subset permissions
  
 If you want to limit records to some role, you can set conditions. 
-For example showing only active (where active = 1) users to secretary and boss.
+For example showing only active (where active = 1) users to boss and secretary only non-admin users. 
+The usual operators ( '=', '!=', -in, -not_in, etc.) are supported.
 
     classes:
         Users:
             columns:
                 active:
                     subset:
-                        1: [boss, secretary]	
+                        boss: 1
+                role:
+                    subset:
+                        secretary: 
+                            '!=': administrator
+			    
 			
  
 =head1 PLUGINS
@@ -501,5 +507,15 @@ Example usage:
 	};
 
 	1;
+
+=head3 Menu hook
+
+In api.pm you can implement sub 'menu' that recieves menu hash and has to return modified verison. Example:
+
+	sub menu {
+		my ($self, $menu) = @_;
+		$menu->{MyNewBlock} = {sort => 120, items => [{name => 'Dashboard', url => '/myPluign/dashboard'}]};
+		return $menu;
+	}
 
 =cut	

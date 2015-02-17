@@ -6,6 +6,7 @@ use MooX::Types::MooseLike::Base qw/ArrayRef InstanceOf/;
 require TableEdit::ClassInfo;
 require TableEdit::RowInfo;
 use TableEdit::Permissions;
+use TableEdit::Plugins;
 
 with 'TableEdit::SchemaInfo::Role::Config';
  
@@ -236,27 +237,41 @@ has menu => (
 	is => 'lazy',
 	default => sub { 
 		my $self = shift;
-		my $sort;
 		my $classes = $self->attr('menu_classes');
 		unless($classes){
 			my @classes = $self->classes();
 			$classes = \@classes if @classes; 
-			$sort = 1;
 		}
 
-		my $menu = {};
+		my $class_links = {};
 		for my $classInfo (@$classes){
 			my $class_name = !ref($classInfo) ? $classInfo : $classInfo->name; 
 			$classInfo = $self->class($class_name);
 			next unless $self->permissions->permission('read', $self->class($class_name) );
-			$menu->{$classInfo->label} = {
+			$class_links->{$classInfo->label} = {
 				class => $class_name,
 				name => $classInfo->label, 
 				url=> join('/', '#' . $classInfo->name, 'list'),};
 		}
-		$menu = [map $menu->{$_}, sort keys %$menu] if $sort;
+		my $menu;
+		$menu->{'Tables'} = {active => 1, sort => 100, items => [map $class_links->{$_}, sort keys %$class_links]};
 
-		return $menu;
+		for my $plugin (TableEdit::Plugins::class_list){
+			if( $plugin->can('menu')){
+				$menu = $plugin->menu($menu) ;
+				
+			}
+		}
+
+		# Sort and return array
+		my $menu_array;
+		for my $block ( keys %$menu){
+			my $block_info = $menu->{$block};
+			$block_info->{title} = $block;
+			push @$menu_array, $block_info;
+		}
+
+		return [sort { $a->{sort} <=> $b->{sort} } @$menu_array];
     }	
 );
 
