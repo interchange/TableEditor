@@ -167,6 +167,7 @@ get '/:class/:id/:related/items' => require_login sub {
 	
 	# Related bind
 	$data = grid_template_params($relationship_class_info, $related_items);
+	$data->{id} = $id;
 	
 	return to_json( $data, {allow_unknown => 1} );
 };
@@ -196,6 +197,7 @@ get '/:class/:id/:related/unrelated/list' => require_login sub {
 
 	# Related bind
 	$data = grid_template_params($relationship_class_info, $rs);
+	$data->{id} = $id;
 	
 	return to_json( $data, {allow_unknown => 1} );
 };
@@ -576,7 +578,7 @@ sub grid_rows {
 
             if ($column->{foreign_column}) {
                 $rel_name = $column->{relationship}->{name};
-                $value = $row->$rel_name;
+                $value = $row->$rel_name if $rel_name;
             }
             else {
                 $value = $row->$column_name;
