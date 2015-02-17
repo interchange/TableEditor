@@ -6,9 +6,9 @@ use Dancer::Plugin::Auth::Extensible;
 use File::Path qw(make_path remove_tree);
 my $appdir = TableEdit::Config::appdir();
 
-sub schema_info {
-	return TableEdit::Routes::API->schema_info;
-}
+sub schema_info {return TableEdit::Routes::API->schema_info;}
+
+
 
 prefix '/';
 prefix '/api';
