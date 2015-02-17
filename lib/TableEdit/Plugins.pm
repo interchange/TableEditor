@@ -10,6 +10,9 @@ my $active_plugin_list = attr('plugins');
 my $plugins = [];
 my $appdir = appdir();
 
+sub list { return @$active_plugin_list };
+sub class_list { return map {my $plugin_module = "TableEdit::Plugins::".$_."::API";} @$active_plugin_list };
+
 for my $plugin (@$active_plugin_list){
     my $plugin_module = "TableEdit::Plugins::".$plugin."::API";
     load_class($plugin_module);
