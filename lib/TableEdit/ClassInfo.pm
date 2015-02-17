@@ -382,7 +382,8 @@ sub _build__relationships {
 		my ($rel_name, $rel, $f_rel) = eval("($rel_info)");
 
         if ($@) {
-            die "Failed to eval relationship parameters ($rel_info): $@";
+            warn "Failed to eval relationship parameters ($rel_info): $@";
+            next;
         }
 
 	    my $rel_source_name = $source->relationship_info($rel)->{source};
