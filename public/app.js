@@ -183,7 +183,6 @@ CrudApp.factory('AuthInterceptor',['$q','$location','$rootScope', function($q,$l
             	$rootScope.user = null;
                 console.log("Response Error 403",rejection);
             }
-            $location.path('/login');
             return $q.reject(rejection);
         }
     }
@@ -901,7 +900,7 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 			var from_page = (current_page - page_scope > 0) ? (current_page - page_scope) : 1;
 			var to_page = (current_page + page_scope < pages) ? (current_page + page_scope) : pages;
 			$scope.data.sort_column = data.sort_column;
-			$scope.sort_desc = data.sort_direction == 'DESC' ? true : false;
+			$scope.sort_desc = data.sort_direction == '-desc' ? true : false;
 
 			$scope.page_list = []; 
 			for (var i = from_page; i <= to_page; i++) {

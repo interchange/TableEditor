@@ -253,10 +253,12 @@ get '/menu' => require_login sub {
 };
 
 
-get '/:class/:column/image/:file' => require_login sub {
-	my $class_info = schema_info->class(param('class'));
-	my $column_info = $class_info->column(param('column'));
-	my $file = param('file');
+get '/:class/:column/image/**' => require_login sub {
+	my ($splat) = splat;
+	my (undef, $class,$column, undef, @file) = @$splat;
+	my $class_info = schema_info->class($class);
+	my $column_info = $class_info->column($column);
+	my $file = join '/', @file;
 	my $path = $column_info->upload_dir;
 	return send_file($path.$file);
 };
@@ -490,10 +492,12 @@ Returns sql order by parameter.
 sub grid_sort {
 	my ($class_info, $get_params) = @_;
 	# Direction	
-	($get_params->{descending} ? $class_info->sort_direction('DESC') : $class_info->sort_direction('')) if $get_params->{sort};
+	($get_params->{descending} ? $class_info->sort_direction('-desc') : $class_info->sort_direction('-asc')) if $get_params->{sort};
 	# Selected or Predefined sort
-	$class_info->sort_column($get_params->{sort}) if $get_params->{sort};
-	return $class_info->sort_column . " " . $class_info->sort_direction if $class_info->sort_column;	
+	if( $get_params->{sort} and $class_info->column($get_params->{sort})){		
+		$class_info->sort_column($get_params->{sort}) ;
+	}
+	return {$class_info->sort_direction => $class_info->sort_column} if $class_info->sort_column;	
 }
 
 
