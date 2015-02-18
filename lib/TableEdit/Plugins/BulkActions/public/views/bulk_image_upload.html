@@ -30,14 +30,14 @@
 			<div class="row-fluid">
 				<h2>Images</h2>
 				<div class="">
-					<div ng-repeat="img in media.images | orderBy:'file'" class="item" id="media-{{img.file}}">
+					<div ng-repeat="img in media.images | orderBy:'file'" class="item" id="media-{{img.id}}">
 						<div class="img-box">
 							<img ng-src="api/{{media_class}}/{{media_column}}/image/{{img.file}}"/>
 						</div>
 						<div class="add-box">
 						<label>Add to {{data.class}}</label><br />
 							<input 
-							   name="{{img.file}}"
+							   name="{{img.id}}"
 								class="form-control"
 								type="text"
 								auto-complete-bulk
@@ -45,11 +45,11 @@
 							
 							<div>	
 								<ul>
-									<li ng-repeat="s in assigned[img.file]"><a href="#/{{s.class}}/edit/{{s.id}}">{{s.label}}</a></li>
+									<li ng-repeat="s in assigned[img.id]"><a href="#/{{s.class}}/edit/{{s.id}}">{{s.label}}</a></li>
 								</ul>					
 							</div>
 						</div>
-						<span class="remove" ng-click="removeMedia(img.file)"><i class="glyphicon glyphicon-remove"></i></span>
+						<span class="remove" ng-click="removeMedia(img.id)"><i class="glyphicon glyphicon-remove"></i></span>
 					</div>
 					
 				</div>

@@ -13,27 +13,41 @@ sub schema_info {return TableEdit::Routes::API->schema_info;}
 prefix '/';
 prefix '/api';
 
-get '/bulkUploadImages/temp' => sub {
+get '/bulkUploadImages/:class/:column' => sub {
 	my $uploaded_images = session('uploaded_images_temp') || {};
-	return to_json {images => [map {{file => $_}} keys %$uploaded_images]};
+	my $class_info = schema_info->class(param('class'));
+	my $column = param('column');
+	my @images;
+	for my $i (keys %$uploaded_images){
+		my $row = $class_info->find_with_delimiter($i);
+		push @images, {
+			id => $row->id,
+			file => $row->$column,
+		};
+	}
+	return to_json {images => \@images};
 };
 
-del '/bulkUploadImages/temp' => sub {
-	my $filename = param('filename');	
+del '/bulkUploadImages/:class/:column' => sub {
 	my $uploaded_images = session('uploaded_images_temp') || {};
-	my $session = session->id;
 	
-	my $path = "public/temp_upload/$session/"; 
-	my $dir = "$appdir/$path";
+	my $class_info = schema_info->class(param('class'));
+	my $column = param('column');
+	my $column_info = $class_info->column(param('column'));
+	my $media = $class_info->find_with_delimiter(param('id'));	
+	my $filename = $media->$column;
+	$media->delete;
+	my $path = $column_info->upload_dir; 
+	my $dir = "$appdir/public/$path";
 	unlink $dir.$filename;
 	
-	delete $uploaded_images->{$filename};
+	delete $uploaded_images->{param('id')};
 	session 'uploaded_images_temp' => $uploaded_images;
 	return to_json {images => $uploaded_images};
 };
 
 
-post '/bulkUploadImages/temp' => sub {
+post '/bulkUploadImages/:class/:column' => sub {
 	my $body = from_json request->body;
 
 	# Add item to list
@@ -44,7 +58,7 @@ post '/bulkUploadImages/temp' => sub {
 		#my $column_info = $class_info->column($body->{column});
 		my $session = session->id;
 		my $uploaded_images = session('uploaded_images_temp') || {};
-		$uploaded_images->{$filename} = 1;
+		$uploaded_images->{$body->{id}} = {file => $filename, id => $body->{id}};
 		session 'uploaded_images_temp' => $uploaded_images;
 	}
 	
@@ -87,32 +101,5 @@ get '/bulkAssign/:class/list' => require_login sub {
 	, {allow_unknown => 1});
 };
 
-=asd
-post '/bulkUploadImages/upload_image' => require_login sub {
-	my $file = upload('file');
-	my $session = session->id;
-	
-	# Upload dir
-	my $path = "public/temp_upload/$session/"; 
-	
-	# Upload image
-    if($file){
-		my $fileName = $file->{filename};
-		
-		my $dir = "$appdir/$path";
-		make_path $dir unless (-e $dir);       
-		
-		if($file->copy_to($dir.$fileName)){			
-		    my $uploaded_images = session('uploaded_images_temp') || {};
-			$uploaded_images->{$fileName} = 1;
-			session 'uploaded_images_temp' => $uploaded_images;
-			return "$fileName";
-		}		
-    }
-    
-	
-	return undef;
-};
-=cut
 
 1;

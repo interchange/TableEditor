@@ -20,7 +20,7 @@
 			<div class="row-fluid">
 				<div class="alert-box span12"></div>
 			</div>
-			<h2><a ng-click="toggle_filters()">Filters</a></h2>
+			<a class="btn btn-primary" ng-click="toggle_filters()"><i class="glyphicon glyphicon-plus"></i> Filters</a>
 			<div class="filters" ng-if="show_filters">
 				<div class="column-search" ng-repeat="column in data.column_list">
 				<label>{{column.label}}</label>
