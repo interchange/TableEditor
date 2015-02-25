@@ -17,6 +17,7 @@ use Time::HiRes;
 
 require TableEdit::SchemaInfo;
 use TableEdit::Config;
+use TableEdit::Menu;
 use TableEdit::Session;
 
 # Global variables
@@ -28,7 +29,7 @@ prefix '/api';
 # One schema_info instance per user (because of different permissions)
 sub schema_info {
 	my $username = session('logged_in_user');
-	$schema_info->{$username} ||= TableEdit::SchemaInfo->new(
+	$schema_info->{$username} ||= TableEdit::Menu->new(
         schema => schema,
         sort => 1,
         config => config->{TableEditor},
