@@ -83,7 +83,7 @@ sub permissions {
 	my ($self, $item, $op) = @_;
 	
 	my $permissions = {};
-	for my $level (keys levels){
+	for my $level (keys %{ levels() }){
 		$permissions->{$level} = $self->permission($level, $item, $op);
 	}
 	return $permissions;
