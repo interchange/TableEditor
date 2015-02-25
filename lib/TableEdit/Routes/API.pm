@@ -355,6 +355,7 @@ get '/:class' => require_login sub {
 	$data->{class} = $class_info->name;
 	$data->{class_label} = $class_info->label;
 	$data->{relations} = $class_info->relationships_info;
+	$data->{permissions} = $class_info->permissions;
 	
 	return to_json($data, {allow_unknown => 1}); 
 };
@@ -479,6 +480,7 @@ sub grid_template_params {
 
 	$grid_params->{class} = $class_info->name;
 	$grid_params->{class_label} = $class_info->label;
+	$grid_params->{permissions} = $class_info->permissions;
 	$grid_params->{page} = $page;
 	$grid_params->{pages} = ceil($count / $page_size);
 	$grid_params->{count} = $count;

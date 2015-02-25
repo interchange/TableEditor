@@ -2,7 +2,7 @@
 
 <div ng-if="data.column_list">
 	<div class="pull-right">
-		<a ng-click="create()" href="#/{{data.class}}/new" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> New {{data.class_label}}</a>
+		<a ng-show="data.permissions.create" ng-click="create()" href="#/{{data.class}}/new" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> New {{data.class_label}}</a>
 	</div>
 	<h1>{{data.class_label}} - List of items</h1>
 	<div id="list-grid" ng-include="'views/list_grid.html'"></div>

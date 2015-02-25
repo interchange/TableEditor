@@ -17,12 +17,14 @@ has roles => (
 
 # Permission levels
 # KEY level is granted to users with this level or levels specified in ARRAY
-my $levels = {
-	'read' => ['full', 'update', 'create', 'delete'], 
-	'update' => ['full', 'create', 'delete'],
-	'create' => ['full', ], 
-	'delete' => ['full', ],
-};
+sub levels {
+	return {
+		'read' => ['full', 'update', 'create', 'delete'], 
+		'update' => ['full', 'create', 'delete'],
+		'create' => ['full', ], 
+		'delete' => ['full', ],
+	};
+}
 
 
 sub role_in {
@@ -46,7 +48,7 @@ sub role_in {
 sub permission {
 	my ($self, $level, $item, $op) = @_;
     #debug "Checking for permission $level for ".$item->name;
-	my @granted_levels = ($level, @{$levels->{$level}});
+	my @granted_levels = ($level, @{levels->{$level}});
 	# Global
 	unless(ref $item){
 			
@@ -73,7 +75,18 @@ sub permission {
 		my $schema_info = $self->schema;
 		return 1 if $self->role_in($schema_info->attr($granted_level));
 	}
-	return undef;
+	return 0;
+}
+
+
+sub permissions {
+	my ($self, $item, $op) = @_;
+	
+	my $permissions = {};
+	for my $level (keys levels){
+		$permissions->{$level} = $self->permission($level, $item, $op);
+	}
+	return $permissions;
 }
 
 1;

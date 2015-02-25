@@ -478,6 +478,21 @@ has sort_direction => (
 	},
 );
 
+=head2 Permissions
+
+List of permission levels.
+
+=cut
+
+
+has permissions => (
+	is => 'lazy',
+	default => sub{
+		my $self = shift;
+		return $self->schema->permissions->permissions($self);
+	},
+);
+
 =head2 attributes
 
 Return attribute value

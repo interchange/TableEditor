@@ -71,7 +71,7 @@
 	
 	
 							<div class="form-group">
-								<button ng-click="save()" class="btn btn-success pull-right">Save</button>
+								<button ng-show="(!create && data.permissions.update) || (create && data.permissions.create)" ng-click="save()" class="btn btn-success pull-right">Save</button>
 								</div>
 							</div>
 						</fieldset>

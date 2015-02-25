@@ -23,7 +23,7 @@
 				</thead>
 				<tbody>
 	
-					<tr class="object-table-row" ng-repeat="row in data.rows" id="row-{{row.id}}">
+					<tr class="object-table-row" ng-repeat="row in data.rows" id="row-{{row.id}}" ng-click="edit()">
 						<td ng-repeat="column in row.row"><span class="object-table-value">{{ column.value }}</span>
 							</td>
 						<td class="actions" ng-include="'views/grid/actions/' + actions + '.html';"></td>

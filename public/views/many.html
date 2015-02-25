@@ -19,8 +19,8 @@
 		</ul>
 	<div class="row-fluid">
 		<div class="pull-right">
-			<a ng-if="item_info.related_type == 'many_to_many'" class="btn btn-primary" ng-click="showRelated()" ><i class="glyphicon glyphicon-plus"></i> Add existing {{data.class_label}}</a>
-			<a class="btn btn-primary" ng-click="create()" ><i class="glyphicon glyphicon-plus"></i> Add new {{data.class_label}}</a>
+			<a ng-show="class.permissions.update" ng-if="item_info.related_type == 'many_to_many'" class="btn btn-primary" ng-click="showRelated()" ><i class="glyphicon glyphicon-plus"></i> Add existing {{data.class_label}}</a>
+			<a ng-show="class.permissions.update && data.permissions.create" class="btn btn-primary" ng-click="create()" ><i class="glyphicon glyphicon-plus"></i> Add new {{data.class_label}}</a>
 		</div>
 
 		<h2>Related {{item_info.related_class_label}}</h2>
