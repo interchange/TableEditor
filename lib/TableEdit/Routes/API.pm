@@ -358,6 +358,7 @@ get '/:class' => require_login sub {
 	return to_json($data, {allow_unknown => 1}); 
 };
 
+# Updating item
 
 post '/:class' => require_login sub {
 	my $class_info = schema_info->class(param('class'));
@@ -366,7 +367,13 @@ post '/:class' => require_login sub {
 	my $item = $body->{item};
 	return to_json {error => 'Please fill the form.'} unless $item->{values} and %{$item->{values}};
 
-	debug "Updating item for ".$class_info->name.": ", $item;
+    # add subset conditions to item values
+    while (my ($col, $value) = each %{$class_info->subset_conditions}) {
+        next if ref($value);
+        $item->{values}->{$col} = $value;
+    }
+    debug "Updating item for ".$class_info->name.": ", $item;
+
 	my $object = $class_info->resultset->update_or_create( $item->{values} );
 	return to_json {error => 'Unable to save.'} unless  $object;
 	my $rowInfo = schema_info->row($object);
