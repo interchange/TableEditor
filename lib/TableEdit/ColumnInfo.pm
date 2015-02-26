@@ -203,9 +203,9 @@ has hidden => (
 	}
 );
 
-=head2 Read-only
+=head2 readonly
 
-Whether column is hidden or not.
+Whether column is readonly or not.
 
 =cut
 
@@ -246,7 +246,8 @@ has upload_dir => (
     	return $dir;
     }
 );
-=head2 upload extensions
+
+=head2 upload_extensions
 
 Allowed extensions.
 
@@ -260,7 +261,10 @@ has upload_extensions => (
     	return undef;
     }
 );
-=head2 upload max size
+
+=head2 upload_max_size
+
+Maximum size of uploads.
 
 =cut
 
@@ -274,7 +278,7 @@ has upload_max_size => (
 
 =head2 hashref
 
-Static and dynamic propeties about column
+Static and dynamic column properties.
 
 =cut
 sub hashref {
@@ -390,11 +394,13 @@ sub attr  {
 		return $node;
 		
 }
+
 =head2 attrs
 
-All column atributes specified in config or schema 
+All column attributes specified in config or schema.
 
 =cut
+
 has attrs => (
     is => 'lazy',
     default => sub {
