@@ -240,6 +240,52 @@ for my $testdb (@handles) {
 	}
     });
 
+    # test relationships for Navigation
+    %expected = (
+        children => {
+            class_name => 'Navigation',
+            type => 'has_many',
+            self_column => 'navigation_id',
+            foreign_column => 'parent_id',
+        },
+        active_children => {
+            class_name => 'Navigation',
+            type => 'has_many',
+            self_column => 'navigation_id',
+            foreign_column => 'parent_id',
+        },
+        parents => {
+            class_name => 'Navigation',
+            type => 'has_many',
+            self_column => 'parent_id',
+            foreign_column => 'navigation_id',
+        },
+        _parent => {
+            class_name => 'Navigation',
+            type => 'belongs_to',
+            self_column => 'parent_id',
+            foreign_column => 'navigation_id',
+        },
+        products => {
+            class_name => 'Product',
+            type => 'many_to_many',
+        },
+        navigation_products => {
+            class_name => 'NavigationProduct',
+            type => 'has_many',
+            self_column => 'navigation_id',
+            foreign_column => 'navigation_id',
+        },
+        navigation_attributes => {
+            class_name => 'NavigationAttribute',
+            type => 'has_many',
+            self_column => 'navigation_id',
+            foreign_column => 'navigation_id',
+        },
+    );
+
+    test_relationships($classes->{Navigation}, \%expected);
+
     # test hashref
     my $col_info = $schema_info->column('UserRole', 'users_id');
     my $col_label = $col_info->hashref->{label};
