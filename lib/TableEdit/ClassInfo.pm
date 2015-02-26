@@ -156,9 +156,8 @@ sub _build__columns {
     while (my ($rel_name, $rel_info) = each %$rels) {
         # build hash by source column
         if(
-        	$rel_info->type ne 'many_to_many' and 
-        	$rel_info->type ne 'has_many' and
-        	$rel_info->type ne 'might_have'
+        	$rel_info->type ne 'many_to_many' and
+                $rel_info->type ne 'has_many'
         ){
 	        $rel_hash{$rel_info->self_column} = $rel_info;
         } 
