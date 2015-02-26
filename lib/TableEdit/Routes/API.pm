@@ -109,8 +109,18 @@ post '/:class/:id/:related/:related_id' => require_login sub {
 	}
 	# Many to Many
 	else {
-		my $add_method = "add_to_$related"; 
-		eval {$row->$add_method($related_row)};	
+		my $add_method = "add_to_$related";
+        my %subset_values;
+
+        # apply subset conditions from intermediate class
+        while (my ($col, $value) = each %{$relationship_info->intermediate_class->subset_conditions}) {
+            next if ref($value);
+            $subset_values{$col} = $value;
+        }
+
+		eval {
+            $row->$add_method($related_row, \%subset_values);
+        };
 		return to_json {'error' => $@->{msg}} if $@;
 	}
 	return to_json {'added' => 1};
