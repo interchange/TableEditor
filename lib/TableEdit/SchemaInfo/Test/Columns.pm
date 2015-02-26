@@ -101,5 +101,27 @@ sub test_column {
 
         isa_ok($rel, 'TableEdit::RelationshipInfo');
     }
+    else {
+        # test name of foreign key
+        my $fk_name = $col_obj->foreign_column;
+        $expected_value = $matches->{foreign_column} || '';
+
+        ok($fk_name eq $expected_value,
+           "Test foreign_column name for column $col_name")
+            || diag "$fk_name instead of $expected_value.";
+
+        # test type of foreign key
+        my $fk_type = $col_obj->foreign_type;
+        $expected_value = $matches->{foreign_type} || '';
+
+        ok($fk_type eq $expected_value,
+           "Test foreign_type name for type $col_name")
+            || diag "$fk_type instead of $expected_value.";
+
+        # test relationship object
+        my $rel = $col_obj->relationship;
+
+        ok(! defined $rel);
+    }
 }
 
