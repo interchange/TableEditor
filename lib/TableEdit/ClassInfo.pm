@@ -174,6 +174,7 @@ sub _build__columns {
         if (exists $rel_hash{$name}) {
             my $rel_obj = $rel_hash{$name};
 
+            $info->{is_foreign_key} = 1;
             $info->{foreign_column} = $rel_obj->foreign_column;
             $info->{foreign_type} = $rel_obj->type;
             $info->{foreign_class} = $rel_obj->class;
