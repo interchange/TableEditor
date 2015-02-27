@@ -243,7 +243,7 @@ get '/:class/autocomplete' => require_login sub {
 	my $items = $class_info->resultset->search(
 		{
 			'-or' => {
-				map {$_ => {'-like' => '%'.param('q').'%'} } @$search_columns
+				map {$_ => {'-ilike' => '%'.param('q').'%'} } @$search_columns
 			}
 		},
 		{rows => 10}
@@ -566,7 +566,7 @@ sub grid_where {
 			
 			if ($column->{data_type} and ! ref $condition and ($column->{data_type} eq 'text' or $column->{data_type} eq 'varchar')){
 				delete $where->{$sql_name};
-				$where->{$sql_name} = {'LIKE' => "%".$condition."%"} if defined $condition and $condition ne '';
+				$where->{$sql_name} = {'-ilike' => "%".$condition."%"} if defined $condition and $condition ne '';
 			}
 			else { 
 				delete $where->{$sql_name};
