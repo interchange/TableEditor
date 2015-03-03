@@ -91,4 +91,10 @@ sub primary_key_string {
 	return join($delimiter, @primary_key_value);
 }
 
+sub string_values {
+	my $self = shift;
+	my $values = {$self->row->get_columns};
+	return {map {$_ => $values->{$_} ? $values->{$_}."" : ""} keys %$values}
+}
+
 1;

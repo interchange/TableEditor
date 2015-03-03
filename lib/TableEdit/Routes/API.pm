@@ -351,7 +351,7 @@ get '/:class/:id' => require_login sub {
 	$data->{title} = $rowInfo->to_string;
 	$data->{id} = $id;
 	$data->{class} = $class_info->name;
-	$data->{values} = {$row->get_columns};
+	$data->{values} = $rowInfo->string_values;
 	return to_json($data, {allow_unknown => 1});
 };
 
@@ -487,7 +487,6 @@ sub grid_template_params {
 		$grid_params->{column_list} , 
 		$primary_key,
 	);
-
 	$grid_params->{class} = $class_info->name;
 	$grid_params->{class_label} = $class_info->label;
 	$grid_params->{permissions} = $class_info->permissions;
