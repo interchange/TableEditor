@@ -242,7 +242,10 @@ Returns array reference.
 has column_types => (
     is => 'ro',
     isa => ArrayRef,
-    default => sub {[]},
+    default => sub {[qw/autocomplete boolean date datetime dropdown
+                        html image_upload integer partials text textfield
+                        tinymce/]
+                },
 );
 
 has primary_key_delimiter  => (
