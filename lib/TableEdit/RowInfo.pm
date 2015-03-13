@@ -94,7 +94,7 @@ sub primary_key_string {
 sub string_values {
 	my $self = shift;
 	my $values = {$self->row->get_columns};
-	return {map {$_ => $values->{$_} ? $values->{$_}."" : ""} keys %$values}
+	return {map {$_ => defined $values->{$_} ? $values->{$_}."" : ""} keys %$values}
 }
 
 1;
