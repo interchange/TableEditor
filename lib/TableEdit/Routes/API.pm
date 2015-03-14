@@ -377,6 +377,20 @@ post '/:class' => require_login sub {
 	send_error("Forbidden to update ".param('class'), 403) unless schema_info->permissions->permission('update', $class_info);
 	my $body = from_json request->body;
 	my $item = $body->{item};
+
+    # empty strings are not allowed for some columns
+    my @form_columns = @{$class_info->form_columns_array};
+
+    for my $col (@form_columns) {
+        if ($col->{data_type} eq 'integer'
+                && $col->{is_nullable}
+                && defined $item->{values}->{$col->{name}}
+                && length($item->{values}->{$col->{name}}) == 0
+            ) {
+            delete $item->{values}->{$col->{name}};
+        }
+    }
+
 	return to_json {error => 'Please fill the form.'} unless $item->{values} and %{$item->{values}};
 
     # add subset conditions to item values
