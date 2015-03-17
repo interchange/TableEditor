@@ -3,7 +3,6 @@ package TableEdit::Routes::API;
 use Dancer ':syntax';
 use POSIX;
 
-use Array::Utils qw(:all);
 use Digest::SHA qw(sha256_hex);
 use Dancer::Plugin::Ajax;
 use Dancer::Plugin::DBIC qw(schema resultset rset);

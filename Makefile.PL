@@ -20,7 +20,6 @@ WriteMakefile(
         'Test::Most' => 0,
         'Test::Database' => 0,
         'YAML'       => 0,
-        'Array::Utils' => 0,
         'Class::Load' => 0,
         'DBD::SQLite' => 1.38_01,
         # we rely on deep configuration merging
