@@ -999,7 +999,7 @@ var LoginCtrl = function ($scope, $rootScope, $timeout, Auth, Url, $location, Me
 						$rootScope.active = data.active;
 						$rootScope.menu = Menu.query();
 						$scope.error = null;						
-						InfoBar.addNext('success', 'You are logged in as '+data.username+'!');
+						InfoBar.add('success', 'You are logged in as '+data.username+'!');
 
 						if (Url.login == '/' || !Url.login ) Url.login = '/login'; // Redirect to home if last route was login 
 						$location.path(Url.login);
