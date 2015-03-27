@@ -53,6 +53,12 @@ any '**' => sub {
 };
 
 
+get '/ping' => sub {
+	header('Access-Control-Allow-Origin' => '*');
+	return to_json {status => 'runnign'};	
+};
+
+
 get '/create_schema' => sub {
 	my $db = config->{plugins}->{DBIC}->{default};
 	return to_json {make_schema_error => make_schema($db)};	
