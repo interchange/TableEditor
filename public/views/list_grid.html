@@ -3,6 +3,7 @@
 			<table class="table table-striped table-responsive" ng-model="data.query">
 				<thead>
 					<tr class="labels">
+						<th></th>
 						<th class="field" ng-repeat="column in data.column_list">
 							<a ng-class="{active: column.name==data.sort_column}" ng-click="sort(column)" class="column-label sort">{{column.label}}
 								<i ng-class="{'glyphicon glyphicon-sort-by-attributes-alt': data.sort_column && (column.name==data.sort_column || column.foreign_column==data.sort_column) && sort_desc, 'glyphicon glyphicon-sort-by-attributes': data.sort_column && (column.name==data.sort_column || column.foreign_column==data.sort_column) && !sort_desc}"></i>
@@ -15,6 +16,7 @@
 						</th>
 					</tr>
 					<tr>
+						<th></th>
 						<th class="column-search" ng-repeat="column in data.column_list">
 							<div class="nullable" ng-if="column.display_type"  ng-include="'views/column/'+column.display_type+'.html'"></div>
 						</th>
@@ -23,7 +25,8 @@
 				</thead>
 				<tbody>
 	
-					<tr class="object-table-row" ng-repeat="row in data.rows" id="row-{{row.id}}" ng-click="edit()">
+					<tr class="object-table-row" ng-repeat="row in data.rows" id="row-{{row.id}}">
+					<td ng-click="edit()" class="object-table-row-edit"></td>
 						<td ng-repeat="column in row.row"><span class="object-table-value">{{ column.value }}</span>
 							</td>
 						<td class="actions" ng-include="'views/grid/actions/' + actions + '.html';"></td>

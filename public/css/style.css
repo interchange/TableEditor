@@ -193,3 +193,9 @@ list-style: none;
 span.help-inline.ng-scope {
 	color: darkred;
 }
+
+tbody > tr.object-table-row > td.object-table-row-edit {
+	width: 20px; 
+	cursor: pointer; 
+	background-color: dimgrey;
+}
