@@ -55,7 +55,7 @@ any '**' => sub {
 
 get '/ping' => sub {
 	header('Access-Control-Allow-Origin' => '*');
-	return to_json {status => 'runnign'};	
+	return to_json {status => 'running'};	
 };
 
 
