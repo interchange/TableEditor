@@ -40,6 +40,8 @@ has class => (
 String representation of object
 
 =cut
+use overload
+'""' => 'to_string';       
 
 sub to_string {
 	my $self = shift;
@@ -49,6 +51,13 @@ sub to_string {
 	my $label = eval $self->attr('to_string') if $self->attr('to_string');
 	return $label if $label;
 
+	# Try common names
+	my @common_names = qw/title name label username/;
+	for my $name (@common_names){
+		return $self->row->$name if $self->row->can($name);
+	}
+
+	# Generate generic unique name
 	my $class = $self->row->result_source->{source_name};
 	my $primary_key = $self->class->primary_key;
 	my $id = $self->primary_key_string;
