@@ -380,14 +380,15 @@ post '/:class' => require_login sub {
     # empty strings are not allowed for some columns
     my @form_columns = @{$class_info->form_columns_array};
 
+	# Set empty values for empty strings
     for my $col (@form_columns) {
-        if ($col->{data_type} eq 'integer'
+        if (($col->{data_type} eq 'integer' or $col->{data_type} eq 'date' or $col->{data_type} eq 'datetime')
                 && $col->{is_nullable}
                 && defined $item->{values}->{$col->{name}}
                 && length($item->{values}->{$col->{name}}) == 0
             ) {
             delete $item->{values}->{$col->{name}};
-        }
+        }       
     }
 
 	return to_json {error => 'Please fill the form.'} unless $item->{values} and %{$item->{values}};
@@ -582,6 +583,7 @@ sub grid_where {
 			}
 			else { 
 				delete $where->{$sql_name};
+				$condition = eval $condition;
 				$where->{$sql_name} = $condition if defined $condition and $condition ne '';	
 			}
 		}
