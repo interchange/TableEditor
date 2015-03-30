@@ -9,9 +9,9 @@ use FindBin;
 use Cwd qw/realpath/;
 use File::Spec;
 use DateTime;
-use Git;
 use TableEdit::ConfigSchema;
 use TableEdit::DriverInfo;
+use Class::Load qw/load_class/;
 
 use Exporter 'import';
 our @EXPORT_OK = qw(
@@ -141,23 +141,27 @@ get '/schema/deploy' => sub {
 	return to_json {deploy_errors => schema->deploy};
 };
 
-get '/update' => sub {
-	my $repo = Git->repository (Directory => $appdir);
-	my @result = $repo->command('pull', '--all');
-	return to_json {result => join ' ', @result};
-};
+if (config->{TableEditor}->{menu_settings}->{update}) {
+    load_class 'Git';
 
-get '/last_update' => sub {
-	my $repo = Git->repository (Directory => $appdir);
-	my ($commit, $author, $date, undef, @comment) = $repo->command('show', '-s', 'HEAD~0');
-	#my ($commit, $author, $date, undef, @comment) = `cd $appdir; git show -s HEAD~0`;
-	$commit = [split ' ',$commit]->[1];
-	my $epoch_date = $repo->command('show', '-s', '--format=%ct', 'HEAD~0');
-	
-	my $nice_date = DateTime->from_epoch(epoch => $epoch_date)->dmy('.') . ' ' . DateTime->from_epoch(epoch => $epoch_date)->hms;
+    get '/update' => sub {
+        my $repo = Git->repository (Directory => $appdir);
+        my @result = $repo->command('pull', '--all');
+        return to_json {result => join ' ', @result};
+    };
 
-	return to_json {commit => $commit, author => $author, date => $nice_date, epoch => $epoch_date, comment => join '', @comment};
-};
+    get '/last_update' => sub {
+        my $repo = Git->repository (Directory => $appdir);
+        my ($commit, $author, $date, undef, @comment) = $repo->command('show', '-s', 'HEAD~0');
+        #my ($commit, $author, $date, undef, @comment) = `cd $appdir; git show -s HEAD~0`;
+        $commit = [split ' ',$commit]->[1];
+        my $epoch_date = $repo->command('show', '-s', '--format=%ct', 'HEAD~0');
+
+        my $nice_date = DateTime->from_epoch(epoch => $epoch_date)->dmy('.') . ' ' . DateTime->from_epoch(epoch => $epoch_date)->hms;
+
+        return to_json {commit => $commit, author => $author, date => $nice_date, epoch => $epoch_date, comment => join '', @comment};
+    };
+}
 
 sub make_schema {
 	my $db = shift;
