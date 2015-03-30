@@ -3,6 +3,7 @@ package TableEdit::Config;
 use Dancer ':syntax';
 
 use Dancer::Plugin::DBIC qw(schema resultset rset);
+use Dancer::Plugin::Auth::Extensible;
 use DBI;
 use DBIx::Class::Schema::Loader qw/ make_schema_at /;
 use FindBin;
@@ -144,13 +145,13 @@ get '/schema/deploy' => sub {
 if (config->{TableEditor}->{menu_settings}->{update}) {
     load_class 'Git';
 
-    get '/update' => sub {
+    get '/update' => require_login sub {
         my $repo = Git->repository (Directory => $appdir);
         my @result = $repo->command('pull', '--all');
         return to_json {result => join ' ', @result};
     };
 
-    get '/last_update' => sub {
+    get '/last_update' => require_login sub {
         my $repo = Git->repository (Directory => $appdir);
         my ($commit, $author, $date, undef, @comment) = $repo->command('show', '-s', 'HEAD~0');
         #my ($commit, $author, $date, undef, @comment) = `cd $appdir; git show -s HEAD~0`;
