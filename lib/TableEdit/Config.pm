@@ -9,6 +9,7 @@ use FindBin;
 use Cwd qw/realpath/;
 use File::Spec;
 use DateTime;
+use Git;
 use TableEdit::ConfigSchema;
 use TableEdit::DriverInfo;
 
@@ -141,14 +142,17 @@ get '/schema/deploy' => sub {
 };
 
 get '/update' => sub {
-	my @result = `cd $appdir; git pull --all`;
+	my $repo = Git->repository (Directory => $appdir);
+	my @result = $repo->command('pull', '--all');
 	return to_json {result => join ' ', @result};
 };
 
 get '/last_update' => sub {
-	my ($commit, $author, $date, undef, @comment) = `cd $appdir; git show -s HEAD~0`;
+	my $repo = Git->repository (Directory => $appdir);
+	my ($commit, $author, $date, undef, @comment) = $repo->command('show', '-s', 'HEAD~0');
+	#my ($commit, $author, $date, undef, @comment) = `cd $appdir; git show -s HEAD~0`;
 	$commit = [split ' ',$commit]->[1];
-	my $epoch_date = `cd $appdir; git show -s --format=%ct HEAD~0`;
+	my $epoch_date = $repo->command('show', '-s', '--format=%ct', 'HEAD~0');
 	
 	my $nice_date = DateTime->from_epoch(epoch => $epoch_date)->dmy('.') . ' ' . DateTime->from_epoch(epoch => $epoch_date)->hms;
 
