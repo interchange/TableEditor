@@ -614,12 +614,20 @@ sub grid_rows {
             my ($value, $rel_name, $rel_class);
             my $column_name = "$column->{name}";
 
+			# Foreign object string
             if ($column->{foreign_column}) {
                 $rel_name = $column->{relationship}->{name};
                 $value = $row->$rel_name if $rel_name;
             }
             else {
-                $value = $row->$column_name;
+            	
+            	# Boolean as yes/no
+            	if($column->{'display_type'} eq 'boolean' and defined $row->$column_name){
+	            		$value = $row->$column_name eq '1' ? 'Yes' : 'No'; 
+            	}
+            	else {
+	                $value = $row->$column_name;
+            	}
             }
 
             if ( index(ref $value, ref schema) == 0 ){ # If schema object
