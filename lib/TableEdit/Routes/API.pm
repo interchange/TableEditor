@@ -46,6 +46,7 @@ any '**' => sub {
 };
 
 get '/TinyMCE' => sub {
+    return {} if ! logged_in_user;
 	return to_json schema_info->attr('tiny_mce') || {};
 };
 
