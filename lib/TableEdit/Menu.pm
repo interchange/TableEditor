@@ -60,6 +60,27 @@ sub _menu_builder {
         $block_info->{title} = $block;
         push @$menu_array, $block_info;
     }
+    
+    # Settings menu
+    if($self->attr('menu_settings') ){
+    	my @items;
+	    
+	    # Update
+	    if($self->attr('menu_settings', 'update') ){
+    	 push @items, {	            
+		            "name" => "Update",
+		            "url" => "#update"
+		         },
+	    }
+	    
+		push @$menu_array, {
+			active => 1, 
+			sort => 150, 
+			title => 'Settings',
+			items => \@items,
+		};
+    }
+
 
     return [sort { $a->{sort} <=> $b->{sort} } @$menu_array];
 }

@@ -1,0 +1,20 @@
+<div>
+	<h1>Program Update</h1>
+	<p>
+		<strong>Version date:</strong> {{lastUpdate.date}}	
+	</p>
+	<a class="btn btn-primary" ng-click="startUpdate()">Update now</a>
+	
+	<div ng-show="updating">
+		<h2>
+			Updating 
+		</h2>
+		<span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+	</div>
+	
+	<div ng-show="update.result">
+		<h2>Update results:</h2>
+		<p>{{ update.result }}</p>
+		<p ng-show="update.result != 'Fetching origin\n Already up-to-date.\n'">Please restart.</p>
+	</div>
+</div>

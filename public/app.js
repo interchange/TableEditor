@@ -7,6 +7,7 @@ var default_routes = {
 	'/404': { templateUrl: 'views/404.html', controller: 'StatusCtrl', public: true },
 	'/login': { templateUrl: 'views/login.html', controller: 'LoginCtrl', public: true },
 	'/status': { templateUrl: 'views/status.html', controller: 'StatusCtrl', public: true },
+	'/update': { templateUrl: 'views/update.html', controller: 'UpdateCtrl' },
 	'/:class/list': { templateUrl: 'views/list.html', controller: 'ListCtrl' },
 	'/:class/new': { templateUrl: 'views/form.html', controller: 'CreateCtrl' },
 	'/:class/edit/:id': { templateUrl: 'views/form.html', controller: 'EditCtrl' },
@@ -303,6 +304,14 @@ CrudApp.factory('Item', function($resource, $location, Url, ClassItem, $route, I
 
 CrudApp.factory('Menu', function($resource) {
     return $resource('api/menu');
+});
+
+CrudApp.factory('Update', function($resource) {
+	return $resource('api/update', {}, {query: {isArray: false}});
+});
+
+CrudApp.factory('LastUpdate', function($resource) {
+	return $resource('api/last_update', {}, {query: {isArray: false}});
 });
 
 CrudApp.factory('TinyMCE', function($resource) {
@@ -666,8 +675,7 @@ var StatusCtrl = function ($scope, Schema, SchemaCreate, DBConfig, InfoBar) {
 				// Error
 				function() {
 					$scope.error.msg = 'Error retrieving status data';
-				}
-				);
+				});
 			} 
 		});
 	}
@@ -679,7 +687,7 @@ var StatusCtrl = function ($scope, Schema, SchemaCreate, DBConfig, InfoBar) {
 		},
 		// Success
 		function(data) {
-			check_status()
+			check_status();
 		},
 		// Error
 		function() {
@@ -687,6 +695,26 @@ var StatusCtrl = function ($scope, Schema, SchemaCreate, DBConfig, InfoBar) {
 		}
 		);
 	};
+};
+
+
+
+var UpdateCtrl = function ($scope, Schema, SchemaCreate, DBConfig, InfoBar, Update, LastUpdate) {
+	
+	$scope.lastUpdate = LastUpdate.get();
+
+	$scope.startUpdate = function(){
+		$scope.updating = 1;
+		$scope.update = null;
+		$scope.update = Update.get(
+				{},
+				// Success
+				function(data) {
+					$scope.updating = null;
+				}
+		); 
+	};
+	
 };
 
 

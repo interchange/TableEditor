@@ -47,6 +47,19 @@ If you have a schema and no db tables you want to use schema deploy to create th
 
 	/api/schema/deploy
 
+=head2 Update
+
+TE can be updated via git from GitHub or from TE with APi. 
+
+	/api/update
+	
+GUI link in menu can be enabeled in config file
+
+	TableEditor:
+		menu_settings: 
+			update: 1
+	
+	
 =head1 FRONTEND
 
 Table Edit uses L<Angular|http://angularjs.org/Angular> and L<Bootstrap|http://getbootstrap.com/> for the frontend.
