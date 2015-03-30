@@ -49,11 +49,11 @@ If you have a schema and no db tables you want to use schema deploy to create th
 
 =head2 Update
 
-TE can be updated via git from GitHub or from TE with APi. 
+TE can be updated via git from GitHub or from TE with API. 
 
 	/api/update
 	
-GUI link in menu can be enabeled in config file
+GUI link in menu can be enabled in config file
 
 	TableEditor:
 		menu_settings: 
@@ -266,7 +266,7 @@ Snippet should return string.
 
 =head3 Class search columns
 
-Autocomplete searches on all columns by default. This can be altered with this attribute.
+Autocomplete searches all columns by default. This can be altered with this attribute.
 
 	search_columns: [name, description]	
 	
