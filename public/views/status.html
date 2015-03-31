@@ -4,11 +4,11 @@
 </div>
 
 <div ng-show="!schema.ready">
-	<h1>Configuration</h1>
+	<h1>Initial setup</h1>
 	<div ng-class="{'alert-success': schema.return, 'alert-danger': !schema.return}" class="alert">
 		<h2>Application</h2>
-		<p ng-show="schema.return">Application is running.</p>
-		<p ng-show="!schema.return">Application is not responding.</p>
+		<p ng-show="schema.return">Your TableEditor application is running. Set up the database by entering connection information below. </p>
+		<p ng-show="!schema.return">TableEditor is not responding.</p>
 	</div>
 	<div ng-class="{'alert-success': schema.db_info, 'alert-danger': schema.return && !schema.db_info}" class="alert">
 		<h2>Database configuration</h2>
@@ -40,15 +40,28 @@
 				</div>
 
 			   <div class="form-group">
-				<label>Schema class</label>
-				<input class="form-control" type="text" name="schema_class" ng-model="db.schema_class"/>
-				<span class="help-block">Optional. If you don't specify existing DBIx schema class one will be generated for you.</span>
+				<label>Host</label>
+				<input class="form-control" name="host" type="text" ng-model="db.host"/>
 				</div>
 
 			   <div class="form-group">
-				<label>DSN suffix</label>
-				<input class="form-control" type="text" name="dsn_suffix" ng-model="db.dsn_suffix"/>
-				<span class="help-block">Optional. Extra options for DB connection. For example "host=246.184.264.112;port=3350"</span>
+				<label>Port</label>
+				<input class="form-control" name="port" type="text" ng-model="db.port"/>
+				</div>
+		
+				<a class="btn btn-default pull-right" ng-show="!shown_advanced" ng-click="show_advanced()">Show advanced settings</a>
+				<div ng-show="shown_advanced">
+				   <div class="form-group">
+					<label>Schema class</label>
+					<input class="form-control" type="text" name="schema_class" ng-model="db.schema_class"/>
+					<span class="help-block">Optional. If you don't specify existing DBIx schema class one will be generated for you.</span>
+					</div>
+	
+				   <div class="form-group">
+					<label>DSN suffix</label>
+					<input class="form-control" type="text" name="dsn_suffix" ng-model="db.dsn_suffix"/>
+					<span class="help-block">Optional. Extra options for DB connection.</span>
+					</div>
 				</div>
 
 			   <div class="form-group">
@@ -60,7 +73,7 @@
 			</form>
 		</div>
 	</div>
-	<div ng-class="{'alert-success': schema.return && !schema.db_connection_error, 'alert-danger': schema.db_connection_error}" class="alert">
+	<div ng-show="schema.db_info || schema.db_connection_error" ng-class="{'alert-success': schema.return && !schema.db_connection_error, 'alert-danger': schema.db_connection_error}" class="alert">
 		<h2>Connection to DB</h2>
 		<p ng-show="schema.db_connection_error">{{schema.db_connection_error}}</p>
 		<div ng-show="schema.return && !schema.db_connection_error">
@@ -68,7 +81,7 @@
 	
 		</div>
 	</div>
-	<div ng-class="{'alert-success': schema.schema, 'alert-danger': schema.schema_error}" class="alert">
+	<div ng-show="schema.return && !schema.db_connection_error" ng-class="{'alert-success': schema.schema, 'alert-danger': schema.schema_error}" class="alert">
 		<h2>DBIx Schema</h2>
 		<p ng-show="schema.schema_error">{{schema.schema_error}}</p>
 		<p ng-show="schema.make_schema"><i class="glyphicon glyphicon-refresh a"></i> DBIx Schema is being created. This could take a while, depending on connection speed and DB size</p>

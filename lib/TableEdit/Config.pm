@@ -44,6 +44,8 @@ hook 'before' => sub {
 			dsn_suffix => $db_settings->dsn_suffix,
 			user => $db_settings->user,
 			pass => $db_settings->pass,
+			host => $db_settings->host,
+			port => $db_settings->port,
 			schema_class => $db_settings->schema_class,
 		}) if $db_settings;
 	}
@@ -92,6 +94,7 @@ get '/schema' => sub {
 		if (eval{schema}){
 			if(%{schema->{class_mappings}}){
 				$schema_info->{schema} = scalar keys %{schema->{class_mappings}};		
+				$schema_info->{schema_keys} = join ', ', keys %{schema->{class_mappings}};		
 			}
 			# Schema doesn't exits. Try to generate it
 			else {
@@ -192,19 +195,17 @@ sub set_db {
 	
 	# Set schema settings
 	if( $db_settings ){
+
         my $dbname = $db_settings->{dbname} || '';
-
-        if ($db_settings->{driver} eq 'Pg') {
-            $dbname = "database=$dbname";
-        }
-
+        $dbname = "dbname=$dbname";
         my $dsn = join (':', ('dbi',
                               $db_settings->{driver} || '',
                               $dbname));
-
-        if ($db_settings->{dsn_suffix}) {
-            $dsn .= ";$db_settings->{dsn_suffix}";
-        }
+        
+        $dsn .= ";host=$db_settings->{host}" if ($db_settings->{host});
+        $dsn .= ";port=$db_settings->{port}" if ($db_settings->{port});
+        $dsn .= ";$db_settings->{dsn_suffix}" if ($db_settings->{dsn_suffix});
+        
 
         # Our settings
         my $our_settings = {

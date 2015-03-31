@@ -59,7 +59,7 @@ CrudApp.directive('checkUser', function ($rootScope, $location, $route, Url, Aut
 	return {
 		link: function (scope, elem, attrs, ctrl, route) {
 			$rootScope.$on('$routeChangeStart', function(event, currRoute, prevRoute){
-				if(!$rootScope.user && !currRoute.public){
+				if(!$rootScope.user ){
 					Auth.login.get({},
 						// Success
 						function(data) {
@@ -76,7 +76,7 @@ CrudApp.directive('checkUser', function ($rootScope, $location, $route, Url, Aut
 						function(data) {
 							$rootScope.user = null;
 							$rootScope.logout();
-							$location.path('login');
+							if(!currRoute.public) $location.path('login');
 						}
 					);
 				}
@@ -656,6 +656,12 @@ var RelatedClassCtrl = function ($scope, $rootScope, $routeParams, RelatedItem, 
 
 
 var StatusCtrl = function ($scope, Schema, SchemaCreate, DBConfig, InfoBar) {
+	
+	$scope.show_advanced = function(){
+		$scope.shown_advanced = 1;
+	}
+	
+	
 	check_status();
 	function check_status() {
 		$scope.schema = Schema.get({},
@@ -954,7 +960,6 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Plugins, ActiveUsers, InfoBar, Menu, TinyMCE) {
 	$rootScope.infoBar = InfoBar;
 	$rootScope.infoBarNext = {};
-	$rootScope.menu = Menu.query(); 
 	$rootScope.$on("$routeChangeStart", function(scope, next, current){
 		InfoBar.clearAllAndLoadNext();
 	});
@@ -966,47 +971,51 @@ var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Pl
 				function(data) {
 					$rootScope.menu = {};
 					$rootScope.user = null;
-					$location.path('/');
+					//$location.path('/');
 				}
 		);
 	};
-	
-	// Load JS from plugins
-	$rootScope.javascripts = Plugins.query(
-			{},
-			// Success
-			function(data){
-				angular.forEach(data, function(value, key){							
-					loadjscssfile(value.js, "js");
-					loadjscssfile(value.css, "css");
-				});
-			
-			}
+
+	if($rootScope.user && $rootScope.user.username){
+		$rootScope.menu = Menu.query(); 
 		
-	);
-	
-	// Active users
-	ActiveUsers.get(
-			{},
-			// Success
-			function(inital_data){
-				$rootScope.active = inital_data.users
-				if(inital_data.interval > 0){
-					$interval(function(){
-						ActiveUsers.get({},
-								function(data){
-							$rootScope.active = data.users;
-						});
-					}, inital_data.interval*1000);
+		// Load JS from plugins
+		$rootScope.javascripts = Plugins.query(
+				{},
+				// Success
+				function(data){
+					angular.forEach(data, function(value, key){							
+						loadjscssfile(value.js, "js");
+						loadjscssfile(value.css, "css");
+					});
+				
 				}
-			}
-	);
+			
+		);
 		
-	// TinyMCE settings
-	$rootScope.tinymceOptions = TinyMCE.get();
+		// Active users
+		ActiveUsers.get(
+				{},
+				// Success
+				function(inital_data){
+					$rootScope.active = inital_data.users
+					if(inital_data.interval > 0){
+						$interval(function(){
+							ActiveUsers.get({},
+									function(data){
+								$rootScope.active = data.users;
+							});
+						}, inital_data.interval*1000);
+					}
+				}
+		);
+			
+		// TinyMCE settings
+		$rootScope.tinymceOptions = TinyMCE.get();
+	}
 }
 
-var LoginCtrl = function ($scope, $rootScope, $timeout, Auth, Url, $location, Menu, InfoBar) {
+var LoginCtrl = function ($scope, $rootScope, $timeout, Auth, Url, $location, Menu, InfoBar, Schema) {
 	$location.path('/login');
 	$scope.error = null;
 
@@ -1045,5 +1054,13 @@ var LoginCtrl = function ($scope, $rootScope, $timeout, Auth, Url, $location, Me
 		));
 	};
 
+	$scope.schema = Schema.get({},
+			function(data) {
+		if(data.db_connection_error){
+			InfoBar.add('warning', 'You have to configure database before you can login!' );
+			$location.path('/status');
+		} 
+	});
+	
 
 };

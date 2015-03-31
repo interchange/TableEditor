@@ -82,6 +82,10 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 1 },
   "pass",
   { data_type => "text", is_nullable => 1 },
+  "host",
+  { data_type => "text", is_nullable => 1 },
+  "port",
+  { data_type => "text", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY

@@ -185,7 +185,7 @@ sub class {
     my ($self, $name) = @_;
     my $classes = $self->_classes;
 
-    if (exists $classes->{$name}) {
+    if (defined $name and exists $classes->{$name}) {
 	return $classes->{$name};
     }
 }
