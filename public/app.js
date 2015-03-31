@@ -65,6 +65,7 @@ CrudApp.directive('checkUser', function ($rootScope, $location, $route, Url, Aut
 						function(data) {
 							$rootScope.user = {};
 							$rootScope.user.username = data.username; 
+							$rootScope.getLoggedInData();
 							if (currRoute.public || $rootScope.user.username ) {
 							}
 							else {
@@ -687,17 +688,20 @@ var StatusCtrl = function ($scope, Schema, SchemaCreate, DBConfig, InfoBar) {
 	}
 	
 	$scope.submit_config = function(){
+		$scope.submitting_config = 1;
 		var db = $scope.db;
 		DBConfig.save({		
 			config: db,
 		},
 		// Success
 		function(data) {
+			$scope.submitting_config = null;
 			check_status();
 		},
 		// Error
 		function() {
-			InfoBar.add('danger', 'Could not add item!');
+			$scope.submitting_config = null;
+			InfoBar.add('danger', 'Could not save settings!');
 		}
 		);
 	};
@@ -964,19 +968,19 @@ var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Pl
 		InfoBar.clearAllAndLoadNext();
 	});
 	
-	$rootScope.logout = function(){
-		Auth.logout.save(
-				{},
-				// Success
-				function(data) {
-					$rootScope.menu = {};
-					$rootScope.user = null;
-					//$location.path('/');
-				}
-		);
-	};
 
-	if($rootScope.user && $rootScope.user.username){
+
+	$rootScope.getLoggedInData = function(){
+		$rootScope.logout = function(){
+			Auth.logout.save(
+					{},
+					// Success
+					function(data) {
+						$rootScope.menu = {};
+						$rootScope.user = null;
+					}
+			);
+		};
 		$rootScope.menu = Menu.query(); 
 		
 		// Load JS from plugins
@@ -1012,7 +1016,7 @@ var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Pl
 			
 		// TinyMCE settings
 		$rootScope.tinymceOptions = TinyMCE.get();
-	}
+	};
 }
 
 var LoginCtrl = function ($scope, $rootScope, $timeout, Auth, Url, $location, Menu, InfoBar, Schema) {
