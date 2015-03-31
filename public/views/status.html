@@ -20,7 +20,7 @@
 			   <div class="form-group">
 				   <label>Database Type</label>
 	 				<select class="form-control" name="driver" ng-model="db.driver">
-	 					<option ng-repeat="driver in schema.db_drivers" value="{{ driver }}">{{ driver }}</option>
+	 					<option ng-repeat="driver in schema.db_drivers" value="{{ driver.value }}">{{ driver.label }}</option>
 	 				</select>
 			   </div>
 

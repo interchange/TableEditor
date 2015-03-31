@@ -5,6 +5,12 @@ use DBI;
 use Moo;
 use MooX::Types::MooseLike::Base qw/ArrayRef/;
 
+my $driver_label = {
+	Pg => 'PostgreSQL',
+	Sybase => 'MS SQL',
+	mysql => 'MySQL',	
+};
+
 =head1 NAME
 
 TableEdit::DriverInfo - DBI driver information for Table Editor
@@ -57,10 +63,15 @@ sub _build_available {
 
     for my $driver (DBI->available_drivers) {
         next if $skip_hash{$driver};
-        push @available, $driver;
+        push @available, {label => label($driver), value => $driver};
     }
 
     return \@available;
+}
+
+sub label {
+	my $driver = shift;
+	return defined $driver_label->{$driver} ? $driver_label->{$driver} : $driver;
 }
 
 =head1 AUTHOR
