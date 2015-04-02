@@ -240,14 +240,21 @@ get '/:class/autocomplete' => require_login sub {
 	
 	my $search_columns = $class_info->search_columns;
 	
-	my $items = $class_info->resultset->search(
-		{
-			'-or' => {
-				map {"LOWER(".$_.")" => {'-like' => '%'.lc param('q').'%'} } @$search_columns
-			}
-		},
-		{rows => 10}
-	);
+    # lhs LIKE ?, [ bind_value ]
+    my $items = $class_info->resultset->search(
+        {
+            [
+                map {
+                    \[
+                        "LOWER($_) LIKE ?",
+                        [ { dbic_colname => $_ }, '%' . lc param('q') . '%' ]
+                     ]
+                } @$search_columns
+
+            ]
+        },
+        { rows => 10 }
+    );
 	
 	my @results;
 	for my $item ($items->all){
