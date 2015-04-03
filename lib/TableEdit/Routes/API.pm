@@ -240,19 +240,19 @@ get '/:class/autocomplete' => require_login sub {
 	
 	my $search_columns = $class_info->search_columns;
 	
+    print STDERR to_dumper $search_columns;
+
     # lhs LIKE ?, [ bind_value ]
     my $items = $class_info->resultset->search(
-        {
-            [
-                map {
-                    \[
-                        "LOWER($_) LIKE ?",
-                        [ { dbic_colname => $_ }, '%' . lc param('q') . '%' ]
-                     ]
-                } @$search_columns
+        [
+            map {
+                \[
+                    "LOWER($_) LIKE ?",
+                    [ { dbic_colname => $_ }, '%' . lc param('q') . '%' ]
+                  ]
+              } @$search_columns
 
-            ]
-        },
+        ],
         { rows => 10 }
     );
 	
@@ -494,6 +494,7 @@ sub grid_template_params {
 	$class_info->page_size($get_params->{page_size}) if $get_params->{page_size};
 	my $page_size = $class_info->page_size;
 	
+    print STDERR to_dumper $where;
 	my $rows = $rs->search(
 	$where,
 	  {
@@ -572,6 +573,7 @@ Table alias.
 
 sub grid_where {
 	my ($class_info, $where, $params, $alias) = @_;
+    print STDERR to_dumper $where;
 	$alias ||= 'me';
 	my @columns = $class_info->columns;
 	for my $column (@columns) {
@@ -587,6 +589,7 @@ sub grid_where {
 			
 			if ($column->{data_type} and ! ref $condition and ($column->{data_type} eq 'text' or $column->{data_type} eq 'varchar')){
 				delete $where->{$sql_name};
+                #$where->{"LOWER($sql_name)"} = {'-like' => "%".lc $condition."%"} if defined $condition and $condition ne '';
 				$where->{"LOWER($sql_name)"} = {'-like' => "%".lc $condition."%"} if defined $condition and $condition ne '';
 			}
 			else { 
