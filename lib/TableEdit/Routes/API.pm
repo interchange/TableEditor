@@ -240,8 +240,6 @@ get '/:class/autocomplete' => require_login sub {
 	
 	my $search_columns = $class_info->search_columns;
 	
-    print STDERR to_dumper $search_columns;
-
     # lhs LIKE ?, [ bind_value ]
     my $items = $class_info->resultset->search(
         [
@@ -494,7 +492,6 @@ sub grid_template_params {
 	$class_info->page_size($get_params->{page_size}) if $get_params->{page_size};
 	my $page_size = $class_info->page_size;
 	
-    print STDERR to_dumper $where;
 	my $rows = $rs->search(
 	$where,
 	  {
@@ -574,7 +571,6 @@ Table alias.
 sub grid_where {
 	my ($class_info, $where, $params, $alias) = @_;
     my @conditions;
-    print STDERR to_dumper $where;
 	$alias ||= 'me';
 	my @columns = $class_info->columns;
 	for my $column (@columns) {
