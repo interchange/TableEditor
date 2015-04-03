@@ -13,6 +13,12 @@ $Data::Dumper::Terse = 1;
 
 sub test_columns {
     my ($class, $expected) = @_;
+    my @check_columns = $class->columns;
+    my %cols;
+
+    for my $colobj (@check_columns) {
+        $cols{$colobj->name} = 1;
+    }
 
     while (my ($col_name, $matches) = each %$expected) {
         my $col_obj = $class->schema->column($class->name, $col_name);
@@ -20,7 +26,14 @@ sub test_columns {
         isa_ok($col_obj, 'TableEdit::ColumnInfo');
 
         test_column($col_obj, $matches);
+
+        delete $cols{$col_name};
     }
+
+    my $keys = scalar(keys %cols);
+
+    ok($keys == 0, "Check for missing columns in " . $class->name)
+        || diag 'Missing columns for ', $class->name, ': ', join(',', keys %cols);
 }
 
 sub test_column {
