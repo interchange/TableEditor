@@ -573,6 +573,7 @@ Table alias.
 
 sub grid_where {
 	my ($class_info, $where, $params, $alias) = @_;
+    my @conditions;
     print STDERR to_dumper $where;
 	$alias ||= 'me';
 	my @columns = $class_info->columns;
@@ -580,26 +581,40 @@ sub grid_where {
 		# Search
 		my $name = $column->{name};
 		if( exists $params->{$name}){
-			my $condition = $params->{$name};
+			my $rhs = $params->{$name};
 			$name = $column->{self_column} || $column->{name};
+			my $lhs = "$alias.$name";
 			
-			$condition = { '=' => undef } and delete $column->{data_type} if $condition eq '<null>';
-			$condition = { '!=' => undef } and delete $column->{data_type} if $condition eq '<notnull>';
-			my $sql_name = "$alias.$name";
-			
-			if ($column->{data_type} and ! ref $condition and ($column->{data_type} eq 'text' or $column->{data_type} eq 'varchar')){
-				delete $where->{$sql_name};
-                #$where->{"LOWER($sql_name)"} = {'-like' => "%".lc $condition."%"} if defined $condition and $condition ne '';
-				$where->{"LOWER($sql_name)"} = {'-like' => "%".lc $condition."%"} if defined $condition and $condition ne '';
-			}
-			else { 
-				delete $where->{$sql_name};
-				$condition = eval $condition;
-				$where->{$sql_name} = $condition if defined $condition and $condition ne '';	
-			}
+            if ( $rhs eq '' ) {
+                # pointless but angular seems to throw these at use if a field
+                # used to contain data but it is later delete.
+                next;
+            }
+            elsif ( $rhs eq '<null>' ) {
+                push @conditions, { $lhs => undef };
+            }
+            elsif ( $rhs eq '<notnull>' ) {
+                push @conditions, { $lhs => { '!=' => undef } };
+            }
+            elsif (
+                    $column->{data_type}
+                and !ref $rhs
+                and (  $column->{data_type} eq 'text'
+                    or $column->{data_type} eq 'varchar' )
+              )
+            {
+                push @conditions,
+                  \[
+                    "LOWER($lhs) LIKE ?",
+                    [ { dbic_colname => $lhs }, '%' . lc $rhs . '%' ]
+                  ];
+            }
+            else {
+                push @conditions, { $lhs => $rhs };
+            }
 		}
 	};
-	return $where;
+    return { -and => \@conditions };
 }
 
 =head2 grid_rows
