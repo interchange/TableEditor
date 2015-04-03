@@ -65,8 +65,10 @@ sub test_column {
     ok($data_type eq $expected_value, "Test data type for column $col_name")
         || diag "$data_type instead of $expected_value.";
 
-    # integer data type maps to textfield display type
-    if ($expected_value eq 'integer') {
+    $expected_value = $matches->{display_type} || $expected_value;
+
+    # integer and varchar data types maps to textfield display type
+    if ($expected_value eq 'integer' || $expected_value eq 'varchar') {
         $expected_value = 'textfield';
     }
 
