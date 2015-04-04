@@ -1,4 +1,5 @@
 ^\.git\/
+.*.gitignore$
 maint
 ^tags$
 .last_cover_stats
@@ -7,9 +8,12 @@ Makefile$
 ^pm_to_blib
 ^.*.bak
 ^.*.old
+.*.orig$
 ^cover_db
 ^.*\.log
 ^.*\.swp$
 ^environments\/
 ^run\/
 ^sessions\/
+^db/config.db
+^lib/TableEditor/

@@ -47,9 +47,11 @@ nbproject/
 .project
 .settings
 lib/TableEdit/Plugins
+lib/TableEditor
 
 # backup files
 *.old
+*.bak
 
 # Dancer stuff
 /run/
