@@ -4,7 +4,9 @@ use warnings;
 use Test::Most;
 use Test::Database;
 
-use Interchange6::Schema 0.070;
+eval "use Interchange6::Schema 0.084";
+plan skip_all => "Interchange6::Schema 0.084 required" if $@;
+
 use TableEdit::SchemaInfo;
 use TableEdit::SchemaInfo::Test::Columns qw(test_columns);
 use TableEdit::SchemaInfo::Test::Relationships qw(test_relationships test_relationship);
