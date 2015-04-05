@@ -211,7 +211,7 @@ sub set_db {
         my $our_settings = {
 			dsn => $dsn,
             user => $db_settings->{user} || '',
-            pass => $db_settings->{pass} || '',
+            password => $db_settings->{pass} || '',
             schema_class => $db_settings->{schema_class}
         };
 
