@@ -249,8 +249,10 @@ sub parse_dbic_settings {
 
 # bootstrap config schema object
 sub _bootstrap_config_schema {
-    my $dbfile = "$appdir/db/config.db";
+    my $dbfile = config->{TableEditor}->{configschema_dbfile} || "db/config.db";
     my $schema;
+
+    $dbfile = file_path($dbfile);
 
     if (-f $dbfile) {
         $schema = TableEdit::ConfigSchema->connect("dbi:SQLite:$dbfile");
@@ -281,16 +283,29 @@ or a relative path starting at appdir.
 
 sub load_settings {
     my $settings_file = shift;
-    my $settings_file_path;
-
-    if (File::Spec->file_name_is_absolute($settings_file)) {
-        $settings_file_path = $settings_file;
-    }
-    else {
-        $settings_file_path = File::Spec->catfile($appdir, $settings_file);
-    }
+    my $settings_file_path = file_path($settings_file);
 
     Dancer::Config::load_settings_from_yaml($settings_file_path);
+}
+
+=head2 file_path $file
+
+Determines path for file.
+
+=cut
+
+sub file_path {
+    my $file = shift;
+    my $file_path;
+
+    if (File::Spec->file_name_is_absolute($file)) {
+        $file_path = $file;
+    }
+    else {
+        $file_path = File::Spec->catfile($appdir, $file);
+    }
+
+    return $file_path;
 }
 
 sub column_types {
