@@ -13,6 +13,10 @@ with 'TableEdit::SchemaInfo::Role::Config';
 with 'TableEdit::SchemaInfo::Role::Label';
 with 'TableEdit::SchemaInfo::Role::ListUtils';
 
+=head1 NAME
+
+TableEdit::ClassInfo - TableEditor class for table information
+
 =head1 ATTRIBUTES
 
 =head2 name

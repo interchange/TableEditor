@@ -5,6 +5,10 @@ use Moo;
 with 'TableEdit::SchemaInfo::Role::Config';
 with 'TableEdit::SchemaInfo::Role::Label';
 
+=head1 NAME
+
+TableEdit::ColumnInfo - TableEditor class for column information
+
 =head1 ATTRIBUTES
 
 =head2 name

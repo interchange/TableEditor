@@ -19,6 +19,12 @@ our @EXPORT_OK = qw(
   appdir column_types load_settings
 );
 
+=head1 NAME
+
+TableEdit::Config - TableEditor configuration functions and routes
+
+=cut
+
 my $appdir = config->{'appdir'};
 my $SQLite = _bootstrap_config_schema();
 my @column_types;

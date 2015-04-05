@@ -23,6 +23,12 @@ use TableEdit::Session;
 my $appdir = TableEdit::Config::appdir();
 my $schema_info;
 
+=head1 NAME
+
+TableEdit::Routes::API - TableEditor API routes
+
+=cut
+
 prefix '/api';
 
 # One schema_info instance per user (because of different permissions)

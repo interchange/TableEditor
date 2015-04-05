@@ -2,6 +2,10 @@ package TableEdit::SchemaInfo::Role::ListUtils;
 
 use Moo::Role;
 
+=head1 NAME
+
+TableEdit::SchemaInfo::Role::ListUtils - Role for list utility functions
+
 =head1 METHODS
 
 =head2 list_output($data,$wantarray,$attribute,$numeric)

@@ -5,6 +5,10 @@ use MooX::Types::MooseLike::Base qw/Enum InstanceOf/;
 
 with 'TableEdit::SchemaInfo::Role::Label';
 
+=head1 NAME
+
+TableEdit:::RelationshipInfo - TableEditor class for relationship information
+
 =head1 ATTRIBUTES
 
 =head2 name

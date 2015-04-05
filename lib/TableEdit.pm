@@ -13,9 +13,9 @@ use TableEdit::Auth;
 
 prefix '/';
 
-=head2 Base url
+=head1 NAME
 
-URIs when the application is mounted at /myurl/.
+TableEdit - TableEditor main module
 
 =cut
 

@@ -6,6 +6,12 @@ use Cwd qw/realpath/;
 use Class::Load qw/load_class/;
 use TableEdit::Config qw/appdir load_settings/;
 
+=head1 NAME
+
+TableEdit::Plugins - TableEditor plugin functions and routes
+
+=cut
+
 my $active_plugin_list = attr('plugins');
 my $plugins = [];
 my $appdir = appdir();

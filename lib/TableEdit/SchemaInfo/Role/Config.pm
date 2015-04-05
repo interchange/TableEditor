@@ -3,6 +3,10 @@ package TableEdit::SchemaInfo::Role::Config;
 use Moo::Role;
 use MooX::Types::MooseLike::Base qw/HashRef/;
 
+=head1 NAME
+
+TableEdit::SchemaInfo::Role::Config - Role for configuration
+
 =head1 ATTRIBUTES
 
 =head2 config

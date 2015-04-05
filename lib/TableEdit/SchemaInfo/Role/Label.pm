@@ -2,6 +2,10 @@ package TableEdit::SchemaInfo::Role::Label;
 
 use Moo::Role;
 
+=head1 NAME
+
+TableEdit::SchemaInfo::Role::Label - Role for labels
+
 =head1 ATTRIBUTES
 
 =head2 label

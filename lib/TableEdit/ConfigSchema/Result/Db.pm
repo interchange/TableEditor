@@ -6,7 +6,7 @@ package TableEdit::ConfigSchema::Result::Db;
 
 =head1 NAME
 
-TableEdit::ConfigSchema::Result::Db
+TableEdit::ConfigSchema::Result::Db - ConfigSchema Db class
 
 =cut
 

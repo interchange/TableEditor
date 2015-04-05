@@ -8,7 +8,11 @@ require TableEdit::RowInfo;
 use TableEdit::Permissions;
 
 with 'TableEdit::SchemaInfo::Role::Config';
- 
+
+=head1 NAME
+
+TableEdit::SchemaInfo - TableEditor class for schema information
+
 =head1 ATTRIBUTES
 
 =head2 schema
