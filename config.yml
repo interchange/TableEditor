@@ -57,4 +57,9 @@ plugins:
 # we share domain with another Dancer application
 session_name: tedit.session
 
+TableEditor:
+  dropdown_threshold: 300
+  page_size: 10
+  primary_key_delimiter: "_"
+  page_sizes: [10, 20, 50, 100]
 

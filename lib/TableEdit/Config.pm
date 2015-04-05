@@ -25,7 +25,7 @@ my @column_types;
 set views => "$appdir/public/views";
 
 # Load TE settings
-my $settings_file = config->{'settings_file'} || 'lib/config.yml';
+my $settings_file = config->{'settings_file'};
 
 load_settings($settings_file) if (-f $settings_file);
 

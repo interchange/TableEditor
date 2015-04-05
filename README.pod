@@ -68,7 +68,7 @@ It is easy to change the Bootstrap theme to get a different look for Table Edit.
 =head1 USE
 
 With basic configuration done you can start using Table Edit. You will probably want to fine tune it a bit though.
-Table editor specific configuration is located in lib/config.yml. Configuration can also be set in schema classes.
+Configuration can also be set in schema classes.
 
 =head2 CRUD
 
@@ -180,8 +180,7 @@ For this example we will use following model and config file.
 		  readonly: 1
 
 TableEditor loads a specific configuration file in addition to the Dancer
-configuration files. This file is located at F<lib/config.yml>. You can change
-the file name in the Dancer configuration with C<settings_file>:
+configuration files. You can specify the file name in the Dancer configuration with C<settings_file>:
 
     settings_file: myte.yml
 
