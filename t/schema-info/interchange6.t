@@ -171,7 +171,9 @@ for my $testdb (@handles) {
     );
 
     # test relationships
-    test_relationships($classes->{Role}, \%expected);
+    subtest "test_relationships of Role" => sub {
+        test_relationships( $classes->{Role}, \%expected );
+    };
 
     # testing UserRole class
     @cols = $classes->{UserRole}->columns;
@@ -212,7 +214,9 @@ for my $testdb (@handles) {
         },
     );
 
-    test_relationships($classes->{Inventory}, \%expected);
+    subtest "test_relationships of Inventory" => sub {
+        test_relationships( $classes->{Inventory}, \%expected );
+    };
 
     # reverse relationship
     %expected = (
@@ -221,9 +225,10 @@ for my $testdb (@handles) {
         foreign_column => 'sku',
     );
 
-    test_relationship($classes->{Product},
-                       $classes->{Product}->relationships->{Inventory},
-                       \%expected);
+    subtest "test_relationship of Product->Inventory" => sub {
+        test_relationship( $classes->{Product},
+            $classes->{Product}->relationships->{Inventory}, \%expected );
+    };
 
     # test relationships for Permission class
     %expected = (
@@ -235,7 +240,9 @@ for my $testdb (@handles) {
         },
     );
 
-    test_relationships($classes->{Permission}, \%expected);
+    subtest "test_relationships of Permission" => sub {
+        test_relationships( $classes->{Permission}, \%expected );
+    };
 
     subtest "test_columns of Tax" => sub {
         test_columns(
@@ -295,7 +302,9 @@ for my $testdb (@handles) {
         },
     );
 
-    test_relationships($classes->{Navigation}, \%expected);
+    subtest "test_relationships of Navigation" => sub {
+        test_relationships( $classes->{Navigation}, \%expected );
+    };
 
     # test hashref
     my $col_info = $schema_info->column('UserRole', 'users_id');
