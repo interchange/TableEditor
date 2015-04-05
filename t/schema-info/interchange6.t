@@ -58,7 +58,7 @@ for my $testdb (@handles) {
     my $classes = $schema_info->classes;
 
     my $count = scalar(keys %$classes);
-    my $expected_value = 49;
+    my $expected_value = 48;
 
     ok ($count == $expected_value, "Test number of classes")
         || diag "Number of classes: $count instead of $expected_value.";
@@ -140,7 +140,8 @@ for my $testdb (@handles) {
     );
 
     # test column info for class
-    test_columns($classes->{Role}, \%expected);
+    subtest "test_columns of Role" =>
+      sub { test_columns( $classes->{Role}, \%expected ) };
 
     %expected = (
         price_modifiers => {
@@ -198,7 +199,9 @@ for my $testdb (@handles) {
         },
     );
 
-    test_columns($classes->{UserRole}, \%expected);
+    subtest "test_columns of UserRole" => sub {
+        test_columns( $classes->{UserRole}, \%expected );
+    };
 
     # test relationship for Inventory class
     %expected = (
@@ -234,14 +237,19 @@ for my $testdb (@handles) {
 
     test_relationships($classes->{Permission}, \%expected);
 
-    test_columns($classes->{Tax}, {
-	decimal_places => {
-	    data_type => 'integer',
-	    default_value => 2,
-	    label => 'Decimal places',
-	    position => 5,
-	}
-    });
+    subtest "test_columns of Tax" => sub {
+        test_columns(
+            $classes->{Tax},
+            {
+                decimal_places => {
+                    data_type     => 'integer',
+                    default_value => 2,
+                    label         => 'Decimal places',
+                    position      => 5,
+                }
+            }
+        );
+    };
 
     # test relationships for Navigation
     %expected = (
