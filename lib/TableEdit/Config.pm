@@ -33,7 +33,7 @@ set views => "$appdir/public/views";
 # Load TE settings
 my $settings_file = config->{'settings_file'};
 
-load_settings($settings_file) if (-f $settings_file);
+load_settings($settings_file) if $settings_file and (-f $settings_file);
 
 # Returns root directory for TableEditor application
 sub appdir {
@@ -188,7 +188,7 @@ sub make_schema {
 		    		return $text;
 		    	}
 		    }},
-		    [ $db->{dsn}, $db->{user}, $db->{pass} ],
+		    [ $db->{dsn}, $db->{user}, $db->{password} ],
 		);
 	};
 	# Return error or empty string if successfull
