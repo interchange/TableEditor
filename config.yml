@@ -39,8 +39,8 @@ plugins:
         provider: Config
         users:
           - user: admin
-            pass: pass
-            roles: [admin]
+            pass: 
+            roles: [superadmin]
             
 ### Sample configuration with users in DB               
 #      users:
@@ -62,4 +62,5 @@ TableEditor:
   page_size: 10
   primary_key_delimiter: "_"
   page_sizes: [10, 20, 50, 100]
+  full: [superadmin]
 
