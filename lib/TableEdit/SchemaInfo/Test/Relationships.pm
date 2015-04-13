@@ -114,7 +114,7 @@ sub test_relationship {
     $expected_value = $expected->{class_name} || $rel_name;
 
     ok($rel_class_name eq $expected_value,
-       "Test class name for class $rel_class_name and relationship $rel_name.")
+       "Test name of related class for class $class_name and relationship $rel_name.")
         || diag "$rel_class_name instead of $expected_value";
 }
 
