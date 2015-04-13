@@ -41,19 +41,20 @@ sub test_column {
     my $expected_value;
 
     my $col_name = $col_obj->name;
+    my $class_name = $col_obj->class->name;
 
     # test_column position
     my $pos = $col_obj->position;
     $expected_value = $matches->{position};
 
-    ok($pos eq $expected_value, "Test position for column $col_name")
+    ok($pos eq $expected_value, "Test position for column $col_name in class $class_name")
         || diag "$pos instead of $expected_value.";
 
     # test column label
     my $label = $col_obj->label;
     $expected_value = $matches->{label} || '';
 
-    ok($label eq $expected_value, "Test label for column $col_name")
+    ok($label eq $expected_value, "Test label for column $col_name in class $class_name")
         || diag "$label instead of $expected_value.";
 
     # test column types
@@ -62,7 +63,7 @@ sub test_column {
 
     $expected_value = $matches->{data_type} || 'varchar';
 
-    ok($data_type eq $expected_value, "Test data type for column $col_name")
+    ok($data_type eq $expected_value, "Test data type for column $col_name in class $class_name")
         || diag "$data_type instead of $expected_value.";
 
     $expected_value = $matches->{display_type} || $expected_value;
@@ -73,7 +74,7 @@ sub test_column {
     }
 
     ok($display_type eq $expected_value,
-       "Test display type for column $col_name")
+       "Test display type for column $col_name in class $class_name")
         || diag "$display_type instead of $expected_value.";
 
 	# test default value
@@ -82,7 +83,7 @@ sub test_column {
 
 	if (defined $default_value || defined $expected_value) {
 	    ok($default_value eq $expected_value,
-	       "Test default value for column $col_name")
+	       "Test default value for column $col_name in class $class_name")
             || diag "$default_value instead of $expected_value.";
 	}
 
@@ -91,7 +92,7 @@ sub test_column {
     $expected_value = $matches->{is_foreign_key} || 0;
 
     ok($is_fk eq $expected_value,
-       "Test is_foreign_key for column $col_name")
+       "Test is_foreign_key for column $col_name in class $class_name")
         || diag "$is_fk instead of $expected_value.";
 
     if ($is_fk) {
@@ -100,7 +101,7 @@ sub test_column {
         $expected_value = $matches->{foreign_column};
 
         ok($fk_name eq $expected_value,
-           "Test foreign_column name for column $col_name")
+           "Test foreign_column name for column $col_name in class $class_name")
             || diag "$fk_name instead of $expected_value.";
 
         # test type of foreign key
@@ -108,7 +109,7 @@ sub test_column {
         $expected_value = $matches->{foreign_type};
 
         ok($fk_type eq $expected_value,
-           "Test foreign_type name for type $col_name")
+           "Test foreign_type name for type $col_name in class $class_name")
             || diag "$fk_type instead of $expected_value.";
 
         # test relationship object
@@ -122,7 +123,7 @@ sub test_column {
         $expected_value = $matches->{foreign_column} || '';
 
         ok($fk_name eq $expected_value,
-           "Test foreign_column name for column $col_name")
+           "Test foreign_column name for column $col_name in class $class_name")
             || diag "$fk_name instead of $expected_value.";
 
         # test type of foreign key
@@ -130,7 +131,7 @@ sub test_column {
         $expected_value = $matches->{foreign_type} || '';
 
         ok($fk_type eq $expected_value,
-           "Test foreign_type name for type $col_name")
+           "Test foreign_type name for type $col_name in class $class_name")
             || diag "$fk_type instead of $expected_value.";
 
         # test relationship object
