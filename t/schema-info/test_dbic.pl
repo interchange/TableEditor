@@ -45,7 +45,7 @@ my %expected = (
         type => 'belongs_to',
         self_column => 'fk_employee_id',
         foreign_column => 'employee_id',
-        class_name => 'Employee',
+        class_name => 'Person::Employee',
     },
 );
 
@@ -62,13 +62,13 @@ test_relationships($schema_info->classes->{'Company::Employee'}, \%expected);
         type => 'might_have',
         self_column => 'person_id',
         foreign_column => 'employee_id',
-        class_name => 'Employee',
+        class_name => 'Person::Employee',
     },
     artist => {
         type => 'might_have',
         self_column => 'person_id',
         foreign_column => 'artist_id',
-        class_name => 'Employee',
+        class_name => 'Person::Artist',
     },
 );
 
