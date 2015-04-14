@@ -72,15 +72,12 @@ sub to_string {
 =head2 attributes
 
 =cut
+
 sub attr  {
-		my ($self, @path) = @_;
-		my $value;
-		my $node = $self->class->config->{classes}->{$self->class->name};
-		for my $p (@path){
-			$node = $node->{$p};
-			return $node unless defined $node;
-		}
-		return $node;
+    my ($self, @path) = @_;
+    my $val =  $self->class->attr(@path);
+
+    return $val;
 }
 
 sub primary_key_value {
