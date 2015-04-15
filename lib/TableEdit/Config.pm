@@ -127,18 +127,34 @@ get '/schema' => sub {
 
 post '/db-config' => sub {
 	my $post = from_json request->body;
-	set_db( $post->{config} );
+	my $error;
 	
-	my $db_test = eval{schema->storage->dbh};
-	my $error = $@;
-	
-	if ( $error ) {
-		set plugins => {DBIC => {'default' => undef }};
-		return undef if $error;
-	}
+	$error = 'Database type not defined!' unless $error or $post->{config}->{driver};
+	$error = 'Database name not defined!' unless $error or $post->{config}->{dbname};
+	$error = 'User not defined!' unless $error or $post->{config}->{user};
 	
 	# Default schema
 	$post->{config}->{schema_class} ||= 'TableEdit::Schema';
+	
+	unless($error){
+		set_db( $post->{config} );
+		my $db_test = eval{schema->storage->dbh} ;
+		$error = $@;
+	}
+	
+	if ( $error ) {	
+		set_db(undef);
+		my $raw_error = $error;
+		$raw_error = $error->{msg} if ref $error eq 'DBIx::Class::Exception';
+		
+		# Pretty errors for user	
+		$error ||= $raw_error;		
+		$error = 'Error' if index ($raw_error, 'The schema default is not configured') >= 0;
+		$error = 'Could not connect to '.$post->{config}->{dbname} if index ($raw_error, 'DBI Connection failed: DBI connect') >= 0;
+		$error = 'Access denied for user '.$post->{config}->{user} if index ($raw_error, 'Access denied for user') >= 0;
+		
+		return to_json {error => $error, raw_error => $raw_error};
+	}
 	
 	# Save to db
 	my $db = $SQLite->resultset('Db')->create({name => 'default', %{$post->{config}} });
@@ -199,6 +215,9 @@ sub make_schema {
 sub set_db {
 	my $db_settings = shift;
 	
+   	# Retrieve current settings
+    my $dbic_settings = config->{plugins}->{DBIC};
+	
 	# Set schema settings
 	if( $db_settings ){
 
@@ -221,14 +240,17 @@ sub set_db {
             schema_class => $db_settings->{schema_class}
         };
 
-        # Retrieve current settings
-        my $dbic_settings = config->{plugins}->{DBIC};
-
         # Merge settings
         $dbic_settings->{default} = $our_settings;
-
-        set plugins => {DBIC => $dbic_settings};
+		debug schema->storage->connect_info([$dsn,$db_settings->{user},$db_settings->{pass},undef])
 	}
+	
+	# Remove if error
+	else {
+        # Merge settings
+        $dbic_settings->{default} = undef;
+	}
+	return $dbic_settings;
 }
 
 # heuristic for parse DSN
