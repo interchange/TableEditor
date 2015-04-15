@@ -57,10 +57,70 @@ plugins:
 # we share domain with another Dancer application
 session_name: tedit.session
 
+
 TableEditor:
+  
+  ### Limit where dropdown field transforms into autocomplete (for related items)
   dropdown_threshold: 300
+  
+  ### Default page size on grid view
   page_size: 10
-  primary_key_delimiter: "_"
+  
+  ### User choices for page size on grid view
   page_sizes: [10, 20, 50, 100]
+  
+  ### Url delimiter for items with multiple primary keys
+  primary_key_delimiter: "_"
+  
+  ### Full permission for "superadmin" role
   full: [superadmin]
+
+  ### Other global permission options
+  # read: [analyst, secretary]
+  # update: []
+  # delete: [boss]
+  # create: []
+  # full: [admin]
+  
+  ### Sidebar menu
+  menu_settings:  
+    ### Show "update" link for application upgrade. 
+    update: 0
+  
+  ### Class specific settings
+  classes:    
+    SomeSampleUserClassName:
+      ### Class specific permissions 
+      read: [normalUserRole]
+      write: [importantRole, bossRole]
+      ### Rename default class name
+      label: Employees
+      ### Limit columns shown in grid view
+      grid_columns: [users_id, username]
+      ### Default grid sort
+      grid_sort: username
+      ### Limit columns shown in form view (also limits grid columns if not set separately)
+      form_columns: [users_id, username, email]
+      ### Strigification of object. Function gets $self TableEdit::RowInfo object and should return string.
+      to_string: | 
+                 my $company = $self->company || "";
+                 return "$self->username ($self->id) $company";
+                 
+      ### Column specific settings                 
+      columns:
+        last_name:
+          label: 'Family name'                  
+        first_name:
+          label: 'Name'
+        created_date:
+          readonly: 1
+          # HTML widget filed type. Avaliable options: autocomplete, boolean, date, datetime, dropdown, html, image_upload, text, textfield, tinymce
+          column_type: 'date'
+        internal_code:
+          hidden: 1
+        description:
+          column_type: 'html'
+        vip_user:
+          subset:
+            importantRole: 1
 
