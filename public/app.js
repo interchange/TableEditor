@@ -76,6 +76,7 @@ CrudApp.directive('checkUser', function ($rootScope, $location, $route, Url, Aut
 						// Error
 						function(data) {
 							$rootScope.user = null;
+							$rootScope.logout();
 							if(!currRoute.public) $location.path('login');
 						}
 					);
