@@ -478,7 +478,7 @@ has sort_direction => (
 	is => 'rw',
 	default => sub{
 		my $self = shift;
-		return $self->attr('grid_sort_direction');
+		return $self->attr('grid_sort_direction') || '-asc';
 	},
 );
 
