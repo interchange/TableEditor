@@ -76,7 +76,7 @@ var custom_routes = {};
 				        <h3 class="panel-title"><i class="fa fa-table fa-fw"></i> {{block.title}}</h3>
 			        </div>
 						<ul class="nav nav-pills nav-stacked">
-							<li ng-repeat="link in block.items" data-active-link=""><a  href="{{link.url}}" class="">{{link.name}}</a></li>
+							<li ng-repeat="link in block.items" data-active-link=""><a  href="{{link.url}}" class="" ng-click="menu_item_click()">{{link.name}}</a></li>
 						</ul>
 					</div>
 					<div class="panel panel-default" ng-show="user.roles && user.roles.indexOf('admin')">

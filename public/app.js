@@ -900,7 +900,7 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 
 	$scope.reset = function () {
 		$scope.current_page = 1;
-		$scope.items = [];
+		$scope.items = [];		
 		$scope.search();
 	};
 	$scope.$on('listReset', function(){ $scope.reset()});
@@ -956,6 +956,11 @@ var ListCtrl = function ($scope, $rootScope, $routeParams, $location, Class, Cla
 		}
 		);
 	};
+	
+	$rootScope.menu_item_click = function() {
+		$scope.item.values = {};
+		$scope.reset();
+	}
 
 	$scope.reset();
 };
@@ -968,7 +973,6 @@ var RootCtrl = function ($scope, $rootScope, $interval, Auth, Url, $location, Pl
 		InfoBar.clearAllAndLoadNext();
 	});
 	
-
 
 	$rootScope.getLoggedInData = function(){
 		$rootScope.logout = function(){
