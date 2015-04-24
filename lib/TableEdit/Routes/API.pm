@@ -388,6 +388,7 @@ post '/:class' => require_login sub {
 	send_error("Forbidden to update ".param('class'), 403) unless schema_info->permissions->permission('update', $class_info);
 	my $body = from_json request->body;
 	my $item = $body->{item};
+    my %values;
 
     # empty strings are not allowed for some columns
     my @form_columns = @{$class_info->form_columns_array};
@@ -400,19 +401,22 @@ post '/:class' => require_login sub {
                 && length($item->{values}->{$col->{name}}) == 0
             ) {
             delete $item->{values}->{$col->{name}};
-        }       
+        }
+        else {
+            $values{$col->{name}} = $item->{values}->{$col->{name}};
+        }
     }
 
-	return to_json {error => 'Please fill the form.'} unless $item->{values} and %{$item->{values}};
+	return to_json {error => 'Please fill the form.'} unless keys %values;
 
     # add subset conditions to item values
     while (my ($col, $value) = each %{$class_info->subset_conditions}) {
         next if ref($value);
-        $item->{values}->{$col} = $value;
+        $values{$col} = $value;
     }
-    debug "Updating item for ".$class_info->name.": ", $item;
+    debug "Updating item for ".$class_info->name.": ", \%values;
 
-	my $object = $class_info->resultset->update_or_create( $item->{values} );
+	my $object = $class_info->resultset->update_or_create( \%values );
 	return to_json {error => 'Unable to save.'} unless  $object;
 	my $rowInfo = schema_info->row($object);
 	my $object_hash = {
