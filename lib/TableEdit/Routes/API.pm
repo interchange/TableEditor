@@ -402,6 +402,9 @@ post '/:class' => require_login sub {
             ) {
             delete $item->{values}->{$col->{name}};
         }
+        elsif ($col->{is_auto_increment} && ! exists $item->{values}->{$col->{name}}) {
+            # skip auto increment column without data
+        }
         else {
             $values{$col->{name}} = $item->{values}->{$col->{name}};
         }
