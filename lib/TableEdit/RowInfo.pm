@@ -55,7 +55,7 @@ sub to_string {
 	my @common_names = qw/title name label username/;
 	for my $name (@common_names){
         if ($self->row->can($name)) {
-            my $label_value = $self->row->$name;
+            my $label_value = $self->row->get_column($name);
             next if ! defined $label_value || $label_value !~ /\S/;
             return $label_value;
         }
@@ -85,7 +85,7 @@ sub primary_key_value {
 	my $primary_key = $self->class->primary_key;
 	my $primary_key_value;
 	for my $key (@$primary_key){
-		$primary_key_value->{$key} = $self->row->$key;
+		$primary_key_value->{$key} = $self->row->get_column($key);
 	}
 	return $primary_key_value;
 }
@@ -96,7 +96,7 @@ sub primary_key_string {
 	my $primary_key = $self->class->primary_key;
 	my @primary_key_value;
 	for my $key (@$primary_key){
-		push @primary_key_value, $self->row->$key;
+		push @primary_key_value, $self->row->get_column($key);
 	}
 	return join($delimiter, @primary_key_value);
 }

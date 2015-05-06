@@ -291,7 +291,7 @@ get '/:class/:column/image/:fileid/:filelabel' => require_login sub {
 	my $column_info = $class_info->column(param('column'));
 	my $row = $class_info->find_with_delimiter(param('fileid'));
 	my $file_col = $column_info->attr('file_column') || 'file';
-	my $file = $row->$file_col;
+	my $file = $row->get_column($file_col);
 	return status '404' unless $row;
 	my $path = $column_info->upload_dir;
 	return send_file($path.$file);
@@ -659,11 +659,11 @@ sub grid_rows {
             else {
             	
             	# Boolean as yes/no
-            	if($column->{'display_type'} eq 'boolean' and defined $row->$column_name){
-	            		$value = $row->$column_name eq '1' ? 'Yes' : 'No'; 
+            	if($column->{'display_type'} eq 'boolean' and defined $row->get_column($column_name)){
+	            		$value = $row->get_column($column_name) eq '1' ? 'Yes' : 'No'; 
             	}
             	else {
-	                $value = $row->$column_name;
+	                $value = $row->get_column($column_name);
             	}
             }
 
