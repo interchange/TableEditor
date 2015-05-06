@@ -648,7 +648,21 @@ sub form_columns_hash {
 	return $form_columns; 
 }
 
+sub form_save_columns_array {
+    my $self = shift;
+    my $form_columns = $self->form_columns;
+    my $primary_keys = $self->primary_key;
+    my %form_save_columns;
 
+    for my $col (@$form_columns, @$primary_keys) {
+        my $col_info = $self->column($col)->hashref;
+		my %col_copy = %{$col_info};
+
+		$form_save_columns{$col} = \%col_copy; 	
+    }
+
+    return [values %form_save_columns];
+}
 
 sub find_with_delimiter {
 	my ($self, $value) = @_;

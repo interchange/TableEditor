@@ -391,7 +391,7 @@ post '/:class' => require_login sub {
     my %values;
 
     # empty strings are not allowed for some columns
-    my @form_columns = @{$class_info->form_columns_array};
+    my @form_columns = @{$class_info->form_save_columns_array};
 
 	# Set empty values for empty strings
     for my $col (@form_columns) {
@@ -400,14 +400,16 @@ post '/:class' => require_login sub {
                 && defined $item->{values}->{$col->{name}}
                 && length($item->{values}->{$col->{name}}) == 0
             ) {
-            delete $item->{values}->{$col->{name}};
+            next;
         }
-        elsif ($col->{is_auto_increment} && ! exists $item->{values}->{$col->{name}}) {
-            # skip auto increment column without data
+        elsif (! exists $item->{values}->{$col->{name}}) {
+            # skip auto increment columns without data
+            next if $col->{is_auto_increment};
+            # skip "NOT NULL" columns without data
+            next if ! $col->{is_nullable};
         }
-        else {
-            $values{$col->{name}} = $item->{values}->{$col->{name}};
-        }
+
+        $values{$col->{name}} = $item->{values}->{$col->{name}};
     }
 
 	return to_json {error => 'Please fill the form.'} unless keys %values;
