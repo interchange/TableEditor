@@ -346,7 +346,7 @@ sub _build__relationships {
             $m2m_found = 'standard';
             $rel_info_buffer = '';
         }
-        elsif ($row =~ s/many_to_many\s(.*)/$1/) {
+        elsif ($row =~ s/^\s*many_to_many\s*(.*)/$1/) {
             $m2m_found = 'candy';
             $rel_info_buffer = '';
         }
