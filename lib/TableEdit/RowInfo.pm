@@ -54,7 +54,7 @@ sub to_string {
 	# Try common names
 	my @common_names = qw/title name label username/;
 	for my $name (@common_names){
-        if ($self->row->can($name)) {
+        if ($self->row->has_column_loaded($name)) {
             my $label_value = $self->row->get_column($name);
             next if ! defined $label_value || $label_value !~ /\S/;
             return $label_value;
