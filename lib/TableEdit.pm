@@ -1,5 +1,6 @@
 package TableEdit;
 # ABSTRACT: Data manupulation web app
+use TableEdit::DBIC;
 use Dancer ':syntax';
 
 our $VERSION = '0.1';
