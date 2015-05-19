@@ -1,5 +1,5 @@
 package    # hide from PAUSE
-  TableEdit::DBIC;
+  TableEdit::DBIxClassModifiers;
 
 use strict;
 use warnings;
