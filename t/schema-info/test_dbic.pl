@@ -1,12 +1,15 @@
 # uses Test::DBIx::Class configuration files in t/etc
 
-BEGIN {
-    use_ok( 'Test::DBIx::Class', 0.41)
-      or BAIL_OUT "Cannot load Test::DBIx::Class 0.41 or above.";
-}
-
+use Class::Load qw/try_load_class/;
+use TableEdit::DBIxClassModifiers;
 use TableEdit::SchemaInfo;
 use TableEdit::SchemaInfo::Test::Relationships qw(test_relationships);
+
+sub BUILD {
+    try_load_class( 'Test::DBIx::Class', 0.41)
+      or plan skip_all => "Cannot load Test::DBIx::Class 0.41 or above.";
+    use Test::DBIx::Class;
+}
 
 isa_ok(Schema, 'DBIx::Class::Schema');
 

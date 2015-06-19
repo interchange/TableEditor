@@ -21,6 +21,7 @@ WriteMakefile(
         'Test::Database' => 0,
         'YAML'       => 0,
         'Class::Load' => 0,
+        'Class::Method::Modifiers' => 0,
         'DBD::SQLite' => 1.38_01,
         # we rely on deep configuration merging
         'Dancer'     => 1.3127,

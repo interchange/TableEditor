@@ -1,5 +1,10 @@
 package TableEdit;
 # ABSTRACT: Data manupulation web app
+
+# TableEdit::DBIxClassModifiers must be loaded before DBIC schema so that CMM
+# before modifiers are in place before load_{namespaces|classes} gets called.
+use TableEdit::DBIxClassModifiers;
+
 use Dancer ':syntax';
 
 our $VERSION = '0.1';

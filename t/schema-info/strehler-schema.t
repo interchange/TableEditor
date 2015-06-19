@@ -4,6 +4,7 @@ use warnings;
 use Test::Most;
 use Test::Database;
 
+use TableEdit::DBIxClassModifiers;
 eval "use Strehler::Schema";
 plan skip_all => "Strehler::Schema required" if $@;
 

@@ -5,7 +5,6 @@ use MooX::Types::MooseLike::Base qw/InstanceOf/;
 
 require TableEdit::ColumnInfo;
 require TableEdit::RelationshipInfo;
-require Class::Inspector;
 
 use TableEdit::Permissions;
 
@@ -332,63 +331,10 @@ sub _build__relationships {
     }
 
 	# Find and Add many to many relationships
-	my $filename = Class::Inspector->resolved_filename( $source->result_class );
-    my $m2m_found = '';
-    my $rel_info_buffer;
-
-	open (my $fh, "<", $filename) or die "cannot open < $filename: $!";
-	while (my $row = <$fh>) {
-		chomp $row;
-        my ($index, $index_candy, $m2m_complete);
-
-        # check for start of relationship method call
-        if ($row =~ s/__PACKAGE__->many_to_many\((.*)/$1/) {
-            $m2m_found = 'standard';
-            $rel_info_buffer = '';
-        }
-        elsif ($row =~ s/^\s*many_to_many\s*(.*)/$1/) {
-            $m2m_found = 'candy';
-            $rel_info_buffer = '';
-        }
-
-		next if ! $m2m_found;
-
-        # strip whitespace
-        $row =~ s/^\s+//;
-        $row =~ s/\s+$//;
-
-        $m2m_complete = 0;
-
-        if ($m2m_found eq 'standard') {
-            # Check for closing )
-            if ($row =~ /(.*)\)/) {
-                $row = $1;
-                $m2m_complete = 1;
-            }
-        }
-        elsif ($m2m_found eq 'candy') {
-            # Check for closing ;
-            if ($row =~ s/(.*?);/$1/) {
-                $m2m_complete = 1;
-            }
-        }
-
-        $rel_info_buffer .= $row;
-
-        next if ! $m2m_complete;
-
-        my $rel_info = $rel_info_buffer;
-
-        $rel_info_buffer = '';
-        $m2m_found = 0;
-
-        # many to many relationship parameters complete
-		my ($rel_name, $rel, $f_rel) = eval("($rel_info)");
-
-        if ($@) {
-            warn "Failed to eval relationship parameters ($rel_info): $@";
-            next;
-        }
+    my %m2m_meta = %{ $source->result_class->_table_editor_m2m_metadata };
+    foreach my $rel_name ( keys %m2m_meta ) {
+        my $rel = $m2m_meta{$rel_name}->{local};
+        my $f_rel = $m2m_meta{$rel_name}->{foreign};
 
 	    my $rel_source_name = $source->relationship_info($rel)->{source};
 	    my $rel_source = $source->schema->resultset($rel_source_name)->result_source;

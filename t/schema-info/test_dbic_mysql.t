@@ -2,9 +2,6 @@ use strict;
 use warnings;
 use Test::Most;
 
-eval "use Test::DBIx::Class";
-plan skip_all => "Test::DBIx::Class required" if $@;
-
 eval "use DBD::mysql";
 plan skip_all => "DBD::mysql required" if $@;
 

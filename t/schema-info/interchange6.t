@@ -4,6 +4,7 @@ use warnings;
 use Test::Most;
 use Test::Database;
 
+use TableEdit::DBIxClassModifiers;
 eval "use Interchange6::Schema 0.084";
 plan skip_all => "Interchange6::Schema 0.084 required" if $@;
 
