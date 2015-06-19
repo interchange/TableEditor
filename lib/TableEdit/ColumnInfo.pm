@@ -240,16 +240,16 @@ Dir to save uploads to.
 
 =cut
 
-has upload_dir => (
-    is => 'lazy',
-    default => sub {
-    	my $self = shift; 
-    	return undef unless $self->display_type eq 'image_upload' or $self->attr('upload_dir');
-    	my $dir = $self->attr('upload_dir') || "upload/".$self->class->name."/".$self->name."/";
-    	$dir = "$dir/" unless substr($dir, -1) eq '/'; 
-    	return $dir;
-    }
-);
+sub upload_dir  {
+  	my $self = shift; 
+   	return undef unless $self->display_type eq 'image_upload' or $self->attr('upload_dir');
+   	my $dir = $self->attr('upload_dir');
+   	$dir = $self->$dir if ref $dir eq 'CODE';
+   	$dir ||= "upload/".$self->class->name."/".$self->name."/";
+   	$dir = "$dir/" unless substr($dir, -1) eq '/'; 
+   	return $dir;
+}
+
 
 =head2 upload_extensions
 
@@ -320,7 +320,7 @@ has static_hashref => (
 		$hash->{name} = $self->name if $self->name;
 		$hash->{upload_max_size} = $self->upload_max_size if defined $self->upload_max_size;
 		$hash->{upload_extensions} = $self->upload_extensions if $self->upload_extensions;
-		$hash->{upload_dir} = $self->upload_dir if $self->upload_dir;
+		#$hash->{upload_dir} = $self->upload_dir if $self->upload_dir;
 		$hash->{relationship} = $hash->{relationship}->hashref if $hash->{relationship};
 	
 	    return $hash;

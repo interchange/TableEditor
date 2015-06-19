@@ -107,4 +107,21 @@ sub string_values {
 	return {map {$_ => defined $values->{$_} ? $values->{$_}."" : ""} keys %$values}
 }
 
+
+=head2 upload dir
+
+Dir to save uploads to.
+
+=cut
+
+sub upload_dir  {
+  	my ($self, $column_info) = @_; 
+   	return undef unless $column_info->display_type eq 'image_upload' or $column_info->attr('upload_dir');
+   	my $dir = $column_info->attr('upload_dir');
+   	$dir = $self->row->$dir if ref $dir eq 'CODE';
+   	$dir ||= "upload/".$self->class->name."/".$self->name."/";
+   	$dir = "$dir/" unless substr($dir, -1) eq '/'; 
+   	return $dir;
+}
+
 1;

@@ -57,6 +57,84 @@ get '/TinyMCE' => sub {
 };
 
 
+post '/:class/:id/:column/upload_image' => require_login sub {
+	my $class_info = schema_info->class(param('class'));
+	my $column_info = $class_info->column(param('column'));
+	my $file = upload('file');
+	
+	# Row lookup
+	my $row = $class_info->find_with_delimiter(param('id'));
+	my $rowInfo = schema_info->row($row);
+	
+	# Upload dir
+	my $path = $rowInfo->upload_dir($column_info); 
+	
+	# Upload image
+    if($file){
+		my $fileName = $file->{filename};
+				
+		my $dir = substr($path, 0, 1) eq '/' ? $path : "$appdir/public/$path";
+		make_path $dir unless (-e $dir);       
+		
+		if($file->copy_to($dir.$fileName)){			
+			return "$fileName";
+		}		
+    }
+	return undef;
+};
+
+
+post '/:class/:column/upload' => require_login sub {
+	my $class_info = schema_info->class(param('class'));
+	my $column_info = $class_info->column(param('column'));
+	my $file = upload('file');
+	
+	
+	# Upload dir
+	my $path = $column_info->upload_dir; 
+	
+	# Upload image
+    if($file){
+		my $fileName = time().'-'.$file->{filename};
+		
+		my $dir = "$appdir/public/$path";
+		make_path $dir unless (-e $dir);       
+		
+		if($file->copy_to($dir.$fileName)){			
+			return "$fileName";
+		}		
+    }
+	return undef;
+};
+
+
+
+get '/:class/:id/:column/image/**' => require_login sub {
+	my ($splat) = splat;
+	my (undef, $class, $id, $column, undef, @file) = @$splat;
+	my $class_info = schema_info->class($class);
+	my $column_info = $class_info->column($column);
+	my $rowInfo = schema_info->row($class_info->find_with_delimiter(param('id')));
+
+	my $file = join '/', @file;
+	my $path = $rowInfo->upload_dir($column_info);
+	my $system_path = substr($path, 0, 1) eq '/' ? 1 : 0; 
+	return send_file($path.$file, system_path => $system_path);
+};
+
+
+get '/:class/:column/image/:fileid/:filelabel' => require_login sub {
+	my $class_info = schema_info->class(param('class'));
+	my $column_info = $class_info->column(param('column'));
+	my $row = $class_info->find_with_delimiter(param('fileid'));
+	my $file_col = $column_info->attr('file_column') || 'file';
+	my $file = $row->get_column($file_col);
+	return status '404' unless $row;
+	my $path = $column_info->upload_dir;
+	return send_file($path.$file);
+};
+
+
 get '/:class/:id/:related/list' => require_login sub {
 	my $id = param('id');
 	my $class_info = schema_info->class(param('class'));
@@ -272,76 +350,6 @@ get '/:class/autocomplete' => require_login sub {
 
 get '/menu' => require_login sub {    
     return to_json schema_info->menu;
-};
-
-
-get '/:class/:column/image/**' => require_login sub {
-	my ($splat) = splat;
-	my (undef, $class,$column, undef, @file) = @$splat;
-	my $class_info = schema_info->class($class);
-	my $column_info = $class_info->column($column);
-	my $file = join '/', @file;
-	my $path = $column_info->upload_dir;
-	return send_file($path.$file);
-};
-
-
-get '/:class/:column/image/:fileid/:filelabel' => require_login sub {
-	my $class_info = schema_info->class(param('class'));
-	my $column_info = $class_info->column(param('column'));
-	my $row = $class_info->find_with_delimiter(param('fileid'));
-	my $file_col = $column_info->attr('file_column') || 'file';
-	my $file = $row->get_column($file_col);
-	return status '404' unless $row;
-	my $path = $column_info->upload_dir;
-	return send_file($path.$file);
-};
-
-
-post '/:class/:column/upload_image' => require_login sub {
-	my $class_info = schema_info->class(param('class'));
-	my $column_info = $class_info->column(param('column'));
-	my $file = upload('file');
-	
-	# Upload dir
-	my $path = $column_info->upload_dir; 
-	
-	# Upload image
-    if($file){
-		my $fileName = $file->{filename};
-		
-		my $dir = "$appdir/public/$path";
-		make_path $dir unless (-e $dir);       
-		
-		if($file->copy_to($dir.$fileName)){			
-			return "$fileName";
-		}		
-    }
-	return undef;
-};
-
-
-post '/:class/:column/upload' => require_login sub {
-	my $class_info = schema_info->class(param('class'));
-	my $column_info = $class_info->column(param('column'));
-	my $file = upload('file');
-	
-	
-	# Upload dir
-	my $path = $column_info->upload_dir; 
-	
-	# Upload image
-    if($file){
-		my $fileName = time().'-'.$file->{filename};
-		
-		my $dir = "$appdir/public/$path";
-		make_path $dir unless (-e $dir);       
-		
-		if($file->copy_to($dir.$fileName)){			
-			return "$fileName";
-		}		
-    }
-	return undef;
 };
 
 
