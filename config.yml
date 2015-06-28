@@ -114,7 +114,7 @@ TableEditor:
           label: 'Name'
         created_date:
           readonly: 1
-          # HTML widget filed type. Avaliable options: autocomplete, boolean, date, datetime, dropdown, html, image_upload, text, textfield, tinymce
+          # HTML widget field type. Avaliable options: autocomplete, boolean, date, datetime, dropdown, html, image_upload, text, textfield, tinymce
           column_type: 'date'
         internal_code:
           hidden: 1
