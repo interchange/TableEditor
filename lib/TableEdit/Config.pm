@@ -52,6 +52,7 @@ hook 'before' => sub {
 			pass => $db_settings->pass,
 			host => $db_settings->host,
 			port => $db_settings->port,
+            schema_dir => $db_settings->schema_dir,
 			schema_class => $db_settings->schema_class,
 		}) if $db_settings;
 	}
@@ -90,7 +91,13 @@ get '/schema' => sub {
             $schema_info->{db_info} = parse_dbic_settings($db);
         }
 	}
-	
+
+    if (my $dir = $schema_info->{db_info}->{schema_dir}) {
+        # Prepending directory with schema class modules
+        # to Perl's load path
+        unshift @INC, $dir;
+    }
+
 	# Check for DB connection
 	my $db_test = eval{schema->storage->dbh};
 	$schema_info->{db_connection_error} = "$@";
