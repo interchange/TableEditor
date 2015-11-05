@@ -29,6 +29,9 @@ WriteMakefile(
         'Dancer::Plugin::Auth::Extensible' => 0,
 	'Template' => 0,
         'DBIx::Class::Schema::Loader' => 0,
+        # default session engine in config.yml
+        'Dancer::Session::Storable' => 0,
+
         'Moo' => 0,
 	# needed for Enum type
         'MooX::Types::MooseLike' => '0.19',
