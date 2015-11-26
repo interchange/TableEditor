@@ -19,6 +19,7 @@ WriteMakefile(
     PREREQ_PM => {
         'Test::Most' => 0,
         'Test::Database' => 0,
+        'Test::DBIx::Class' => 0,
         'YAML'       => 0,
         'Class::Load' => 0,
         'Class::Method::Modifiers' => 0,
