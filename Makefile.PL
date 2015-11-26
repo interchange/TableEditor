@@ -34,8 +34,7 @@ WriteMakefile(
         'Dancer::Session::Storable' => 0,
 
         'Moo' => 0,
-	# needed for Enum type
-        'MooX::Types::MooseLike' => '0.19',
+        'Type::Tiny' => 0,
         'Plack::Handler::Starman' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },

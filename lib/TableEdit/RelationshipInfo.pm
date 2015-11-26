@@ -1,7 +1,7 @@
 package TableEdit::RelationshipInfo;
 
 use Moo;
-use MooX::Types::MooseLike::Base qw/Enum InstanceOf/;
+use Types::Standard qw/Enum InstanceOf/;
 
 with 'TableEdit::SchemaInfo::Role::Label';
 

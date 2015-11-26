@@ -1,7 +1,7 @@
 package TableEdit::Menu;
 
 use Moo;
-use MooX::Types::MooseLike::Base qw/InstanceOf/;
+use Types::Standard qw/InstanceOf/;
 
 use TableEdit::Plugins;
 

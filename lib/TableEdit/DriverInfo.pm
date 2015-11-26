@@ -3,7 +3,7 @@ package TableEdit::DriverInfo;
 use DBI;
 
 use Moo;
-use MooX::Types::MooseLike::Base qw/ArrayRef/;
+use Types::Standard qw/ArrayRef/;
 
 my $driver_label = {
 	Pg => 'PostgreSQL',

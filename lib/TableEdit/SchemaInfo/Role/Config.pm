@@ -1,7 +1,7 @@
 package TableEdit::SchemaInfo::Role::Config;
 
 use Moo::Role;
-use MooX::Types::MooseLike::Base qw/HashRef/;
+use Types::Standard qw/HashRef/;
 
 =head1 NAME
 

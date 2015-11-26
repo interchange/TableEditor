@@ -1,7 +1,7 @@
 package TableEdit::SchemaInfo;
 
 use Moo;
-use MooX::Types::MooseLike::Base qw/ArrayRef InstanceOf/;
+use Types::Standard qw/ArrayRef InstanceOf/;
 
 require TableEdit::ClassInfo;
 require TableEdit::RowInfo;

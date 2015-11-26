@@ -2,7 +2,7 @@ package TableEdit::RowInfo;
 
 use DBI;
 use Moo;
-use MooX::Types::MooseLike::Base qw/InstanceOf/;
+use Types::Standard qw/InstanceOf/;
 
 with 'TableEdit::SchemaInfo::Role::Config';
 

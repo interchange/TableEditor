@@ -1,7 +1,7 @@
 package TableEdit::ClassInfo;
 
 use Moo;
-use MooX::Types::MooseLike::Base qw/InstanceOf/;
+use Types::Standard qw/InstanceOf/;
 
 require TableEdit::ColumnInfo;
 require TableEdit::RelationshipInfo;
