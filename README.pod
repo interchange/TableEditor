@@ -340,12 +340,16 @@ You can also use more powerful and customizable editor TinyMCE.
 
 	column_type = 'tinymce';
 
-TinyMCE settings can be set in this (or any other TE) config. Here is sample:
+TinyMCE settings can be set in this (or any other TE) config. Here is a sample:
 
 	TableEditor:	  
 	  tiny_mce:
 	    plugins: print textcolor image
 	    toolbar: undo redo styleselect bold italic print forecolor backcolor image
+
+Please note:
+
+With TinyMCE you use "Enter" for a paragraph (C<E<lt>pE<gt>>) and "Ctrl-Enter" for a linebreak (C<E<lt>brE<gt>>).
 
 Example of image column conf:
 
