@@ -351,6 +351,8 @@ Please note:
 
 With TinyMCE you use "Enter" for a paragraph (C<E<lt>pE<gt>>) and "Ctrl-Enter" for a linebreak (C<E<lt>brE<gt>>).
 
+To enable HTML source code view, add C<code> both to plugins and toolbar.
+
 Example of image column conf:
 
 =head4 Image upload
