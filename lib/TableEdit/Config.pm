@@ -126,9 +126,13 @@ get '/schema' => sub {
 	else {
 		$schema_info->{db_drivers} = TableEdit::DriverInfo->new->available;
 	}
-		
-	$schema_info->{db_info}->{pass} = '******' if $schema_info->{db_info} and $schema_info->{db_info}->{pass};
-	
+
+    if ($schema_info->{db_info}) {
+        for my $censored (qw/pass password/) {
+            delete $schema_info->{db_info}->{$censored};
+        }
+    }
+
 	return to_json $schema_info;
 };
 
