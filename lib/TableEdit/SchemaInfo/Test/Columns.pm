@@ -68,8 +68,11 @@ sub test_column {
 
     $expected_value = $matches->{display_type} || $expected_value;
 
-    # numeric and varchar data types maps to textfield display type
-    if ($expected_value eq 'numeric' || $expected_value eq 'varchar') {
+    # numeric and (var)char data types maps to textfield display type
+    if ($expected_value eq 'numeric'
+            || $expected_value eq 'varchar'
+            || $expected_value eq 'char'
+        ) {
         $expected_value = 'textfield';
     }
 
