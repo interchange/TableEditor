@@ -5,8 +5,8 @@ use Test::Most;
 use Test::Database;
 
 use TableEdit::DBIxClassModifiers;
-eval "use Interchange6::Schema 0.084";
-plan skip_all => "Interchange6::Schema 0.084 required" if $@;
+eval "use Interchange6::Schema 0.091";
+plan skip_all => "Interchange6::Schema 0.091 required" if $@;
 
 use TableEdit::SchemaInfo;
 use TableEdit::SchemaInfo::Test::Columns qw(test_columns);
@@ -59,7 +59,7 @@ for my $testdb (@handles) {
     my $classes = $schema_info->classes;
 
     my $count = scalar(keys %$classes);
-    my $expected_value = 48;
+    my $expected_value = 49;
 
     ok ($count == $expected_value, "Test number of classes")
         || diag "Number of classes: $count instead of $expected_value.";
@@ -136,6 +136,7 @@ for my $testdb (@handles) {
         },
         description => {
             label => 'Description',
+            data_type => 'text',
             position => 4,
         },
     );
@@ -249,12 +250,75 @@ for my $testdb (@handles) {
         test_columns(
             $classes->{Tax},
             {
+                taxes_id => {
+                    data_type => 'integer',
+                    label => 'Taxes id',
+                    position => 1,
+                },
+                tax_name => {
+                    data_type => 'varchar',
+                    label => 'Tax name',
+                    position => 2,
+                    size => 64,
+                },
+                description => {
+                    data_type => 'varchar',
+                    label => 'Description',
+                    position => 3,
+                    size => 64,
+                },
+                percent => {
+                    data_type => 'numeric',
+                    label => 'Percent',
+                    position => 4,
+                },
                 decimal_places => {
                     data_type     => 'integer',
                     default_value => 2,
                     label         => 'Decimal places',
                     position      => 5,
-                }
+                },
+                rounding => {
+                    data_type => 'char',
+                    label => 'Rounding',
+                    position => 6,
+                },
+                valid_from => {
+                    data_type => 'date',
+                    label => 'Valid from',
+                    position => 7,
+                },
+                valid_to => {
+                    data_type => 'date',
+                    label => 'Valid to',
+                    position => 8,
+                },
+                country_iso_code => {
+                    data_type => 'char',
+                    label => 'Country iso code',
+                    is_foreign_key => 1,
+                    foreign_column => 'country_iso_code',
+                    foreign_type => 'belongs_to',
+                    position => 9,
+                },
+                states_id => {
+                    data_type => 'integer',
+                    label => 'States id',
+                    is_foreign_key => 1,
+                    foreign_column => 'states_id',
+                    foreign_type => 'belongs_to',
+                    position => 10,
+                },
+                created => {
+                    data_type => 'datetime',
+                    label => 'Created',
+                    position => 11,
+                },
+                last_modified => {
+                    data_type => 'datetime',
+                    label => 'Last modified',
+                    position => 12,
+                },
             }
         );
     };
