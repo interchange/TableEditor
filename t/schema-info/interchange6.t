@@ -12,6 +12,8 @@ use TableEdit::SchemaInfo;
 use TableEdit::SchemaInfo::Test::Columns qw(test_columns);
 use TableEdit::SchemaInfo::Test::Relationships qw(test_relationships test_relationship);
 
+$ENV{PGOPTIONS} = '--client-min-messages=warning';
+
 my @all_handles = Test::Database->handles();
 my @handles;
 my %exclude_dbd = (CSV => 1,
