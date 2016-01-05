@@ -1,6 +1,6 @@
 package TableEdit::SchemaInfo::Test::Columns;
 
-use Test::More;
+use Test::Most;
 use Data::Dumper;
 
 use strict;
@@ -89,6 +89,12 @@ sub test_column {
 	       "Test default value for column $col_name in class $class_name")
             || diag "$default_value instead of $expected_value.";
 	}
+
+    if ($matches->{dropdown_options}) {
+        # test for dropdown options
+        cmp_deeply($col_obj->dropdown_options, $matches->{dropdown_options},
+                   "Test dropdown options for column $col_name in $class_name");
+    }
 
     # test whether column is foreign key
     my $is_fk = $col_obj->is_foreign_key;
