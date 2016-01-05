@@ -48,6 +48,8 @@ for my $testdb (@handles) {
 
     isa_ok($schema, 'Interchange6::Schema');
 
+    $schema->deploy({add_drop_table => 1});
+
     $schema_info = TableEdit::SchemaInfo->new(
         schema => $schema,
         user_roles => ['tester'],
