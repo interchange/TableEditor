@@ -178,9 +178,12 @@ sub dropdown_options {
 	    	$self->display_type ('autocomplete');
 	    }
 	}
+    elsif (my $options = $self->attrs->{dropdown_options}) {
+        $self->display_type('dropdown');
+        return $options;
+    }
 	return undef;
 }
-
 
 =head2 default_value
 
