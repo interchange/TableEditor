@@ -57,6 +57,18 @@ for my $testdb (@handles) {
         user_roles => ['tester'],
         config => {
             read => ['tester'],
+            classes => {
+                Permission => {
+                    columns => {
+                        perm => {
+                            dropdown_options => [
+                                option_label => 'buy',
+                                value => 1,
+                            ]
+                        },
+                    }
+                }
+            }
         },
     );
 
@@ -248,6 +260,36 @@ for my $testdb (@handles) {
     subtest "test_relationship of Product->Inventory" => sub {
         test_relationship( $classes->{Product},
             $classes->{Product}->relationships->{Inventory}, \%expected );
+    };
+
+    # test columns for Permission class
+    subtest "test_columns of Permission" => sub {
+        test_columns(
+            $classes->{Permission},
+            {
+                permissions_id => {
+                    data_type => 'integer',
+                    label => 'Permissions id',
+                    position => 1,
+                },
+                roles_id => {
+                    data_type => 'integer',
+                    label => 'Roles id',
+                    position => 2,
+                    is_foreign_key => 1,
+                    foreign_type => 'belongs_to',
+                    foreign_column => 'roles_id',
+                },
+                perm => {
+                    label => 'Perm',
+                    position => 3,
+                    dropdown_options => [
+                        option_label => 'buy',
+                        value => 1,
+                    ],
+                },
+            }
+        )
     };
 
     # test relationships for Permission class
