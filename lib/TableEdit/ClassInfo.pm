@@ -258,13 +258,13 @@ sub _build__relationships {
     my $columns = {};
     my %rel_hash;
     my @relationship_list = $self->attr('relationships') ? @{$self->attr('relationships')} : $source->relationships;
-	my $not_found_relastionships;
+	my $not_found_relationships;
 
 	# Has many, might have, belongs to
     for my $rel_name (@relationship_list){
         my $rel_info = $source->relationship_info($rel_name);
 
-        unless ($rel_info) {$not_found_relastionships->{$rel_name} = 1; next;};
+        unless ($rel_info) {$not_found_relationships->{$rel_name} = 1; next;};
         next if $rel_info->{hidden};
 
         # Determine name of class this relationship points to
@@ -346,9 +346,9 @@ sub _build__relationships {
           		  
         $rel_source_name =~ s/\w+:://g;		  
         if($self->attr('relationships')){
-        	next unless $not_found_relastionships->{$rel_name}; 
-        }		  
-		
+            next unless $not_found_relationships->{$rel_name};
+        }
+
 		$rel_hash{$rel_name} = TableEdit::RelationshipInfo->new(
             name => $rel_name,
             type => 'many_to_many',
