@@ -194,6 +194,20 @@ for my $testdb (@handles) {
             label => 'Roles id',
             data_type => 'integer',
             position => 2,
+            dropdown_options => [
+                {
+                    'option_label' => 'admin',
+                    'value' => '1',
+                },
+                {
+                    'value' => '3',
+                    'option_label' => 'anonymous',
+                },
+                {
+                    'option_label' => 'user',
+                    'value' => '2'
+                },
+            ],
         },
         users_id => {
             is_foreign_key => 1,
