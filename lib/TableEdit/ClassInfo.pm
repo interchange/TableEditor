@@ -355,6 +355,7 @@ sub _build__relationships {
             origin_class => $self,
             class_name => $class_name,
             class => $class_info,
+            self_column => $rel_hash{$rel}->self_column,
             intermediate_name => $rel,
             intermediate_relation => $f_rel,
             intermediate_class_name => $rel_source_name,
