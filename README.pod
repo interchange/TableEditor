@@ -212,7 +212,7 @@ Class wide setting are in __PACKAGE__->resultset_attributes();
 
 =head3 Dropdown threshold
 
-You can set number of rows that are still ok for dropdown. Tables with more than that will show items ID with autocomplete search istead of dropdown by default. 
+You can set number of rows that are still ok for dropdown. Tables with more than that will show items ID with autocomplete search instead of dropdown by default.
 
 	dropdown_threshold: 50
 	
