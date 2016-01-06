@@ -312,6 +312,24 @@ Available widgets are: boolean, date, datetime, dropdown, html, image_upload, in
 
 	column_type = 'text';
 
+=head3 Dropdown values
+ 
+For foreign keys of the C<belongs_to> or C<might_have> where the number of
+related records doesn't exceed C<dropdown_threshold> we switch column
+type automatically to C<dropdown>, otherwise we use C<autocomplete>.
+
+You can also specify dropdown values in the configuration:
+
+    type:
+      column_type: dropdown
+      dropdown_options:
+        -
+         option_label: Collection
+         value: collection
+        -
+         option_label: Category
+         value: category
+
 =head3 Prefill column
 
 You can set a value to fill field on "new" form.
