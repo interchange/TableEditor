@@ -352,6 +352,22 @@ Summernote editor is used. To use it just change column_type.
 
 	column_type = 'html';
 
+The editor is included with the TableEditor sources:
+
+=over 4
+
+=item Summernote
+
+Included version is 0.7.1, downloaded from
+L<https://github.com/summernote/summernote/releases>.
+
+=item Angular Summernote
+
+Included version is 0.7.0, downloaded from
+L<https://github.com/summernote/angular-summernote/releases>.
+
+=back
+
 =head4 TinyMCE HTML / WYSIWYG editor
 
 You can also use more powerful and customizable editor TinyMCE.
