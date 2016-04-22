@@ -337,8 +337,19 @@ sub _build__relationships {
         my $f_rel = $m2m_meta{$rel_name}->{foreign};
 
 	    my $rel_source_name = $source->relationship_info($rel)->{source};
-	    my $rel_source = $source->schema->resultset($rel_source_name)->result_source;
-	  	my $class_name = $rel_source->relationship_info($f_rel)->{source};
+        my $rel_rs = $source->schema->resultset($rel_source_name);
+        unless ($rel_rs) {
+            die "Resultset for relationship $rel_source_name missing.";
+        }
+
+        my $rel_source = $rel_rs->result_source;
+        my $rel_info = $rel_source->relationship_info($f_rel);
+
+        unless ($rel_info) {
+            die "Relationship info for $f_rel missing from $rel.";
+        }
+
+	  	my $class_name = $rel_info->{source};
         $class_name =~ s/\w+:://g;		
         my $class_info = $self->schema->class($class_name);
 
