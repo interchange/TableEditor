@@ -275,8 +275,8 @@ sub parse_dbic_settings {
             my @options = split(';', $parts[2]);
 
             for my $opt (@options) {
-                if ($opt =~ /^(dbname=)(\w+)$/) {
-                    $db->{dbname} = $2;
+                if ($opt =~ /^((database|dbname)=)(\w+)$/) {
+                    $db->{dbname} = $3;
                     last;
                 }
             }
