@@ -403,7 +403,7 @@ post '/:class' => require_login sub {
 
 	# Set empty values for empty strings
     for my $col (@form_columns) {
-        if (($col->{data_type} eq 'integer' or $col->{data_type} eq 'date' or $col->{data_type} eq 'datetime')
+        if (($col->{data_type} eq 'integer' or $col->{data_type} eq 'date' or $col->{data_type} eq 'datetime' or $col->{data_type} eq 'boolean')
                 && $col->{is_nullable}
                 && defined $item->{values}->{$col->{name}}
                 && length($item->{values}->{$col->{name}}) == 0
