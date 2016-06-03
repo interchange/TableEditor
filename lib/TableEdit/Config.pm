@@ -101,7 +101,8 @@ get '/schema' => sub {
 	# Check for DB connection
 	my $db_test = eval{schema->storage->dbh};
 	$schema_info->{db_connection_error} = "$@";
-	
+	delete $schema_info->{db_info};
+
 	# Check if DBIx class schema exists
 	unless($schema_info->{db_connection_error}){
 		if (eval{schema}){
@@ -127,7 +128,7 @@ get '/schema' => sub {
 		$schema_info->{db_drivers} = TableEdit::DriverInfo->new->available;
 	}
 
-    if ($schema_info->{db_info}) {
+    if (exists $schema_info->{db_info} && $schema_info->{db_info}) {
         for my $censored (qw/pass password/) {
             delete $schema_info->{db_info}->{$censored};
         }
